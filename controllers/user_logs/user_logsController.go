@@ -94,7 +94,7 @@ func GetUserLogByID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Country{}).
-		Joins("JOIN users ON user_logs.user_id=users.uuid").
+		Joins("JOIN users ON user_logs.user_uuid=users.uuid").
 		Where("user_logs.user_uuid = ?", UserUUID).
 		Where("users.fullname ILIKE ? OR user_logs.name ILIKE ? OR users.title ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
@@ -203,7 +203,7 @@ func UpdateUserLog(c *fiber.Ctx) error {
 		UUID string `json:"uuid"`
 
 		Name        string `gorm:"type:text;not null" json:"name"`
-		UserUUID    string   `json:"user_uuid"`
+		UserUUID    string `json:"user_uuid"`
 		Action      string `gorm:"type:text;not null" json:"action"`
 		Description string `gorm:"type:text;not null" json:"description"`
 		Signature   string `json:"signature"`

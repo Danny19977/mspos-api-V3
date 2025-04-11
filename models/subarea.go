@@ -27,5 +27,7 @@ type SubArea struct {
 	Drs    []Dr    `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 	Cyclos []Cyclo `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 
+	RoutePlan []RoutePlan `gorm:"foreignKey:SubAreaUUID;references:UUID"`
+
 	Users []User `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 }

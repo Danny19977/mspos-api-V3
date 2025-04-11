@@ -7,7 +7,7 @@ type Province struct {
 	UUID string `gorm:"type:text;not null;unique" json:"uuid"`
 
 	Name        string  `json:"name"`
-	CountryUUID string    `json:"country_uuid" gorm:"type:varchar(255);not null"`
+	CountryUUID string  `json:"country_uuid" gorm:"type:varchar(255);not null"`
 	Country     Country `gorm:"foreignKey:CountryUUID;references:UUID"`
 	Signature   string  `json:"signature"`
 
@@ -17,6 +17,7 @@ type Province struct {
 	Communes []Commune `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 
 	Brands   []Brand   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	RoutePlan []RoutePlan `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 	Posforms []PosForm `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 	Pos      []Pos     `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 

@@ -21,6 +21,7 @@ type Commune struct {
 
 	Signature string `json:"signature"`
 
+	RouthePlan []RoutePlan `gorm:"foreignKey:CommuneUUID;references:UUID"`
 	Pos      []Pos     `gorm:"foreignKey:CommuneUUID;references:UUID"`
 	PosForms []PosForm `gorm:"foreignKey:CommuneUUID;references:UUID"`
 

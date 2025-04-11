@@ -16,7 +16,7 @@ type Sup struct {
 	AsmUUID string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
 	Asm     Asm    `gorm:"foreignKey:AsmUUID;references:UUID"`
 
-	UserUUID string `json:"user_id" gorm:"type:varchar(255);not null"`
+	UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
 	// User   User `gorm:"foreignKey:UserUUID"`
 
 	Signature string `json:"signature"`

@@ -26,7 +26,7 @@ type Cyclo struct {
 
 	Signature string `json:"signature"`
 
-	UserUUID string `json:"user_id" gorm:"type:varchar(255);not null"`
+	UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
 	// User   User `gorm:"foreignKey:UserUUID"`
 
 	PosForms []PosForm `gorm:"foreignKey:CycloUUID;references:UUID"`

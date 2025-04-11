@@ -47,6 +47,7 @@ type User struct {
 	// Drs    []Dr    `gorm:"foreignKey:UserUUID"`
 	// Cyclos []Cyclo `gorm:"foreignKey:UserUUID"`
 
+	RoutePlan []RoutePlan `gorm:"foreignKey:UserUUID;references:UUID"`
 	Managers []Manager  `gorm:"foreignKey:UserUUID;references:UUID"`
 	UserLogs []UserLogs `gorm:"foreignKey:UserUUID;references:UUID"`
 }

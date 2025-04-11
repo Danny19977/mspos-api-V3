@@ -34,20 +34,20 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR users.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
@@ -99,7 +99,7 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 // Query data UserUUID
 func GetPosformByUserUUID(c *fiber.Ctx) error {
 	db := database.DB
-	UserUUID := c.Params("user_id")
+	UserUUID := c.Params("user_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -117,24 +117,24 @@ func GetPosformByUserUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
-		Where("pos_forms.user_id = ?", UserUUID).
-		Where("pos_forms.user_id = ?", UserUUID).
+		Where("pos_forms.user_uuid = ?", UserUUID).
+		Where("pos_forms.user_uuid = ?", UserUUID).
 		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR users.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
-		Where("pos_forms.user_id = ?", UserUUID).
-		Where("pos_forms.user_id = ?", UserUUID).
+		Where("pos_forms.user_uuid = ?", UserUUID).
+		Where("pos_forms.user_uuid = ?", UserUUID).
 		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR users.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -193,10 +193,10 @@ func GetPosformByProvinceUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.province_uuid = ?", ProvinceUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
@@ -204,11 +204,11 @@ func GetPosformByProvinceUUID(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON pos_forms.country_uuid=countries.id").
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN countries ON pos_forms.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.province_uuid = ?", ProvinceUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
@@ -284,10 +284,10 @@ func GetPosformByAreaUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.area_uuid = ?", AreaUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
@@ -295,10 +295,10 @@ func GetPosformByAreaUUID(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.area_uuid = ?", AreaUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
@@ -374,10 +374,10 @@ func GetPaginatedPosFormBySubAreaUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.subarea_uuid = ?", subAreaUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
@@ -385,10 +385,10 @@ func GetPaginatedPosFormBySubAreaUUID(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.subarea_uuid = ?", subAreaUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
@@ -464,10 +464,10 @@ func GetPaginatedPosFormByCommuneUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.commune_uuid = ?", CommuneUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
@@ -475,10 +475,10 @@ func GetPaginatedPosFormByCommuneUUID(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.id").
-		Joins("JOIN users ON pos_forms.user_id=users.id").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.id").
+		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
+		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_id=pos.id").
 		Where("pos_forms.commune_uuid = ?", CommuneUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).

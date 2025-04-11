@@ -32,16 +32,16 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Dr{}).
-		Joins("JOIN users ON drs.user_id=users.id").
+		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON drs.country_uuid=countries.id").
-		Joins("JOIN provinces ON drs.province_uuid=provinces.id").
-		Joins("JOIN areas ON drs.area_uuid=areas.id").
-		Joins("JOIN asms ON drs.asm_uuid=asms.id").
-		Joins("JOIN users ON drs.user_id=users.id").
+		Joins("JOIN countries ON drs.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON drs.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON drs.area_uuid=areas.uuid").
+		Joins("JOIN asms ON drs.asm_uuid=asms.uuid").
+		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -111,7 +111,7 @@ func GetPaginatedDrByProvince(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Dr{}).
-		Joins("JOIN users ON drs.user_id=users.uuid").
+		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.province_uuid = ?", province_uuid).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
@@ -121,7 +121,7 @@ func GetPaginatedDrByProvince(c *fiber.Ctx) error {
 		Joins("JOIN provinces ON drs.province_uuid=provinces.uuid").
 		Joins("JOIN areas ON drs.area_uuid=areas.uuid").
 		Joins("JOIN asms ON drs.asm_uuid=asms.uuid").
-		Joins("JOIN users ON drs.user_id=users.uuid").
+		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.province_uuid = ?", province_uuid).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -192,7 +192,7 @@ func GetPaginatedArea(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Dr{}).
-		Joins("JOIN users ON drs.user_id=users.id").
+		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.area_uuid = ?", area_uuid).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
@@ -202,7 +202,7 @@ func GetPaginatedArea(c *fiber.Ctx) error {
 		Joins("JOIN provinces ON drs.province_uuid=provinces.uuid").
 		Joins("JOIN areas ON drs.area_uuid=areas.uuid").
 		Joins("JOIN asms ON drs.asm_uuid=asms.uuid").
-		Joins("JOIN users ON drs.user_id=users.uuid").
+		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.area_uuid = ?", area_uuid).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -273,7 +273,7 @@ func GetPaginatedSubArea(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Dr{}).
-		Joins("JOIN users ON drs.user_id=users.uuid").
+		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.subarea_uuid = ?", subarea_uuid).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
@@ -283,7 +283,7 @@ func GetPaginatedSubArea(c *fiber.Ctx) error {
 		Joins("JOIN provinces ON drs.province_uuid=provinces.uuid").
 		Joins("JOIN areas ON drs.area_uuid=areas.uuid").
 		Joins("JOIN asms ON drs.asm_uuid=asms.uuid").
-		Joins("JOIN users ON drs.user_id=users.uuid").
+		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.subarea_uuid = ?", subarea_uuid).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -405,7 +405,7 @@ func UpdateDr(c *fiber.Ctx) error {
 		// AsmUUID      uint   `json:"asm_uuid" gorm:"type:varchar(255);not null"`
 		// SupUUID      uint   `json:"sup_uuid" gorm:"type:varchar(255);not null"`
 		Signature string `json:"signature"`
-		UserUUID  string `json:"user_id"`
+		UserUUID  string `json:"user_uuid"`
 	}
 
 	var updateData UpdateData

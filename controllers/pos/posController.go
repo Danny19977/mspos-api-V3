@@ -325,7 +325,7 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	UserUUID := c.Params("user_id")
+	UserUUID := c.Params("user_uuid")
 
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
@@ -349,14 +349,14 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("user_id = ?", UserUUID).
+		Where("user_uuid = ?", UserUUID).
 		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("user_id = ?", UserUUID).
+		Where("user_uuid = ?", UserUUID).
 		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -479,7 +479,7 @@ func UpdatePos(c *fiber.Ctx) error {
 		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
 		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
 
-		UserUUID string `json:"user_id" gorm:"type:varchar(255);not null"`
+		UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
 
 		Status    bool   `json:"status"`
 		Signature string `json:"signature"`

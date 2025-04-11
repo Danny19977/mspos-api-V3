@@ -84,7 +84,7 @@ func SOSPie(c *fiber.Ctx) error {
 			SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
 			SUM(time) ) * 100) AS eq
 		FROM pos_forms 
-			INNER JOIN provinces ON pos_forms.province_uuid=provinces.id
+			INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
 				WHERE "pos_forms"."deleted_at" IS NULL AND "pos_forms"."created_at" BETWEEN ? ::TIMESTAMP  
 				AND ? ::TIMESTAMP 
 		GROUP BY "provinces"."name"; 
@@ -122,14 +122,14 @@ func TrackingVisitDRS(c *fiber.Ctx) error {
 		SUM(time) ) * 100) AS sos,
 	ROUND(100 - ROUND(SUM(eq1) / COUNT("pos_forms"."id") * 100)) AS oos,
 	(SELECT COUNT(*) FROM users 
-		INNER JOIN provinces ON users.province_uuid=provinces.id
+		INNER JOIN provinces ON users.province_uuid=provinces.uuid
 		WHERE "users"."deleted_at" IS NULL AND role='DR' AND status=true AND province_uuid="provinces"."id") AS dr,
 		
 	COUNT("pos_forms"."id") AS visit,
 
 	ROUND(40 * (SELECT COUNT(*) 
 			FROM users 
-			INNER JOIN provinces ON users.province_uuid=provinces.id
+			INNER JOIN provinces ON users.province_uuid=provinces.uuid
 				WHERE  "users"."deleted_at" IS NULL AND role='DR' AND status=true AND province_uuid="provinces"."id") * 
 	CASE 
 		WHEN ? = 0 THEN 1
@@ -138,7 +138,7 @@ func TrackingVisitDRS(c *fiber.Ctx) error {
 	
 		ROUND(COUNT("pos_forms"."id") / (40 * (SELECT COUNT(*) 
 			FROM users 
-			INNER JOIN provinces ON users.province_uuid=provinces.id
+			INNER JOIN provinces ON users.province_uuid=provinces.uuid
 				WHERE  "users"."deleted_at" IS NULL AND role='DR' AND status=true AND province_uuid="provinces"."id") * 
 	CASE 
 			WHEN ? = 0 THEN 1
@@ -146,8 +146,8 @@ func TrackingVisitDRS(c *fiber.Ctx) error {
 		END )) AS perf
 	
 			FROM pos_forms 
-					INNER JOIN provinces ON pos_forms.province_uuid=provinces.id
-				INNER JOIN users ON pos_forms.user_id=users.id
+					INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
+				INNER JOIN users ON pos_forms.user_uuid=users.uuid
 					WHERE "pos_forms"."deleted_at" IS NULL AND "pos_forms"."created_at" BETWEEN ? ::TIMESTAMP  
 					AND ? ::TIMESTAMP
 
@@ -176,8 +176,8 @@ func SummaryChartBar(c *fiber.Ctx) error {
 		) * 100) AS sos,
 		ROUND(100 - ROUND(SUM(eq1) / COUNT("pos_forms"."id") * 100)) AS oos
 		FROM pos_forms 
-				INNER JOIN provinces ON pos_forms.province_uuid=provinces.id
-			INNER JOIN users ON pos_forms.user_id=users.id
+				INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
+			INNER JOIN users ON pos_forms.user_uuid=users.uuid
 				WHERE "pos_forms"."deleted_at" IS NULL AND "pos_forms"."created_at" BETWEEN ? ::TIMESTAMP  
 				AND ? ::TIMESTAMP
 
@@ -202,9 +202,9 @@ func BetterDR(c *fiber.Ctx) error {
 		"areas"."name" AS area,
 	SUM(sold) AS ventes
 	FROM pos_forms
-	INNER JOIN users ON pos_forms.user_id=users.id
-	INNER JOIN provinces ON pos_forms.province_uuid=provinces.id
-	INNER JOIN areas ON pos_forms.province_uuid=areas.id
+	INNER JOIN users ON pos_forms.user_uuid=users.uuid
+	INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
+	INNER JOIN areas ON pos_forms.province_uuid=areas.uuid
 	WHERE "pos_forms"."deleted_at" IS NULL AND "users"."role"='DR' AND "pos_forms"."created_at" BETWEEN ? ::TIMESTAMP 
 			AND ? ::TIMESTAMP
 	GROUP BY fullname, "provinces"."name", "areas"."name"
@@ -230,9 +230,9 @@ func BetterSup(c *fiber.Ctx) error {
 			"areas"."name" AS area,
 		SUM(sold) AS ventes
 		FROM pos_forms
-		INNER JOIN users ON pos_forms.user_id=users.id
-		INNER JOIN provinces ON pos_forms.province_uuid=provinces.id
-		INNER JOIN areas ON pos_forms.province_uuid=areas.id
+		INNER JOIN users ON pos_forms.user_uuid=users.uuid
+		INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
+		INNER JOIN areas ON pos_forms.province_uuid=areas.uuid
 		WHERE "pos_forms"."deleted_at" IS NULL AND "users"."role"='Supervisor' AND "pos_forms"."created_at" BETWEEN ? ::TIMESTAMP 
 				AND ? ::TIMESTAMP
 		GROUP BY fullname, "provinces"."name", "areas"."name"
@@ -281,7 +281,7 @@ func GoogleMaps(c *fiber.Ctx) error {
 			pos_forms.longitude AS longitude,
 			users.fullname AS name
 		FROM pos_forms
-		INNER JOIN users ON pos_forms.user_id=users.id
+		INNER JOIN users ON pos_forms.user_uuid=users.uuid
 		WHERE "pos_forms"."deleted_at" IS NULL AND latitude::FLOAT != 0 AND longitude::FLOAT != 0 AND
 		"pos_forms"."created_at" BETWEEN ? ::TIMESTAMP AND ? ::TIMESTAMP;
 	`

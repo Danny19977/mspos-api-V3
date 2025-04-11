@@ -31,23 +31,31 @@ func GetPaginatedRouthplan(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.RoutePlan{}).
-		Where("route_plans.name ILIKE ? OR users.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR subareas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Where("name ILIKE ?", "%"+search+"%").
+	db.Model(&models.Province{}).
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Joins("JOIN provinces ON provinces.uuid = route_plans.province_uuid").
+		Joins("JOIN areas ON areas.uuid = route_plans.area_uuid").
+		Joins("JOIN sub_areas ON sub_areas.uuid = route_plans.sub_area_uuid").
+		Joins("JOIN communes ON communes.uuid = route_plans.commune_uuid").
+		Where("users.fullname ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR subareas.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
+	// Fetch paginated data
 	err = db.
-		Where("route_plans.name ILIKE ? OR users.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR subareas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Joins("JOIN provinces ON provinces.uuid = route_plans.province_uuid").
+		Joins("JOIN areas ON areas.uuid = route_plans.area_uuid").
+		Joins("JOIN sub_areas ON sub_areas.uuid = route_plans.sub_area_uuid").
+		Joins("JOIN communes ON communes.uuid = route_plans.commune_uuid").
+		// Where("users.fullname ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR subareas.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
-		Order("route_plans.updated_at DESC").
-		Preload("User").
+		Order("updated_at DESC").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("RutePlanItems").
+		Preload("User").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -160,9 +168,11 @@ func UpdateRouthplan(c *fiber.Ctx) error {
 	type UpdateData struct {
 		UUID string `json:"uuid"`
 
-		UserUUID     string   `json:"user_uuid"`
+		UserUUID     string `json:"user_uuid"`
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
+		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
 		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+		CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
 		TotalPOS     int    `json:"total_pos"`
 		Signature    string `json:"signature"`
 	}
@@ -183,7 +193,9 @@ func UpdateRouthplan(c *fiber.Ctx) error {
 	db.Where("uuid = ?", uuid).First(&RoutePlan)
 	RoutePlan.UserUUID = updateData.UserUUID
 	RoutePlan.ProvinceUUID = updateData.ProvinceUUID
+	RoutePlan.AreaUUID = updateData.AreaUUID
 	RoutePlan.SubAreaUUID = updateData.SubAreaUUID
+	RoutePlan.CommuneUUID = updateData.CommuneUUID
 	// RoutePlan.TotalPOS = updateData.TotalPOS
 	RoutePlan.Signature = updateData.Signature
 

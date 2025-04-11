@@ -139,7 +139,7 @@ func UpdateManager(c *fiber.Ctx) error {
 	type UpdateData struct {
 		Title       string `json:"title"` // Example Head of Sales, Support, Manager, etc
 		CountryUUID uint   `json:"country_uuid" gorm:"type:varchar(255);not null"`
-		UserUUID    uint   `json:"user_id"` // Corrected field name
+		UserUUID    uint   `json:"user_uuid"` // Corrected field name
 		Signature   string `json:"signature"`
 	}
 

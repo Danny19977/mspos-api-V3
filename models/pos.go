@@ -27,7 +27,7 @@ type Pos struct {
 	CommuneUUID  string   `json:"commune_uuid" gorm:"type:varchar(255);not null"`
 	Commune      Commune  `gorm:"foreignKey:CommuneUUID;references:UUID"`
 
-	UserUUID string `json:"user_id" gorm:"type:varchar(255);not null"`
+	UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
 	User     User   `gorm:"foreignKey:UserUUID"`
 
 	AsmUUID   string `json:"asm_uuid" gorm:"type:varchar(255);not null"`

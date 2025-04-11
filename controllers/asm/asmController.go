@@ -38,7 +38,7 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON asms.user_uuid=users.id").
+		Joins("JOIN users ON asms.user_uuid=users.uuid").
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -114,7 +114,7 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON asms.province_uuid=provinces.id").
+		Joins("JOIN provinces ON asms.province_uuid=provinces.uuid").
 		Where("provinces.uuid = ?", province_uuid).
 		Where("provinces.name ILIKE ?", "%"+search+"%").
 		Offset(offset).

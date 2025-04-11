@@ -365,7 +365,7 @@ func UpdateSup(c *fiber.Ctx) error {
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
 		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
 		AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-		UserUUID     string `json:"user_id"`
+		UserUUID     string `json:"user_uuid"`
 		Signature    string `json:"signature"`
 	}
 

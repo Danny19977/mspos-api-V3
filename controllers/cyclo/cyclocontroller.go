@@ -294,7 +294,7 @@ func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
 		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
 		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
-		Joins("JOIN users ON cyclos.user_id=users.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.subarea_uuid = ?", subAreaUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -369,7 +369,7 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
 		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
 		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
-		Joins("JOIN users ON cyclos.user_id=users.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.commune_uuid = ?", CommuneUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
@@ -378,7 +378,7 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
 		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
 		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
-		Joins("JOIN users ON cyclos.user_id=users.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.commune_uuid = ?", CommuneUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -506,7 +506,7 @@ func UpdateCyclo(c *fiber.Ctx) error {
 		SupUUID      string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
 		DrUUID       string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
 		Signature    string `json:"signature"`
-		UserUUID     string `json:"user_id"`
+		UserUUID     string `json:"user_uuid"`
 	}
 
 	var updateData UpdateData

@@ -33,14 +33,14 @@ func GetPaginatedCommunes(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Commune{}).
-		Joins("JOIN provinces ON communes.province_uuid = provinces.id").
-		Joins("JOIN areas ON communes.area_uuid = areas.id").
+		Joins("JOIN provinces ON communes.province_uuid = provinces.uuid").
+		Joins("JOIN areas ON communes.area_uuid = areas.uuid").
 		Where("provinces.name ILIKE ? OR areas.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON communes.province_uuid = provinces.id").
-		Joins("JOIN areas ON communes.area_uuid = areas.id").
+		Joins("JOIN provinces ON communes.province_uuid = provinces.uuid").
+		Joins("JOIN areas ON communes.area_uuid = areas.uuid").
 		Where("provinces.name ILIKE ? OR areas.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -106,14 +106,14 @@ func GetPaginatedCommunesByProvinceUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Commune{}).
-		Joins("JOIN provinces ON communes.province_uuid = provinces.id").
-		Joins("JOIN areas ON communes.area_uuid = areas.id").
+		Joins("JOIN provinces ON communes.province_uuid = provinces.uuid").
+		Joins("JOIN areas ON communes.area_uuid = areas.uuid").
 		Where("communes.province_uuid = ?", ProvinceUUID).
 		Where("provinces.name ILIKE ? OR areas.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON communes.province_uuid = provinces.id").
+		Joins("JOIN provinces ON communes.province_uuid = provinces.uuid").
 		Joins("JOIN areas ON communes.area_uuid = areas.uuid").
 		Where("communes.province_uuid = ?", ProvinceUUID).
 		Where("provinces.name ILIKE ? OR areas.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").

@@ -18,8 +18,8 @@ func SOSPieByArea(c *fiber.Ctx) error {
 			SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
 			SUM(time) ) * 100) AS eq
 		FROM pos_forms 
-			INNER JOIN provinces ON pos_forms.province_uuid=provinces.id
-			INNER JOIN areas ON pos_forms.area_uuid=areas.id
+			INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
+			INNER JOIN areas ON pos_forms.area_uuid=areas.uuid
 		WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"=? AND 
 				"pos_forms"."created_at" BETWEEN ? ::TIMESTAMP AND ? ::TIMESTAMP 
 		GROUP BY "areas"."name";
@@ -43,7 +43,7 @@ func SOSByYear(c *fiber.Ctx) error {
 			SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
 			SUM(time) ) * 100) AS eq
 	FROM pos_forms
-	INNER JOIN provinces ON pos_forms.province_uuid=provinces.id
+	INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
 	WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"=? AND 
     EXTRACT(YEAR FROM "pos_forms"."created_at") = EXTRACT(YEAR FROM CURRENT_DATE)
 		AND EXTRACT(MONTH FROM "pos_forms"."created_at") BETWEEN 1 AND 12 
@@ -125,8 +125,8 @@ func SOSTableView(c *fiber.Ctx) error {
 				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
 				SUM(time) ) * 100) AS time
 		FROM pos_forms
-		INNER JOIN areas ON pos_forms.area_uuid=areas.id
-		INNER JOIN provinces ON pos_forms.province_uuid=provinces.id
+		INNER JOIN areas ON pos_forms.area_uuid=areas.uuid
+		INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
 		WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"=? AND "pos_forms"."created_at" BETWEEN ? ::TIMESTAMP 
 			AND ? ::TIMESTAMP 
 		GROUP BY areas.name; 
