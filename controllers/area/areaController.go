@@ -181,15 +181,15 @@ func GetAreaBySups(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Area{}).
-		Joins("JOIN sups ON s.sup_uuid=sups.id").
-		Where("areas.id = ?", AreaUUID).
+		Joins("JOIN sups ON s.sup_uuid=sups.uuid").
+		Where("areas.uuid = ?", AreaUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Joins("JOIN sups ON areas.sup_uuid=sups.id").
-		Where("areas.id = ?", AreaUUID).
+		Joins("JOIN sups ON areas.sup_uuid=sups.uuid").
+		Where("areas.uuid = ?", AreaUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).

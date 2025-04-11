@@ -32,18 +32,18 @@ func GetPaginatedCyclo(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -114,19 +114,19 @@ func GetPaginatedCycloProvinceByID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.province_uuid = ?", ProvinceUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.province_uuid = ?", ProvinceUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -198,19 +198,19 @@ func GetPaginatedCycloByAreaUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.area_uuid = ?", AreaUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.area_uuid = ?", AreaUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -282,19 +282,19 @@ func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.subarea_uuid = ?", subAreaUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_id=users.uuid").
 		Where("cyclos.subarea_uuid = ?", subAreaUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -366,19 +366,19 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_id=users.uuid").
 		Where("cyclos.commune_uuid = ?", CommuneUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON cyclos.country_uuid=countries.id").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.id").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.id").
-		Joins("JOIN users ON cyclos.user_id=users.id").
+		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
+		Joins("JOIN users ON cyclos.user_id=users.uuid").
 		Where("cyclos.commune_uuid = ?", CommuneUUID).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).

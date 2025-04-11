@@ -115,7 +115,7 @@ func UpdateRutePlanItem(c *fiber.Ctx) error {
 	type UpdateData struct {
 		UUID        string `json:"uuid"`
 		PosUUID     uint   `json:"pos_uuid" gorm:"type:varchar(255);not null"`
-		RoutePlanID uint   `json:"routeplan_id"`
+		RoutePlanID uint   `json:"routeplan_uuid"`
 	}
 
 	var updateData UpdateData

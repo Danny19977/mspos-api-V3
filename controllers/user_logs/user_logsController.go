@@ -34,7 +34,7 @@ func GetPaginatedUserLogs(c *fiber.Ctx) error {
 	db.Model(&models.UserLogs{}).Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON user_logs.user_id=users.id").
+		Joins("JOIN users ON user_logs.user_uuid=users.uuid").
 		Where("users.fullname ILIKE ? OR user_logs.name ILIKE ? OR users.title ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -73,7 +73,7 @@ func GetPaginatedUserLogs(c *fiber.Ctx) error {
 // query data
 func GetUserLogByID(c *fiber.Ctx) error {
 	db := database.DB
-	UserUUID := c.Params("user_id")
+	UserUUID := c.Params("user_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -94,14 +94,14 @@ func GetUserLogByID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Country{}).
-		Joins("JOIN users ON user_logs.user_id=users.id").
-		Where("user_logs.user_id = ?", UserUUID).
+		Joins("JOIN users ON user_logs.user_id=users.uuid").
+		Where("user_logs.user_uuid = ?", UserUUID).
 		Where("users.fullname ILIKE ? OR user_logs.name ILIKE ? OR users.title ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON user_logs.user_id=users.id").
-		Where("user_logs.user_id = ?", UserUUID).
+		Joins("JOIN users ON user_logs.user_uuid=users.uuid").
+		Where("user_logs.user_uuid = ?", UserUUID).
 		Where("users.fullname ILIKE ? OR user_logs.name ILIKE ? OR users.title ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).

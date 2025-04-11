@@ -256,12 +256,12 @@ func GetAllSubAreaDr(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.SubArea{}).
-		Where("id = ?", subAreaUUID).
+		Where("uuid = ?", subAreaUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("id = ?", subAreaUUID).
+		Where("uuid = ?", subAreaUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).

@@ -114,7 +114,7 @@ func GetPaginatedCommunesByProvinceUUID(c *fiber.Ctx) error {
 
 	err = db.
 		Joins("JOIN provinces ON communes.province_uuid = provinces.id").
-		Joins("JOIN areas ON communes.area_uuid = areas.id").
+		Joins("JOIN areas ON communes.area_uuid = areas.uuid").
 		Where("communes.province_uuid = ?", ProvinceUUID).
 		Where("provinces.name ILIKE ? OR areas.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -309,7 +309,7 @@ func GetPaginatedCommunesBySubAreaUUID(c *fiber.Ctx) error {
 func GetPaginatedCommunesByCyclo(c *fiber.Ctx) error {
 	db := database.DB
 
-	commueID := c.Params("commune_uuid")
+	commueUUID := c.Params("commune_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -330,12 +330,12 @@ func GetPaginatedCommunesByCyclo(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Commune{}).
-		Where("communes.cyclo_uuid = ?", commueID).
+		Where("communes.cyclo_uuid = ?", commueUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("communes.cyclo_uuid = ?", commueID).
+		Where("communes.cyclo_uuid = ?", commueUUID).
 		Where("communes.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).

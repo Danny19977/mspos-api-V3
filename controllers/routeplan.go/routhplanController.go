@@ -114,7 +114,7 @@ func GetRouthplan(c *fiber.Ctx) error {
 
 	var Routeplan models.RoutePlan
 	db.Where("uuid = ?", uuid).First(&Routeplan)
-	if Routeplan.ID == 0 {
+	if Routeplan.UUID == "0" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
@@ -160,7 +160,7 @@ func UpdateRouthplan(c *fiber.Ctx) error {
 	type UpdateData struct {
 		UUID string `json:"uuid"`
 
-		UserUUID     string   `json:"user_id"`
+		UserUUID     string   `json:"user_uuid"`
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
 		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
 		TotalPOS     int    `json:"total_pos"`
@@ -207,7 +207,7 @@ func DeleteRouthplan(c *fiber.Ctx) error {
 
 	var routeplan models.RoutePlan
 	db.Where("uuid = ?", uuid).First(&routeplan)
-	if routeplan.ID == 0 {
+	if routeplan.UUID == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",

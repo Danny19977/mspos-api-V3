@@ -95,7 +95,7 @@ func GetAllUsers(c *fiber.Ctx) error {
 
 // query data
 func GetUserByID(c *fiber.Ctx) error {
-	ProvinceUUID := c.Params("id")
+	ProvinceUUID := c.Params("uuid")
 	db := database.DB
 	var users []models.User
 	db.Where("province_uuid = ?", ProvinceUUID).Where("role = ?", "DR").Where("status = ?", true).Find(&users)

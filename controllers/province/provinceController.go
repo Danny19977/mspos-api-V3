@@ -106,13 +106,13 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Province{}).
-		Where("id = ?", ProvinceUUID).
+		Where("uuid = ?", ProvinceUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("id = ?", ProvinceUUID).
+		Where("uuid = ?", ProvinceUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -172,14 +172,14 @@ func GetAllProvinces(c *fiber.Ctx) error {
 
 // query data
 func GetProvinceByID(c *fiber.Ctx) error {
-	id := c.Params("id")
+	uuid := c.Params("uuid")
 	db := database.DB
 	var provinces []models.Province
-	db.Where("country_uuid = ?", id).Find(&provinces)
+	db.Where("country_uuid = ?", uuid).Find(&provinces)
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "provinces by id found",
+		"message": "provinces by uuid found",
 		"data":    provinces,
 	})
 }

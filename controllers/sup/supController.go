@@ -33,16 +33,16 @@ func GetPaginatedSups(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Sup{}).
-		Joins("JOIN users ON sups.user_id=users.id").
+		Joins("JOIN users ON sups.user_uuid=users.uuid").
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON sups.country_uuid=countries.id").
-		Joins("JOIN provinces ON sups.province_uuid=provinces.id").
-		Joins("JOIN areas ON sups.area_uuid=areas.id").
-		Joins("JOIN asms ON sups.asm_uuid=asms.id").
-		Joins("JOIN users ON sups.user_id=users.id").
+		Joins("JOIN countries ON sups.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON sups.area_uuid=areas.uuid").
+		Joins("JOIN asms ON sups.asm_uuid=asms.uuid").
+		Joins("JOIN users ON sups.user_uuid=users.uuid").
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -112,17 +112,17 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Sup{}).
-		Joins("JOIN users ON sups.user_id=users.id").
+		Joins("JOIN users ON sups.user_uuid=users.uuid").
 		Where("sups.province_uuid = ?", province_uuid).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON sups.country_uuid=countries.id").
-		Joins("JOIN provinces ON sups.province_uuid=provinces.id").
-		Joins("JOIN areas ON sups.area_uuid=areas.id").
-		Joins("JOIN asms ON sups.asm_uuid=asms.id").
-		Joins("JOIN users ON sups.user_id=users.id").
+		Joins("JOIN countries ON sups.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON sups.area_uuid=areas.uuid").
+		Joins("JOIN asms ON sups.asm_uuid=asms.uuid").
+		Joins("JOIN users ON sups.user_uuid=users.uuid").
 		Where("sups.province_uuid = ?", province_uuid).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -193,17 +193,17 @@ func GetPaginatedArea(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Sup{}).
-		Joins("JOIN users ON sups.user_id=users.id").
+		Joins("JOIN users ON sups.user_uuid=users.uuid").
 		Where("sups.area_uuid = ?", area_uuid).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON sups.country_uuid=countries.id").
-		Joins("JOIN provinces ON sups.province_uuid=provinces.id").
-		Joins("JOIN areas ON sups.area_uuid=areas.id").
-		Joins("JOIN asms ON sups.asm_uuid=asms.id").
-		Joins("JOIN users ON sups.user_id=users.id").
+		Joins("JOIN countries ON sups.country_uuid=countries.uuid").
+		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
+		Joins("JOIN areas ON sups.area_uuid=areas.uuid").
+		Joins("JOIN asms ON sups.asm_uuid=asms.uuid").
+		Joins("JOIN users ON sups.user_uuid=users.uuid").
 		Where("sups.area_uuid = ?", area_uuid).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
