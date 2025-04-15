@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+//By Area Found here 
 func NdTableView(c *fiber.Ctx) error {
 	province := c.Params("province")
 	start_date := c.Params("start_date")
@@ -43,7 +44,7 @@ func NdTableView(c *fiber.Ctx) error {
 		"data":    chartData,
 	})
 }
-
+//calculate the ND by Year 
 func NdByYear(c *fiber.Ctx) error {
 	province := c.Params("province")
 	sql1 := `  
@@ -67,3 +68,73 @@ func NdByYear(c *fiber.Ctx) error {
 		"data":    chartData,
 	})
 }
+
+//calculate the ND by Country add Total POS at the after the name of the Territoires
+func NdCountryTableView(c *fiber.Ctx) error {
+
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "chartData data",
+		"data":    nil,
+	})
+}
+
+//calculate the ND by Province add Total POS at the after the name of the Territoires
+func NdProvinceTableView(c *fiber.Ctx) error {
+
+
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "chartData data",
+		"data":    nil,
+	})
+}
+
+//calculate the ND by Area add Total POS at the after the name of the Territoires
+func NdAreaTableView(c *fiber.Ctx) error {
+
+
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "chartData data",
+		"data":    nil,
+	})
+}
+
+//calculate the ND by AubArea add Total POS at the after the name of the Territoires
+func NdSubAreaTableView(c *fiber.Ctx) error {
+
+	
+
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "chartData data",
+		"data":    nil,
+	})
+}
+
+//calculate the ND by Commune add Total POS at the after the name of the Territoires
+func NdCommuneTableView(c *fiber.Ctx) error {
+
+	
+
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "chartData data",
+		"data":    nil,
+	})
+}
+
+func NdTopBrands(c *fiber.Ctx) error{
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "chartData data",
+		"data":    nil,
+	})
+}
+
+
+
+
+
+

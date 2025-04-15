@@ -8,10 +8,10 @@ type RutePlanItem struct {
 	gorm.Model
 	UUID string `gorm:"not null;unique" json:"uuid"`
 
-	RoutePlanID uint      `json:"routeplan_id"`
-	RoutePlan   RoutePlan `gorm:"foreignKey:RoutePlanID"`
+	RoutePlanID string      `json:"routeplan_id" gorm:"type:varchar(255);not null"`
+	RoutePlan   RoutePlan `gorm:"foreignKey:RoutePlanID;references:UUID"`
 
-	PosUUID uint `json:"pos_uuid" gorm:"type:varchar(255);not null"`
+	PosUUID string `json:"pos_uuid" gorm:"type:varchar(255);not null"`
 	Pos     Pos  `gorm:"foreignKey:PosUUID;references:UUID"`
 
 	Status bool `json:"status"`

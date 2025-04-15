@@ -165,8 +165,9 @@ func GetAllAsms(c *fiber.Ctx) error {
 	db := database.DB
 	var data []models.Asm
 	db.
-		Preload("User").
+		// Preload("User").
 		Find(&data)
+		
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Asms",

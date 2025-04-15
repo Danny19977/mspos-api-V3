@@ -48,8 +48,14 @@ type User struct {
 	// Cyclos []Cyclo `gorm:"foreignKey:UserUUID"`
 
 	RoutePlan []RoutePlan `gorm:"foreignKey:UserUUID;references:UUID"`
-	Managers []Manager  `gorm:"foreignKey:UserUUID;references:UUID"`
-	UserLogs []UserLogs `gorm:"foreignKey:UserUUID;references:UUID"`
+	Managers  []Manager   `gorm:"foreignKey:UserUUID;references:UUID"`
+	UserLogs  []UserLogs  `gorm:"foreignKey:UserUUID;references:UUID"`
+
+	CountryName  string `json:"country_name" gorm:"-"`
+	ProvinceName string `json:"province_name" gorm:"-"`
+	AreaName     string `json:"area_name" gorm:"-"`
+	SubAreaName  string `json:"subarea_name" gorm:"-"`
+	CommuneName  string `json:"commune_name" gorm:"-"` 
 }
 
 type UserResponse struct {
@@ -61,15 +67,31 @@ type UserResponse struct {
 	Title        string `json:"title"`
 	Role         string `json:"role"`
 	CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null"`
+	Country      Country
 	ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
+	Province     Province
 	AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
+	Area         Area
 	SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+	SubArea      SubArea
 	CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
+	Commune      Commune
 	Permission   string `json:"permission"`
 	Status       bool   `json:"status"`
 	Signature    string `json:"signature"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+
+	CountryName  string `json:"country_name" gorm:"-"`
+	ProvinceName string `json:"province_name" gorm:"-"`
+	AreaName     string `json:"area_name" gorm:"-"`
+	SubAreaName  string `json:"subarea_name" gorm:"-"`
+	CommuneName  string `json:"commune_name" gorm:"-"` 
+
+	Asm          Asm   `json:"asm"`
+	Sup          Sup   `json:"sup"`
+	Dr           Dr    `json:"dr"`
+	Cyclo        Cyclo `json:"cyclo"`
 }
 
 type Login struct {

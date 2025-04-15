@@ -48,6 +48,7 @@ func Setup(app *fiber.App) {
 	u := api.Group("/users")
 	u.Get("/all", user.GetAllUsers)
 	u.Get("/all/paginate", user.GetPaginatedUsers)
+	u.Get("/all/paginate/nosearch", user.GetPaginatedNoSerach)
 	u.Get("/all/:id", user.GetUserByID)
 	u.Get("/get/:uuid", user.GetUser)
 	u.Post("/create", user.CreateUser)
@@ -213,13 +214,17 @@ func Setup(app *fiber.App) {
 
 	//routeplan controller
 	rp := api.Group("/routeplans")
-	rp.Get("/all", routeplan.GetRouthplan)
-	rp.Get("/all/paginate", routeplan.GetPaginatedRouthplan)
-	rp.Get("/all/:id", routeplan.GetRouthplan)
-	rp.Get("/get/:uuid", routeplan.GetRouthplan)
-	rp.Post("/create", routeplan.CreateRouthplan)
-	rp.Put("/update/:uuid", routeplan.UpdateRouthplan)
-	rp.Delete("/delete/:uuid", routeplan.DeleteRouthplan)
+	rp.Get("/all", routeplan.GetRouteplan)
+	rp.Get("/all/paginate", routeplan.GetPaginatedRouteplan)
+	rp.Get("/all/paginate/:province_uuid", routeplan.GetPaginatedRouthplaByProvinceUUID)
+	rp.Get("/all/paginate/:area_uuid", routeplan.GetPaginatedRouthplaByareaUUID)
+	rp.Get("/all/paginate/:subarea_uuid", routeplan.GetPaginatedRouthplaBySubareaUUID)
+	rp.Get("/all/paginate/:commune_uuid", routeplan.GetPaginatedRouteplaBycommuneUUID)
+	rp.Get("/all/:id", routeplan.GetRouteplan)
+	rp.Get("/get/:uuid", routeplan.GetRouteplan)
+	rp.Post("/create", routeplan.CreateRouteplan)
+	rp.Put("/update/:uuid", routeplan.UpdateRouteplan)
+	rp.Delete("/delete/:uuid", routeplan.DeleteRouteplan)
 
 	//routeplanitem controller
 	rpi := api.Group("/routeplan-items")

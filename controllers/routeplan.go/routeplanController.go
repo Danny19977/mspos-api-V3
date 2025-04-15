@@ -1,4 +1,4 @@
-package pos
+package routeplan
 
 import (
 	"strconv"
@@ -6,24 +6,14 @@ import (
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 )
 
 // Paginate
-func GetPaginatedPos(c *fiber.Ctx) error {
+func GetPaginatedRouteplan(c *fiber.Ctx) error {
+
+	// Initialize database connection
 	db := database.DB
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
-	// Provide default values if start_date or end_date are empty
-	if start_date == "" {
-		start_date = "1970-01-01T00:00:00Z" // Default start date
-	}
-	if end_date == "" {
-		end_date = "2100-01-01T00:00:00Z" // Default end date
-	}
-
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -38,19 +28,19 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Pos
+	var dataList []models.RoutePlan
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	db.Model(&models.RoutePlan{}).
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -60,8 +50,6 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
-		Preload("PosEquipments").
-		Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -72,7 +60,7 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 		})
 	}
 
-	// Calculate total pages
+	/// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
@@ -86,29 +74,19 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "POS retrieved successfully",
+		"message":    "Routeplan retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
 }
 
-// Paginate by province id
-func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
+// GetPaginatedRouthplaByProvinceID
+func GetPaginatedRouthplaByProvinceUUID(c *fiber.Ctx) error {
+
+	provinceUUID := c.Params("province_uuid")
+
+	// Initialize database connection
 	db := database.DB
-
-	ProvinceUUID := c.Params("province_uuid")
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
-	// Provide default values if start_date or end_date are empty
-	if start_date == "" {
-		start_date = "1970-01-01T00:00:00Z" // Default start date
-	}
-	if end_date == "" {
-		end_date = "2100-01-01T00:00:00Z" // Default end date
-	}
-
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -123,21 +101,21 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Pos
+	var dataList []models.RoutePlan
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("province_uuid = ?", ProvinceUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	db.Model(&models.RoutePlan{}).
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("route_plans.province_uuid = ?", provinceUUID).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("province_uuid = ?", ProvinceUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("route_plans.province_uuid = ?", provinceUUID).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -147,8 +125,6 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
-		Preload("PosEquipments").
-		Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -159,7 +135,7 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 		})
 	}
 
-	// Calculate total pages
+	/// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
@@ -173,21 +149,19 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "POS retrieved successfully",
+		"message":    "Routeplan retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
 }
 
-// Paginate by area id
-func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
+// GetPaginatedRouthplaByareaUUID
+func GetPaginatedRouthplaByareaUUID(c *fiber.Ctx) error {
+
+	areaUUID := c.Params("area_uuid")
+
+	// Initialize database connection
 	db := database.DB
-
-	AreaUUID := c.Params("area_uuid")
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -202,21 +176,21 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Pos
+	var dataList []models.RoutePlan
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("area_uuid = ?", AreaUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	db.Model(&models.RoutePlan{}).
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("route_plans.area_uuid = ?", areaUUID).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("area_uuid = ?", AreaUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("route_plans.area_uuid = ?", areaUUID).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -226,87 +200,6 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
-		Preload("PosEquipments").
-		Preload("PosForms").
-		Find(&dataList).Error
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"status":  "error",
-			"message": "Failed to fetch Area",
-			"error":   err.Error(),
-		})
-	}
-
-	// Calculate total pages
-	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	// Prepare pagination metadata
-	pagination := map[string]interface{}{
-		"total_records": totalRecords,
-		"total_pages":   totalPages,
-		"current_page":  page,
-		"page_size":     limit,
-	}
-
-	// Return response
-	return c.JSON(fiber.Map{
-		"status":     "success",
-		"message":    "POS retrieved successfully",
-		"data":       dataList,
-		"pagination": pagination,
-	})
-}
-
-// Paginate by SubArea id
-func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
-	db := database.DB
-
-	SubAreaUUID := c.Params("subarea_uuid")
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
-	// Parse query parameters for pagination
-	page, err := strconv.Atoi(c.Query("page", "1"))
-	if err != nil || page <= 0 {
-		page = 1
-	}
-	limit, err := strconv.Atoi(c.Query("limit", "15"))
-	if err != nil || limit <= 0 {
-		limit = 15
-	}
-	offset := (page - 1) * limit
-
-	// Parse search query
-	search := c.Query("search", "")
-
-	var dataList []models.Pos
-	var totalRecords int64
-
-	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("sub_area_uuid = ?", SubAreaUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
-
-	// Fetch paginated data
-	err = db.
-		Where("sub_area_uuid = ?", SubAreaUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Offset(offset).
-		Limit(limit).
-		Order("updated_at DESC").
-		Preload("Country").
-		Preload("Province").
-		Preload("Area").
-		Preload("SubArea").
-		Preload("Commune").
-		Preload("User").
-		Preload("PosEquipments").
-		Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -317,7 +210,7 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 		})
 	}
 
-	// Calculate total pages
+	/// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
@@ -331,21 +224,19 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "POS retrieved successfully",
+		"message":    "Routeplan retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
 }
 
-// Paginate by Commune id / UserUUID
-func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
+// GetPaginatedRouthplaBysubareaUUID
+func GetPaginatedRouthplaBySubareaUUID(c *fiber.Ctx) error {
+
+	subareaUUID := c.Params("subarea_uuid")
+
+	// Initialize database connection
 	db := database.DB
-
-	UserUUID := c.Params("user_uuid")
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -360,21 +251,21 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Pos
+	var dataList []models.RoutePlan
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("user_uuid = ?", UserUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	db.Model(&models.RoutePlan{}).
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("route_plans.subarea_uuid = ?", subareaUUID).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("user_uuid = ?", UserUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("route_plans.subarea_uuid = ?", subareaUUID).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -384,8 +275,6 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
-		Preload("PosEquipments").
-		Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -396,7 +285,7 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 		})
 	}
 
-	// Calculate total pages
+	/// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
@@ -410,35 +299,128 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "POS retrieved successfully",
+		"message":    "Routeplan retrieved successfully",
+		"data":       dataList,
+		"pagination": pagination,
+	})
+}
+
+// GetPaginatedRouteplaBycommuneUUID
+func GetPaginatedRouteplaBycommuneUUID(c *fiber.Ctx) error {
+
+	communeUUID := c.Params("commune_uuid")
+
+	// Initialize database connection
+	db := database.DB
+	// Parse query parameters for pagination
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	limit, err := strconv.Atoi(c.Query("limit", "15"))
+	if err != nil || limit <= 0 {
+		limit = 15
+	}
+	offset := (page - 1) * limit
+
+	// Parse search query
+	search := c.Query("search", "")
+
+	var dataList []models.RoutePlan
+	var totalRecords int64
+
+	// Count total records matching the search query
+	db.Model(&models.RoutePlan{}).
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("route_plans.commune_uuid = ?", communeUUID).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Count(&totalRecords)
+
+	// Fetch paginated data
+	err = db.
+		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
+		Where("route_plans.commune_uuid = ?", communeUUID).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Offset(offset).
+		Limit(limit).
+		Order("updated_at DESC").
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Preload("User").
+		Find(&dataList).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch provinces",
+			"error":   err.Error(),
+		})
+	}
+
+	/// Calculate total pages
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+
+	// Prepare pagination metadata
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
+	}
+
+	// Return response
+	return c.JSON(fiber.Map{
+		"status":     "success",
+		"message":    "Routeplan retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
 }
 
 // Get All data
-func GetAllPoss(c *fiber.Ctx) error {
+func GetAllRouteplan(c *fiber.Ctx) error {
 	db := database.DB
-	var data []models.Pos
-	db.Where("status = ?", true).Find(&data)
+
+	var data []models.RoutePlan
+	db.Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "All Pos",
+		"message": "All Routeplan",
+		"data":    data,
+	})
+}
+
+// Get All data by id
+func GetAllRouteplanBySearch(c *fiber.Ctx) error {
+	db := database.DB
+
+	search := c.Query("search", "")
+
+	var data []models.RoutePlan
+	db.Where("name ILIKE ?", "%"+search+"%").
+		Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Routeplan",
 		"data":    data,
 	})
 }
 
 // Get one data
-func GetPos(c *fiber.Ctx) error {
+func GetRouteplan(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 	db := database.DB
-	var pos models.Pos
-	db.Where("uuid = ?", uuid).First(&pos)
-	if pos.Name == "" {
+
+	var Routeplan models.RoutePlan
+	db.Where("uuid = ?", uuid).First(&Routeplan)
+	if Routeplan.UUID == "0" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
-				"message": "No pos name found",
+				"message": "No Routeplan name found",
 				"data":    nil,
 			},
 		)
@@ -446,127 +428,107 @@ func GetPos(c *fiber.Ctx) error {
 	return c.JSON(
 		fiber.Map{
 			"status":  "success",
-			"message": "pos found",
-			"data":    pos,
+			"message": "RoutePlan found",
+			"data":    Routeplan,
 		},
 	)
 }
 
 // Create data
-func CreatePos(c *fiber.Ctx) error {
-	p := &models.Pos{}
+func CreateRouteplan(c *fiber.Ctx) error {
+	p := &models.RoutePlan{}
 
 	if err := c.BodyParser(&p); err != nil {
 		return err
 	}
 
-	p.UUID = uuid.New().String()
+	// p.UUID = uuid.New().String()
 	database.DB.Create(p)
 
 	return c.JSON(
 		fiber.Map{
 			"status":  "success",
-			"message": "pos created success",
+			"message": "routeplan created success",
 			"data":    p,
 		},
 	)
 }
 
 // Update data
-func UpdatePos(c *fiber.Ctx) error {
+func UpdateRouteplan(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 	db := database.DB
 
 	type UpdateData struct {
 		UUID string `json:"uuid"`
 
-		Name      string `gorm:"not null" json:"name"` // Celui qui vend
-		Shop      string `json:"shop"`                 // Nom du shop
-		Postype   string `json:"postype"`              // Type de POS
-		Gerant    string `json:"gerant"`               // name of the onwer of the pos
-		Avenue    string `json:"avenue"`
-		Quartier  string `json:"quartier"`
-		Reference string `json:"reference"`
-		Telephone string `json:"telephone"`
-		Image     string `json:"image"`
-
-		CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null"`
+		UserUUID     string `json:"user_uuid"`
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
 		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
 		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
-
-		UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
-
-		Status    bool   `json:"status"`
-		Signature string `json:"signature"`
+		CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
+		TotalPOS     int    `json:"total_pos"`
+		Signature    string `json:"signature"`
 	}
 
 	var updateData UpdateData
-
 	if err := c.BodyParser(&updateData); err != nil {
 		return c.Status(500).JSON(
 			fiber.Map{
 				"status":  "error",
-				"message": "Review your input",
+				"message": "Review your iunput",
 				"data":    nil,
 			},
 		)
 	}
 
-	pos := new(models.Pos)
+	RoutePlan := new(models.RoutePlan)
 
-	db.Where("uuid = ?", uuid).First(&pos)
-	pos.Name = updateData.Name
-	pos.Shop = updateData.Shop
-	pos.Postype = updateData.Postype
-	pos.Gerant = updateData.Gerant
-	pos.Avenue = updateData.Avenue
-	pos.Quartier = updateData.Quartier
-	pos.Reference = updateData.Reference
-	pos.Telephone = updateData.Telephone
-	pos.CountryUUID = updateData.CountryUUID
-	pos.ProvinceUUID = updateData.ProvinceUUID
-	pos.AreaUUID = updateData.AreaUUID
-	pos.SubAreaUUID = updateData.SubAreaUUID
-	pos.UserUUID = updateData.UserUUID
-	pos.Status = updateData.Status
-	pos.Signature = updateData.Signature
+	db.Where("uuid = ?", uuid).First(&RoutePlan)
+	RoutePlan.UserUUID = updateData.UserUUID
+	RoutePlan.ProvinceUUID = updateData.ProvinceUUID
+	RoutePlan.AreaUUID = updateData.AreaUUID
+	RoutePlan.SubAreaUUID = updateData.SubAreaUUID
+	RoutePlan.CommuneUUID = updateData.CommuneUUID
+	// RoutePlan.TotalPOS = updateData.TotalPOS
+	RoutePlan.Signature = updateData.Signature
 
-	db.Save(&pos)
+	db.Save(&RoutePlan)
 
 	return c.JSON(
 		fiber.Map{
 			"status":  "success",
-			"message": "POS updated success",
-			"data":    pos,
+			"message": "RoutePlan updated success",
+			"data":    RoutePlan,
 		},
 	)
+
 }
 
 // Delete data
-func DeletePos(c *fiber.Ctx) error {
+func DeleteRouteplan(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 
 	db := database.DB
 
-	var pos models.Pos
-	db.Where("uuid = ?", uuid).First(&pos)
-	if pos.Name == "" {
+	var routeplan models.RoutePlan
+	db.Where("uuid = ?", uuid).First(&routeplan)
+	if routeplan.UUID == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
-				"message": "No POS name found",
+				"message": "No routeplan name found",
 				"data":    nil,
 			},
 		)
 	}
 
-	db.Delete(&pos)
+	db.Delete(&routeplan)
 
 	return c.JSON(
 		fiber.Map{
 			"status":  "success",
-			"message": "POS deleted success",
+			"message": "RoutePlan deleted success",
 			"data":    nil,
 		},
 	)

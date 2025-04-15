@@ -114,8 +114,8 @@ func UpdateRutePlanItem(c *fiber.Ctx) error {
 
 	type UpdateData struct {
 		UUID        string `json:"uuid"`
-		PosUUID     uint   `json:"pos_uuid" gorm:"type:varchar(255);not null"`
-		RoutePlanID uint   `json:"routeplan_uuid"`
+		PosUUID     string   `json:"pos_uuid" gorm:"type:varchar(255);not null"`
+		RoutePlanID string   `json:"routeplan_uuid"`
 	}
 
 	var updateData UpdateData
@@ -156,7 +156,7 @@ func DeleteRutePlanItem(c *fiber.Ctx) error {
 
 	var rutePlanItems models.RutePlanItem
 	db.Where("uuid = ?", uuid).First(&rutePlanItems)
-	if rutePlanItems.PosUUID == 0 {
+	if rutePlanItems.PosUUID == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",

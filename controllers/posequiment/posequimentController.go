@@ -205,7 +205,7 @@ func GetPosEquipment(c *fiber.Ctx) error {
 	db := database.DB
 	var posequipment models.PosEquipment
 	db.Where("uuid = ?", uuid).First(&posequipment)
-	if posequipment.PosUUID == 0 {
+	if posequipment.PosUUID == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
@@ -250,7 +250,7 @@ func UpdatePosEquipment(c *fiber.Ctx) error {
 
 	type UpdateData struct {
 		UUID          string `json:"uuid"`
-		PosUUID       uint   `json:"pos_uuid" gorm:"type:varchar(255);not null"`
+		PosUUID       string   `json:"pos_uuid" gorm:"type:varchar(255);not null"`
 		Parasol       string `json:"parasol"`                        //Equrtor, Compatition, Parasol
 		ParasolStatus string `gorm:"not null" json:"parasol_status"` // Status d'equipements  Casser, Vieux, Bien
 
@@ -307,7 +307,7 @@ func DeletePosEquipment(c *fiber.Ctx) error {
 
 	var PosEquipment models.PosEquipment
 	db.Where("uuid = ?", uuid).First(&PosEquipment)
-	if PosEquipment.PosUUID == 0 {
+	if PosEquipment.PosUUID == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",

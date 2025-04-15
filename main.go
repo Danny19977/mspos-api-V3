@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"strings"
-
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/routes"
 	"github.com/gofiber/fiber/v2"
@@ -34,7 +33,7 @@ func main() {
 
 	// Middleware
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:4200, http://192.168.11.229:4200, http://192.168.1.85:4200, http://192.168.1.71:4200 , http://192.168.1.112:4200 , http://192.168.1.70:4200, http://192.168.251.229:4200, http://192.168.251.226:4200, http://192.168.73.229:4200",
+		AllowOrigins:     "http://localhost:4200, http://192.168.11.229:4200, http://192.168.11.144:4200",
 		AllowHeaders:     "Origin, Content-Type, Accept",
 		AllowCredentials: true,
 		AllowMethods: strings.Join([]string{

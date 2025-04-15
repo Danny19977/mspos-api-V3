@@ -81,6 +81,71 @@ func GetPaginatedUsers(c *fiber.Ctx) error {
 	})
 }
 
+
+func GetPaginatedNoSerach(c *fiber.Ctx) error {
+	db := database.DB
+
+	// Parse query parameters for pagination
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	limit, err := strconv.Atoi(c.Query("limit", "15"))
+	if err != nil || limit <= 0 {
+		limit = 15
+	}
+	offset := (page - 1) * limit
+	var users []models.User
+	var totalRecords int64
+
+	// Count total records matching the search query
+	db.Model(&models.User{}).
+		Count(&totalRecords)
+
+	err = db.
+		Offset(offset).
+		Limit(limit).
+		Order("users.updated_at DESC").
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Preload("Cyclo").
+		Preload("Dr").
+		Preload("Sup").
+		Preload("Asm").
+		Preload("Managers").
+		Find(&users).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch Users",
+			"error":   err.Error(),
+		})
+	}
+
+	// Calculate total pages
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+
+	//  Prepare pagination metadata
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
+	}
+
+	// Return response
+	return c.JSON(fiber.Map{
+		"status":     "success",
+		"message":    "Users retrieved successfully",
+		"data":       users,
+		"pagination": pagination,
+	})
+}
+
 // query all data
 func GetAllUsers(c *fiber.Ctx) error {
 	db := database.DB
@@ -157,17 +222,20 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	user := &models.User{
-		// UUID:       p.UUID,
-		Fullname:   p.Fullname,
-		Email:      p.Email,
-		Title:      p.Title,
-		Phone:      p.Phone,
-		Role:       p.Role,
-		Permission: p.Permission,
-		Image:      p.Image,
-		Status:     p.Status,
-		// IsManager:  p.IsManager,
-		Signature: p.Signature,
+		Fullname:     p.Fullname,
+		Email:        p.Email,
+		Title:        p.Title,
+		Phone:        p.Phone,
+		Role:         p.Role,
+		Permission:   p.Permission,
+		Image:        p.Image,
+		Status:       p.Status,
+		Signature:    p.Signature,
+		CountryUUID:  p.CountryUUID,
+		ProvinceUUID: p.ProvinceUUID,
+		AreaUUID:     p.AreaUUID,
+		SubAreaUUID:  p.SubAreaUUID,
+		CommuneUUID:  p.CommuneUUID,
 	}
 
 	user.SetPassword(p.Password)

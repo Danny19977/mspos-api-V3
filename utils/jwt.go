@@ -2,7 +2,6 @@ package utils
 
 import (
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -10,10 +9,10 @@ import (
 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
-func GenerateJwt(issuer uint) (string, error) {
+func GenerateJwt(issuer string) (string, error) {
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{
-		Issuer:    strconv.Itoa(int(issuer)),
+		Issuer:    issuer,
 		ExpiresAt: time.Now().Add(time.Hour * 72).Unix(), // 3 days
 	})
 

@@ -13,12 +13,16 @@ type Country struct {
 	Areas     []Area     `gorm:"foreignKey:CountryUUID;references:UUID"`
 	SubAreas  []SubArea  `gorm:"foreignKey:CountryUUID;references:UUID"`
 	Communes  []Commune  `gorm:"foreignKey:CountryUUID;references:UUID"`
+
 	Managers  []Manager  `gorm:"foreignKey:CountryUUID;references:UUID"`
 	Asms      []Asm      `gorm:"foreignKey:CountryUUID;references:UUID"`
 	Sups      []Sup      `gorm:"foreignKey:CountryUUID;references:UUID"`
 	Drs       []Dr       `gorm:"foreignKey:CountryUUID;references:UUID"`
 	Cyclos    []Cyclo    `gorm:"foreignKey:CountryUUID;references:UUID"`
+
 	Brands    []Brand    `gorm:"foreignKey:CountryUUID;references:UUID"`
 	Pos       []Pos      `gorm:"foreignKey:CountryUUID;references:UUID"`
+
 	Users     []User     `gorm:"foreignKey:CountryUUID;references:UUID"`
+	RoutePlans []RoutePlan `gorm:"foreignKey:CountryUUID;references:UUID"`
 }

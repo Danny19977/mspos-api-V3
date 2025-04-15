@@ -47,7 +47,7 @@ func Register(c *fiber.Ctx) error {
 		ProvinceUUID: nu.ProvinceUUID,
 		AreaUUID:     nu.AreaUUID,
 		SubAreaUUID:  nu.SubAreaUUID,
-		CommuneUUID:    nu.CommuneUUID,
+		CommuneUUID:  nu.CommuneUUID,
 	}
 
 	u.SetPassword(nu.Password)
@@ -97,7 +97,7 @@ func Login(c *fiber.Ctx) error {
 
 	database.DB.Where("email = ? OR phone = ?", lu.Identifier, lu.Identifier).First(&u)
 
-	if u.ID == 0 {
+	if u.UUID == "00000000-0000-0000-0000-000000000000" {
 		c.Status(404)
 		return c.JSON(fiber.Map{
 			"message": "invalid email or phone 😰",
@@ -118,7 +118,7 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	token, err := utils.GenerateJwt(u.ID)
+	token, err := utils.GenerateJwt(u.UUID)
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -143,12 +143,40 @@ func AuthUser(c *fiber.Ctx) error {
 
 	u := models.User{}
 
-	database.DB.Where("id = ?", UserUUID).
+	database.DB.
+		// Joins("LEFT JOIN countries ON users.country_uuid = countries.uuid").
+		// Joins("LEFT JOIN provinces ON users.province_uuid = provinces.uuid").
+		// Joins("LEFT JOIN areas ON users.area_uuid = areas.uuid").
+		// Joins("LEFT JOIN sub_areas ON users.sub_area_uuid = sub_areas.uuid").
+		// Joins("LEFT JOIN communes ON users.commune_uuid = communes.uuid").
+		Where("users.uuid = ?", UserUUID).
+	// 	Select(`
+	// 		users.*,
+
+	// 		countries.uuid as country_uuid,
+	// 		countries.name as country_name,
+			
+	// 		provinces.uuid as province_uuid,
+	// 		provinces.name as province_name,
+			
+	// 		areas.uuid as area_uuid,
+	// 		areas.name as area_name,
+			
+	// 		sub_areas.uuid as subarea_uuid,
+	// 		sub_areas.name as subarea_name,
+			
+	// 		communes.uuid as commune_uuid,
+	// 		communes.name as commune_name
+	// `).
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr").
+		Preload("Cyclo").
 		First(&u)
 
 	r := &models.UserResponse{
@@ -162,12 +190,27 @@ func AuthUser(c *fiber.Ctx) error {
 		Permission:   u.Permission,
 		Status:       u.Status,
 		CountryUUID:  u.CountryUUID,
+		Country:      u.Country,
 		ProvinceUUID: u.ProvinceUUID,
+		Province:     u.Province,
 		AreaUUID:     u.AreaUUID,
+		Area:         u.Area,
 		SubAreaUUID:  u.SubAreaUUID,
-		CommuneUUID:    u.CommuneUUID,
+		SubArea:      u.SubArea,
+		CommuneUUID:  u.CommuneUUID,
+		Commune:      u.Commune,
 		CreatedAt:    u.CreatedAt,
 		UpdatedAt:    u.UpdatedAt,
+
+		CountryName:  u.Country.Name,
+		ProvinceName: u.Province.Name,
+		AreaName:     u.Area.Name,
+		SubAreaName:  u.SubArea.Name,
+		CommuneName:  u.Commune.Name,
+		Asm:          u.Asm,
+		Sup:          u.Sup,
+		Dr:           u.Dr,
+		Cyclo:        u.Cyclo,
 	}
 	return c.JSON(r)
 }

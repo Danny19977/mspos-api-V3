@@ -6,7 +6,7 @@ type PosEquipment struct {
 	gorm.Model
 	UUID string `gorm:"not null;unique" json:"uuid"`
 
-	PosUUID uint `json:"pos_uuid" gorm:"type:varchar(255);not null"`
+	PosUUID string `json:"pos_uuid" gorm:"type:varchar(255);not null"`
 	Pos     Pos  `gorm:"foreignKey:PosUUID;references:UUID"` // Status d'equipements  Casser, Vieux, Bien
 
 	Parasol       string `json:"parasol"`                        // drop down brand  create a line "other"

@@ -50,7 +50,7 @@ func GetPaginatedSups(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		Preload("Asm.User").
+		// Preload("Asm.User").
 		// Preload("User").
 		Preload("Drs").
 		Preload("Cyclos").
@@ -131,7 +131,7 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		Preload("Asm.User").
+		// Preload("Asm.User").
 		// Preload("User").
 		Preload("Drs").
 		Preload("Cyclos").
