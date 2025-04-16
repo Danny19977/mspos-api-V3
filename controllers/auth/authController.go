@@ -144,30 +144,30 @@ func AuthUser(c *fiber.Ctx) error {
 	u := models.User{}
 
 	database.DB.
-		// Joins("LEFT JOIN countries ON users.country_uuid = countries.uuid").
-		// Joins("LEFT JOIN provinces ON users.province_uuid = provinces.uuid").
-		// Joins("LEFT JOIN areas ON users.area_uuid = areas.uuid").
-		// Joins("LEFT JOIN sub_areas ON users.sub_area_uuid = sub_areas.uuid").
-		// Joins("LEFT JOIN communes ON users.commune_uuid = communes.uuid").
-		Where("uuid = ?", UserUUID).
-	// 	Select(`
-	// 		users.*,
+		Joins("LEFT JOIN countries ON users.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON users.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON users.area_uuid = areas.uuid").
+		Joins("LEFT JOIN sub_areas ON users.sub_area_uuid = sub_areas.uuid").
+		Joins("LEFT JOIN communes ON users.commune_uuid = communes.uuid").
+		Where("users.uuid = ?", UserUUID).
+		Select(`
+			users.*,
 
-	// 		countries.uuid as country_uuid,
-	// 		countries.name as country_name,
+			countries.uuid as country_uuid,
+			countries.name as country_name,
 			
-	// 		provinces.uuid as province_uuid,
-	// 		provinces.name as province_name,
+			provinces.uuid as province_uuid,
+			provinces.name as province_name,
 			
-	// 		areas.uuid as area_uuid,
-	// 		areas.name as area_name,
+			areas.uuid as area_uuid,
+			areas.name as area_name,
 			
-	// 		sub_areas.uuid as subarea_uuid,
-	// 		sub_areas.name as subarea_name,
+			sub_areas.uuid as subarea_uuid,
+			sub_areas.name as subarea_name,
 			
-	// 		communes.uuid as commune_uuid,
-	// 		communes.name as commune_name
-	// `).
+			communes.uuid as commune_uuid,
+			communes.name as commune_name
+	`).
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").

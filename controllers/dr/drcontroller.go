@@ -45,19 +45,19 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		Preload("SubArea").
-		Preload("Asm.User").
-		Preload("Sup.User").
-		// Preload("User").
+		Preload("Asm").
+		Preload("Sup").
+		Preload("User").
 		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
 
+
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch sups",
+			"message": "Failed to fetch DRs",
 			"error":   err.Error(),
 		})
 	}
@@ -123,8 +123,8 @@ func GetPaginatedDrByProvince(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Asm.User").
-		Preload("Sup.User").
+		Preload("Asm").
+		Preload("Sup").
 		// Preload("User").
 		Preload("Cyclos").
 		Preload("Pos").
@@ -160,7 +160,7 @@ func GetPaginatedDrByProvince(c *fiber.Ctx) error {
 }
 
 // Paginate by  Area ID
-func GetPaginatedArea(c *fiber.Ctx) error {
+func GetPaginatedDrByArea(c *fiber.Ctx) error {
 	db := database.DB
 
 	area_uuid := c.Params("area_uuid")
@@ -200,8 +200,8 @@ func GetPaginatedArea(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Asm.User").
-		Preload("Sup.User").
+		Preload("Asm").
+		Preload("Sup").
 		// Preload("User").
 		Preload("Cyclos").
 		Preload("Pos").
@@ -236,8 +236,8 @@ func GetPaginatedArea(c *fiber.Ctx) error {
 	})
 }
 
-// Paginate by  Area ID
-func GetPaginatedSubArea(c *fiber.Ctx) error {
+// Paginate by  SubArea ID
+func GetPaginatedDrBySubArea(c *fiber.Ctx) error {
 	db := database.DB
 
 	subarea_uuid := c.Params("subarea_uuid")
@@ -269,7 +269,7 @@ func GetPaginatedSubArea(c *fiber.Ctx) error {
 	err = db.
 		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.subarea_uuid = ?", subarea_uuid).
-		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("drs.updated_at DESC").
@@ -277,8 +277,8 @@ func GetPaginatedSubArea(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Asm.User").
-		Preload("Sup.User").
+		Preload("Asm").
+		Preload("Sup").
 		// Preload("User").
 		Preload("Cyclos").
 		Preload("Pos").

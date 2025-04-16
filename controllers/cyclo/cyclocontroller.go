@@ -32,12 +32,12 @@ func GetPaginatedCyclo(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
-		Joins("JOIN users ON sups.user_uuid=users.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON sups.user_uuid=users.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -45,11 +45,10 @@ func GetPaginatedCyclo(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		Preload("SubArea").
-		Preload("Commune").
-		Preload("Asm.User").
-		// Preload("Sup.User").
-		Preload("Dr.User"). //Dr is not displaying on the database must fix this
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr"). 
+		// Preload("User").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -124,9 +123,9 @@ func GetPaginatedCycloProvinceByID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm.User").
-		Preload("Sup.User").
-		Preload("Dr.User"). //Dr is not displaying on the database must fix this
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr"). 
 		// Preload("User").
 		Preload("Pos").
 		Preload("PosForms").
@@ -185,13 +184,13 @@ func GetPaginatedCycloByAreaUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
-		Joins("JOIN users ON sups.user_uuid=users.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.area_uuid = ?", AreaUUID).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON sups.user_uuid=users.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.area_uuid = ?", AreaUUID).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
@@ -202,9 +201,9 @@ func GetPaginatedCycloByAreaUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm.User").
-		Preload("Sup.User").
-		Preload("Dr.User"). //Dr is not displaying on the database must fix this
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr"). 
 		// Preload("User").
 		Preload("Pos").
 		Preload("PosForms").
@@ -263,21 +262,15 @@ func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
-		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
 		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.subarea_uuid = ?", subAreaUUID).
-		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON cyclos.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON cyclos.province_uuid=provinces.uuid").
-		Joins("JOIN areas ON cyclos.area_uuid=areas.uuid").
 		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.subarea_uuid = ?", subAreaUUID).
-		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("cyclos.updated_at DESC").
@@ -286,11 +279,12 @@ func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm.User").
-		Preload("Sup.User").
-		Preload("Dr.User"). //Dr is not displaying on the database must fix this
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr"). 
 		// Preload("User").
 		Preload("Pos").
+		Preload("PosForms").
 		Preload("PosForms").
 		Find(&dataList).Error
 
@@ -347,7 +341,7 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
-		Joins("JOIN users ON sups.user_uuid=users.uuid").
+		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
 		Where("cyclos.commune_uuid = ?", CommuneUUID).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
@@ -362,11 +356,9 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		Preload("SubArea").
-		Preload("Commune").
-		Preload("Asm.User").
-		Preload("Sup.User").
-		Preload("Dr.User"). //Dr is not displaying on the database must fix this
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr"). 
 		// Preload("User").
 		Preload("Pos").
 		Preload("PosForms").

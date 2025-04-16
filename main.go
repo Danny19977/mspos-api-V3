@@ -33,7 +33,7 @@ func main() {
 
 	// Middleware
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:4200, http://192.168.11.229:4200, http://192.168.11.144:4200",
+		AllowOrigins:     "http://localhost:4200, http://192.168.110.229:4200, http://192.168.110.144:4200, http://192.168.1.66:4200",
 		AllowHeaders:     "Origin, Content-Type, Accept",
 		AllowCredentials: true,
 		AllowMethods: strings.Join([]string{
