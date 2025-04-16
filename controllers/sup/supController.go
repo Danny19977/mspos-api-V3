@@ -38,19 +38,15 @@ func GetPaginatedSups(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON sups.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
-		Joins("JOIN areas ON sups.area_uuid=areas.uuid").
-		Joins("JOIN asms ON sups.asm_uuid=asms.uuid").
 		Joins("JOIN users ON sups.user_uuid=users.uuid").
-		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("sups.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		// Preload("Asm.User").
+		Preload("Asm").
 		// Preload("User").
 		Preload("Drs").
 		Preload("Cyclos").
@@ -118,20 +114,16 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON sups.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
-		Joins("JOIN areas ON sups.area_uuid=areas.uuid").
-		Joins("JOIN asms ON sups.asm_uuid=asms.uuid").
 		Joins("JOIN users ON sups.user_uuid=users.uuid").
 		Where("sups.province_uuid = ?", province_uuid).
-		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("sups.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		// Preload("Asm.User").
+		Preload("Asm").
 		// Preload("User").
 		Preload("Drs").
 		Preload("Cyclos").
@@ -199,20 +191,16 @@ func GetPaginatedArea(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON sups.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
-		Joins("JOIN areas ON sups.area_uuid=areas.uuid").
-		Joins("JOIN asms ON sups.asm_uuid=asms.uuid").
 		Joins("JOIN users ON sups.user_uuid=users.uuid").
 		Where("sups.area_uuid = ?", area_uuid).
-		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("sups.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		Preload("Asm.User").
+		Preload("Asm").
 		// Preload("User").
 		Preload("Drs").
 		Preload("Cyclos").
@@ -411,11 +399,11 @@ func DeleteSup(c *fiber.Ctx) error {
 
 	var sup models.Sup
 	db.Where("uuid = ?", uuid).First(&sup)
-	if sup.ProvinceUUID == "" {
+	if sup.UUID == "00000000-0000-0000-0000-000000000000" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
-				"message": "No sup name found",
+				"message": "No sup found",
 				"data":    nil,
 			},
 		)

@@ -69,6 +69,7 @@ func Setup(app *fiber.App) {
 	// Areas controller
 	ar := api.Group("/areas")
 	ar.Get("/all", area.GetAllAreas)
+	ar.Get("/all/province_uuid", area.GetAllAreasByProvinceUUID)
 	ar.Get("/all/paginate", area.GetPaginatedAreas)
 	ar.Get("/all/paginate/:province_uuid", area.GetAreaByASM)
 	ar.Get("/all/paginate/:area_uuid", area.GetAreaBySups)
@@ -82,6 +83,7 @@ func Setup(app *fiber.App) {
 	//SubArea controller
 	sa := api.Group("/subareas")
 	sa.Get("/all", Subarea.GetAllSubArea)
+	sa.Get("/all/area_uuid", Subarea.GetAllDataBySubAreaByAreaUUID)
 	sa.Get("/all/paginate", Subarea.GetPaginatedSubArea)
 	sa.Get("/all/paginate/:province_uuid", Subarea.GetPaginatedSubAreaByASM)
 	sa.Get("/all/paginate/:area_uuid", Subarea.GetPaginatedSubAreaBySup)
@@ -94,6 +96,7 @@ func Setup(app *fiber.App) {
 	// Commune controller
 	com := api.Group("/communes")
 	com.Get("/all", commune.GetAllCommunes)
+	com.Get("/all/subarea_uuid", commune.GetAllCommunesBySubareaUUID)
 	com.Get("/all/paginate", commune.GetPaginatedCommunes)
 	com.Get("/all/paginate/:province_uuid", commune.GetPaginatedCommunesByProvinceUUID)
 	com.Get("/all/paginate/:area_uuid", commune.GetPaginatedCommunesByAreaUUID)

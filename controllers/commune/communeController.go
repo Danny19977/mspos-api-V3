@@ -392,6 +392,22 @@ func GetAllCommunes(c *fiber.Ctx) error {
 	})
 }
 
+// Get All data
+func GetAllCommunesBySubareaUUID(c *fiber.Ctx) error {
+	db := database.DB
+
+	subAreaUUID := c.Params("subarea_uuid")
+
+	var data []models.Commune
+	db. Where("subarea_uuid = ?", subAreaUUID).Find(&data).Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Communes",
+		"data":    data,
+	})
+}
+
+
 // query data
 func GetCountryCommuneByID(c *fiber.Ctx) error {
 	id := c.Params("id")

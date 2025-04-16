@@ -37,12 +37,8 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON drs.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON drs.province_uuid=provinces.uuid").
-		Joins("JOIN areas ON drs.area_uuid=areas.uuid").
-		Joins("JOIN asms ON drs.asm_uuid=asms.uuid").
 		Joins("JOIN users ON drs.user_uuid=users.uuid").
-		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("drs.updated_at DESC").
@@ -117,13 +113,9 @@ func GetPaginatedDrByProvince(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON drs.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON drs.province_uuid=provinces.uuid").
-		Joins("JOIN areas ON drs.area_uuid=areas.uuid").
-		Joins("JOIN asms ON drs.asm_uuid=asms.uuid").
 		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.province_uuid = ?", province_uuid).
-		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("drs.updated_at DESC").
@@ -198,13 +190,9 @@ func GetPaginatedArea(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON drs.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON drs.province_uuid=provinces.uuid").
-		Joins("JOIN areas ON drs.area_uuid=areas.uuid").
-		Joins("JOIN asms ON drs.asm_uuid=asms.uuid").
 		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.area_uuid = ?", area_uuid).
-		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("drs.updated_at DESC").
@@ -279,10 +267,6 @@ func GetPaginatedSubArea(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON drs.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON drs.province_uuid=provinces.uuid").
-		Joins("JOIN areas ON drs.area_uuid=areas.uuid").
-		Joins("JOIN asms ON drs.asm_uuid=asms.uuid").
 		Joins("JOIN users ON drs.user_uuid=users.uuid").
 		Where("drs.subarea_uuid = ?", subarea_uuid).
 		Where("countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ? OR users.fullname ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").

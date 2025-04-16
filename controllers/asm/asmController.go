@@ -287,7 +287,7 @@ func DeleteAsm(c *fiber.Ctx) error {
 
 	var asm models.Asm
 	db.Where("uuid = ?", uuid).First(&asm)
-	if asm.ID == 0 {
+	if asm.UUID == "00000000-0000-0000-0000-000000000000" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
@@ -296,7 +296,7 @@ func DeleteAsm(c *fiber.Ctx) error {
 			},
 		)
 	}
-
+ 
 	db.Delete(&asm)
 
 	return c.JSON(

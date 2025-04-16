@@ -149,7 +149,7 @@ func AuthUser(c *fiber.Ctx) error {
 		// Joins("LEFT JOIN areas ON users.area_uuid = areas.uuid").
 		// Joins("LEFT JOIN sub_areas ON users.sub_area_uuid = sub_areas.uuid").
 		// Joins("LEFT JOIN communes ON users.commune_uuid = communes.uuid").
-		Where("users.uuid = ?", UserUUID).
+		Where("uuid = ?", UserUUID).
 	// 	Select(`
 	// 		users.*,
 
