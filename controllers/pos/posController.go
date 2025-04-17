@@ -1,8 +1,8 @@
 package pos
 
 import (
-	"strconv"
-
+	"strconv" 
+	
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
@@ -421,6 +421,86 @@ func GetAllPoss(c *fiber.Ctx) error {
 	db := database.DB
 	var data []models.Pos
 	db.Where("status = ?", true).Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Pos",
+		"data":    data,
+	})
+}
+
+// Get All data by manager
+func GetAllPosByManager(c *fiber.Ctx) error {
+	db := database.DB
+
+	countryUUID := c.Params("country_uuid")
+
+	var data []models.Pos
+	db.Where("country_uuid = ?", countryUUID).
+	Where("status = ?", true).Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Pos",
+		"data":    data,
+	})
+}
+
+// Get All data by ASM
+func GetAllPosByASM(c *fiber.Ctx) error {
+	db := database.DB
+
+	provinceUUID := c.Params("province_uuid")
+
+	var data []models.Pos
+	db.Where("province_uuid = ?", provinceUUID).
+	Where("status = ?", true).Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Pos",
+		"data":    data,
+	})
+}
+
+// Get All data by Supervisor
+func GetAllPosBySup(c *fiber.Ctx) error {
+	db := database.DB
+
+	areaUUID := c.Params("area_uuid")
+
+	var data []models.Pos
+	db.Where("area_uuid = ?", areaUUID).
+	Where("status = ?", true).Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Pos",
+		"data":    data,
+	})
+}
+
+// Get All data by DR
+func GetAllPosByDR(c *fiber.Ctx) error {
+	db := database.DB
+
+	subAreaUUID := c.Params("sub_area_uuid")
+
+	var data []models.Pos
+	db.Where("sub_area_uuid = ?", subAreaUUID).
+	Where("status = ?", true).Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Pos",
+		"data":    data,
+	})
+}
+
+// Get All data by CYclo
+func GetAllPosByCyclo(c *fiber.Ctx) error {
+	db := database.DB
+
+	userUUID := c.Params("user_uuid")
+
+	var data []models.Pos
+	db.Where("user_uuid = ?", userUUID).
+	Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",
