@@ -22,6 +22,7 @@ type Country struct {
 
 	Brands []Brand `gorm:"foreignKey:CountryUUID;references:UUID"`
 	Pos    []Pos   `gorm:"foreignKey:CountryUUID;references:UUID"`
+	PosForms []PosForm `gorm:"foreignKey:CountryUUID;references:UUID"`
 
 	Users      []User      `gorm:"foreignKey:CountryUUID;references:UUID"`
 	RoutePlans []RoutePlan `gorm:"foreignKey:CountryUUID;references:UUID"`

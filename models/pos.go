@@ -43,7 +43,6 @@ type Pos struct {
 	Signature string `json:"signature"`
 
 	// PosFormItems  []PosFormItems `gorm:"foreignKey:PosUUID;references:UUID"`
-	PosEquipments []PosEquipment `gorm:"foreignKey:PosUUID;references:UUID"`
 	PosForms      []PosForm      `gorm:"foreignKey:PosUUID;references:UUID"`
 }
 

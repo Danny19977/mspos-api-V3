@@ -16,14 +16,6 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
 
-	// Provide default values if start_date or end_date are empty
-	if start_date == "" {
-		start_date = "1970-01-01T00:00:00Z" // Default start date
-	}
-	if end_date == "" {
-		end_date = "2100-01-01T00:00:00Z" // Default end date
-	}
-
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
 		page = 1 // Default page number
@@ -41,6 +33,7 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
+		Joins("JOIN countries ON pos_forms.country_uuid=countries.uuid").
 		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
 		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
@@ -50,6 +43,7 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 		Count(&totalRecords)
 
 	err = db.
+		Joins("JOIN countries ON pos_forms.country_uuid=countries.uuid").
 		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
 		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
 		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
@@ -59,16 +53,17 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 		Offset(offset).
 		Limit(limit).
 		Order("pos_forms.updated_at DESC").
+		Preload("Country").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("ASM.User").
+		Preload("Sup.User").
+		Preload("Dr.User").
+		Preload("Cyclo.User").
 		Preload("Pos").
-		Preload("PosFormItems.Brand").
+		Preload("PosFormItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -108,14 +103,6 @@ func GetPosformByUserUUID(c *fiber.Ctx) error {
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
 
-	// Provide default values if start_date or end_date are empty
-	if start_date == "" {
-		start_date = "1970-01-01T00:00:00Z" // Default start date
-	}
-	if end_date == "" {
-		end_date = "2100-01-01T00:00:00Z" // Default end date
-	}
-
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
 		page = 1 // Default page number
@@ -192,6 +179,7 @@ func GetPosformByUserUUID(c *fiber.Ctx) error {
 		"pagination": pagination,
 	})
 }
+
 // Query data province
 func GetPosformByProvinceUUID(c *fiber.Ctx) error {
 	db := database.DB
@@ -200,14 +188,6 @@ func GetPosformByProvinceUUID(c *fiber.Ctx) error {
 
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
-
-	// Provide default values if start_date or end_date are empty
-	if start_date == "" {
-		start_date = "1970-01-01T00:00:00Z" // Default start date
-	}
-	if end_date == "" {
-		end_date = "2100-01-01T00:00:00Z" // Default end date
-	}
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
