@@ -160,6 +160,25 @@ func GetAllBrands(c *fiber.Ctx) error {
 	})
 }
 
+// Get All data by ProvinceUUID
+func GetAllBrandsByProvince(c *fiber.Ctx) error {
+	db := database.DB
+
+	ProvinceUUID := c.Params("province_uuid")
+
+	var data []models.Brand
+	db.
+		Preload("Province").
+		Order("brands.updated_at DESC").
+		Where("province_uuid = ?", ProvinceUUID).
+		Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Brands",
+		"data":    data,
+	})
+}
+
 // Get one data
 func GetOneBrand(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")

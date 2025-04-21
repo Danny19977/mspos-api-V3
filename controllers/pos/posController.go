@@ -60,8 +60,8 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
-		Preload("PosEquipments").
 		Preload("PosForms").
+		Preload("PosEquipments").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -147,8 +147,8 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
-		Preload("PosEquipments").
 		Preload("PosForms").
+		Preload("PosEquipments").
 		Find(&dataList).Error
 
 	if err != nil {

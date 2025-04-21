@@ -44,29 +44,5 @@ type Pos struct {
 
 	// PosFormItems  []PosFormItems `gorm:"foreignKey:PosUUID;references:UUID"`
 	PosForms      []PosForm      `gorm:"foreignKey:PosUUID;references:UUID"`
-}
-
-type PosPaginate struct {
-	Id                 string `json:"id"`
-	UUID               string `json:"uuid"`
-	Name               string `json:"name"`    // Celui qui vend
-	Shop               string `json:"shop"`    // Nom du shop
-	Manager            string `json:"manager"` // name of the onwer of the pos
-	Commune            string `json:"commune"`
-	Avenue             string `json:"avenue"`
-	Quartier           string `json:"quartier"`
-	Reference          string `json:"reference"`
-	Telephone          string `json:"telephone"`
-	Eparasol           bool   `json:"eparasol"`
-	Etable             bool   `json:"etable"`
-	Ekiosk             bool   `json:"ekiosk"`
-	InputGroupSelector string `json:"inputgroupselector"`
-	Cparasol           bool   `json:"cparasol"`
-	Ctable             bool   `json:"ctable"`
-	Ckiosk             bool   `json:"ckiosk"`
-	Province           string `json:"province"`
-	Area               string `json:"area"`
-	Dr                 string `json:"dr"`
-	Status             bool   `json:"status"`
-	Signature          string `json:"signature"`
+	PosEquipments []PosEquipment `gorm:"foreignKey:PosUUID;references:UUID"`
 }

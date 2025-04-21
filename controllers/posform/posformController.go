@@ -6,7 +6,6 @@ import (
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 // Paginate ALL data
@@ -15,6 +14,14 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
+
+	// Provide default values if start_date or end_date are empty
+	if start_date == "" {
+		start_date = "1970-01-01T00:00:00Z" // Default start date
+	}
+	if end_date == "" {
+		end_date = "2100-01-01T00:00:00Z" // Default end date
+	}
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -33,23 +40,15 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN countries ON pos_forms.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("provinces.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%").
+		Where("pos.name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN countries ON pos_forms.country_uuid=countries.uuid").
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("provinces.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%").
+		Where(" pos.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("pos_forms.updated_at DESC").
@@ -94,14 +93,22 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 	})
 }
 
-// Query data UserUUID
-func GetPosformByUserUUID(c *fiber.Ctx) error {
+// Query data province by UUID
+func GetPaginatedPosFormProvine(c *fiber.Ctx) error {
 	db := database.DB
-
-	UserUUID := c.Params("user_uuid")
 
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
+
+	// Provide default values if start_date or end_date are empty
+	if start_date == "" {
+		start_date = "1970-01-01T00:00:00Z" // Default start date
+	}
+	if end_date == "" {
+		end_date = "2100-01-01T00:00:00Z" // Default end date
+	}
+
+	provinceUUID := c.Params("province_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -120,26 +127,20 @@ func GetPosformByUserUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.user_uuid = ?", UserUUID).
+		Where("pos_forms.province_uuid = ?", provinceUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("provinces.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+		Where("pos.name ILIKE ?", "%"+search+"%")
 
 	err = db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.user_uuid = ?", UserUUID).
+		Where("pos_forms.province_uuid = ?", provinceUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("provinces.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%").
+		Where("pos.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("pos_forms.updated_at DESC").
+		Preload("Country").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
@@ -149,7 +150,7 @@ func GetPosformByUserUUID(c *fiber.Ctx) error {
 		Preload("Dr").
 		Preload("Cyclo").
 		Preload("Pos").
-		Preload("PosFormItems.Brand").
+		Preload("PosFormItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -180,14 +181,22 @@ func GetPosformByUserUUID(c *fiber.Ctx) error {
 	})
 }
 
-// Query data province
-func GetPosformByProvinceUUID(c *fiber.Ctx) error {
+// Query data area by UUID
+func GetPaginatedPosFormArea(c *fiber.Ctx) error {
 	db := database.DB
-
-	ProvinceUUID := c.Params("province_uuid")
 
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
+
+	// Provide default values if start_date or end_date are empty
+	if start_date == "" {
+		start_date = "1970-01-01T00:00:00Z" // Default start date
+	}
+	if end_date == "" {
+		end_date = "2100-01-01T00:00:00Z" // Default end date
+	}
+
+	areaUUID := c.Params("area_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -206,36 +215,31 @@ func GetPosformByProvinceUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
+		Where("pos_forms.area_uuid = ?", areaUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("pos_forms.province_uuid = ?", ProvinceUUID).
-		Where("provinces.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%").
+		Where(" pos.name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.province_uuid = ?", ProvinceUUID).
+		Where("pos_forms.area_uuid = ?", areaUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("provinces.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%").
+		Where(" pos.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("pos_forms.updated_at DESC").
+		Preload("Country").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("ASM.User").
+		Preload("Sup.User").
+		Preload("Dr.User").
+		Preload("Cyclo.User").
 		Preload("Pos").
-		Preload("PosFormItems.Brand").
+		Preload("PosFormItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -266,14 +270,22 @@ func GetPosformByProvinceUUID(c *fiber.Ctx) error {
 	})
 }
 
-// Query data area
-func GetPosformByAreaUUID(c *fiber.Ctx) error {
+// Query data subarea by UUID
+func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 	db := database.DB
-
-	AreaUUID := c.Params("area_uuid")
 
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
+
+	// Provide default values if start_date or end_date are empty
+	if start_date == "" {
+		start_date = "1970-01-01T00:00:00Z" // Default start date
+	}
+	if end_date == "" {
+		end_date = "2100-01-01T00:00:00Z" // Default end date
+	}
+
+	subareaUUID := c.Params("sub_area_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -292,25 +304,17 @@ func GetPosformByAreaUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.area_uuid = ?", AreaUUID).
+		Where("pos_forms.sub_area_uuid = ?", subareaUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR users.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where(" pos.name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.area_uuid = ?", AreaUUID).
+		Where("pos_forms.sub_area_uuid = ?", subareaUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR users.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where(" pos.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("pos_forms.updated_at DESC").
@@ -319,13 +323,12 @@ func GetPosformByAreaUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("ASM.User").
+		Preload("Sup.User").
+		Preload("Dr.User").
+		Preload("Cyclo.User").
 		Preload("Pos").
-		Preload("PosFormItems.Brand").
-		Preload("User").
+		Preload("PosFormItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -340,7 +343,7 @@ func GetPosformByAreaUUID(c *fiber.Ctx) error {
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
-	pagination := map[string]interface{}{
+	pagination := map[string]any{
 		"total_pages": totalPages,
 		"page":        page,
 		"page_size":   limit,
@@ -356,14 +359,22 @@ func GetPosformByAreaUUID(c *fiber.Ctx) error {
 	})
 }
 
-// Query data Subarea ID
-func GetPaginatedPosFormBySubAreaUUID(c *fiber.Ctx) error {
+// Query data commune by UUID
+func GetPaginatedPosFormCommune(c *fiber.Ctx) error {
 	db := database.DB
-
-	subAreaUUID := c.Params("subarea_uuid")
 
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
+
+	// Provide default values if start_date or end_date are empty
+	if start_date == "" {
+		start_date = "1970-01-01T00:00:00Z" // Default start date
+	}
+	if end_date == "" {
+		end_date = "2100-01-01T00:00:00Z" // Default end date
+	}
+
+	CycloUUID := c.Params("cyclo_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -382,25 +393,17 @@ func GetPaginatedPosFormBySubAreaUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.subarea_uuid = ?", subAreaUUID).
+		Where("pos_forms.cyclo_uuid = ?", CycloUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR users.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where(" pos.name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.subarea_uuid = ?", subAreaUUID).
+		Where("pos_forms.cyclo_uuid = ?", CycloUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR users.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where(" pos.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("pos_forms.updated_at DESC").
@@ -409,13 +412,12 @@ func GetPaginatedPosFormBySubAreaUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("ASM.User").
+		Preload("Sup.User").
+		Preload("Dr.User").
+		Preload("Cyclo.User").
 		Preload("Pos").
-		Preload("PosFormItems.Brand").
-		Preload("User").
+		Preload("PosFormItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -430,97 +432,7 @@ func GetPaginatedPosFormBySubAreaUUID(c *fiber.Ctx) error {
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
-	pagination := map[string]interface{}{
-		"total_pages": totalPages,
-		"page":        page,
-		"page_size":   limit,
-		"length":      dataList,
-	}
-
-	// Return response
-	return c.JSON(fiber.Map{
-		"status":     "success",
-		"message":    "All PosForms Successfully",
-		"data":       dataList,
-		"pagination": pagination,
-	})
-}
-
-// Query data Commune ID
-func GetPaginatedPosFormByCommuneUUID(c *fiber.Ctx) error {
-	db := database.DB
-
-	CommuneUUID := c.Params("commune_uuid")
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
-	page, err := strconv.Atoi(c.Query("page", "1"))
-	if err != nil || page <= 0 {
-		page = 1 // Default page number
-	}
-	limit, err := strconv.Atoi(c.Query("limit", "15"))
-	if err != nil || limit <= 0 {
-		limit = 15
-	}
-	offset := (page - 1) * limit
-
-	// Deferent filter
-	search := c.Query("search", "")
-
-	var dataList []models.PosForm
-	var totalRecords int64
-
-	db.Model(&models.PosForm{}).
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
-		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.commune_uuid = ?", CommuneUUID).
-		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR users.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
-
-	err = db.
-		Joins("JOIN provinces ON pos_forms.province_uuid=provinces.uuid").
-		Joins("JOIN sups ON pos_forms.sup_uuid=sups.uuid").
-		Joins("JOIN users ON pos_forms.user_uuid=users.uuid").
-		Joins("JOIN areas ON pos_forms.area_uuid=areas.uuid").
-		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.commune_uuid = ?", CommuneUUID).
-		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("users.fullname ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR sups.name ILIKE ? OR users.name ILIKE ? OR pos.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Offset(offset).
-		Limit(limit).
-		Order("pos_forms.updated_at DESC").
-		Preload("Country").
-		Preload("Province").
-		Preload("Area").
-		Preload("SubArea").
-		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
-		Preload("Pos").
-		Preload("PosFormItems.Brand").
-		Preload("User").
-		Find(&dataList).Error
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"status":  "error",
-			"message": "Failed to fetch provinces",
-			"error":   err.Error(),
-		})
-	}
-
-	// Calculate total pages
-	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	// Prepare pagination metadata
-	pagination := map[string]interface{}{
+	pagination := map[string]any{
 		"total_pages": totalPages,
 		"page":        page,
 		"page_size":   limit,
@@ -580,7 +492,7 @@ func CreatePosform(c *fiber.Ctx) error {
 		return err
 	}
 
-	p.UUID = uuid.New().String()
+	// p.UUID = uuid.New().String()
 	database.DB.Create(p)
 
 	return c.JSON(
@@ -598,10 +510,8 @@ func UpdatePosform(c *fiber.Ctx) error {
 	db := database.DB
 
 	type UpdateData struct {
-		UUID string `json:"uustringid"`
-
-		Price   float64 `gorm:"default: 0" json:"price"`
-		Comment string  `json:"comment"`
+		Price   int    `gorm:"default:0" json:"price"`
+		Comment string `json:"comment"`
 
 		Latitude  string `json:"latitude"`  // Latitude of the user
 		Longitude string `json:"longitude"` // Longitude of the user
@@ -610,7 +520,7 @@ func UpdatePosform(c *fiber.Ctx) error {
 		PosUUID      string `json:"pos_uuid" gorm:"type:varchar(255);not null"`
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
 		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+		SubAreaUUID  string `json:"sub_area_uuid" gorm:"type:varchar(255);not null"`
 		AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
 		SupUUID      string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
 		DrUUID       string `json:"dr_uuid" gorm:"type:varchar(255);not null"`

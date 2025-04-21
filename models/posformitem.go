@@ -20,3 +20,4 @@ type PosFormItems struct {
 	Brand   Brand   `gorm:"foreignKey:BrandUUID;references:UUID"`     // Brand of the POS
 
 }
+

@@ -5,20 +5,21 @@ import "gorm.io/gorm"
 type PosForm struct {
 	gorm.Model
 
-	UUID string `gorm:"not null;unique" json:"uuuintid"`
+	UUID string `gorm:"not null;unique" json:"uuid"`
 
-	Price   float64 `gorm:"default: 0" json:"price"`
-	Comment string  `json:"comment"`
+	Price   int    `gorm:"default:0" json:"price"`
+	Sold    int    `gorm:"default:0" json:"sold"`
+	Comment string `json:"comment"`
 
 	Latitude  string `json:"latitude"`  // Latitude of the user
 	Longitude string `json:"longitude"` // Longitude of the user
 	Signature string `json:"signature"`
 
 	PosUUID      string `json:"pos_uuid" gorm:"type:varchar(255);not null"`
-	CountryUUID string `json:"country_uuid" gorm:"type:varchar(255);not null"`
+	CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null"`
 	ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
 	AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-	SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+	SubAreaUUID  string `json:"sub_area_uuid" gorm:"type:varchar(255);not null"`
 	CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
 
 	AsmUUID   string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
@@ -37,6 +38,8 @@ type PosForm struct {
 	Sup   Sup   `gorm:"foreignKey:SupUUID;references:UUID"`
 	Dr    Dr    `gorm:"foreignKey:DrUUID;references:UUID"`
 	Cyclo Cyclo `gorm:"foreignKey:CycloUUID;references:UUID"`
+
+	Sync bool `json:"sync"`
 
 	PosFormItems []PosFormItems `gorm:"foreignKey:PosFormUUID;references:UUID"`
 
