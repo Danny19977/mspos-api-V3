@@ -59,6 +59,10 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr").
+		Preload("Cyclo").
 		Preload("User").
 		Preload("PosForms").
 		Preload("PosEquipments").
@@ -146,6 +150,10 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr").
+		Preload("Cyclo").
 		Preload("User").
 		Preload("PosForms").
 		Preload("PosEquipments").
@@ -225,6 +233,10 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr").
+		Preload("Cyclo").
 		Preload("User").
 		Preload("PosEquipments").
 		Preload("PosForms").
@@ -304,6 +316,10 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr").
+		Preload("Cyclo").
 		Preload("User").
 		Preload("PosEquipments").
 		Preload("PosForms").
@@ -341,10 +357,18 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	UserUUID := c.Params("user_uuid")
+	CycloUUID := c.Params("cyclo_uuid")
 
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
+
+	// Provide default values if start_date or end_date are empty
+	if start_date == "" {
+		start_date = "1970-01-01T00:00:00Z" // Default start date
+	}
+	if end_date == "" {
+		end_date = "2100-01-01T00:00:00Z" // Default end date
+	}
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -365,14 +389,14 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("user_uuid = ?", UserUUID).
+		Where("user_uuid = ?", CycloUUID).
 		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("user_uuid = ?", UserUUID).
+		Where("user_uuid = ?", CycloUUID).
 		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -384,8 +408,12 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
-		Preload("PosEquipments").
+		Preload("Asm").
+		Preload("Sup").
+		Preload("Dr").
+		Preload("Cyclo").
 		Preload("PosForms").
+		Preload("PosEquipments").
 		Find(&dataList).Error
 
 	if err != nil {

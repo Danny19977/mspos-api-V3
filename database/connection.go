@@ -48,7 +48,7 @@ func Connect() {
 		&models.PosForm{},
 		&models.PosFormItems{},
 		&models.RoutePlan{},
-		&models.RutePlanItem{},
+		&models.RoutePlanItem{},
 		&models.Brand{},
 	)
 }

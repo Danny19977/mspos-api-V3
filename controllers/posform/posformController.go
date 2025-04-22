@@ -57,10 +57,10 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM.User").
-		Preload("Sup.User").
-		Preload("Dr.User").
-		Preload("Cyclo.User").
+		Preload("ASM").
+		Preload("Sup").
+		Preload("Dr").
+		Preload("Cyclo").
 		Preload("Pos").
 		Preload("PosFormItems").
 		Find(&dataList).Error
@@ -77,17 +77,17 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
-	pagination := map[string]any{
-		"total_pages": totalPages,
-		"page":        page,
-		"page_size":   limit,
-		"length":      dataList,
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
 	}
 
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "All PosForms Successfully",
+		"message":    "POSFORM retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
@@ -156,7 +156,7 @@ func GetPaginatedPosFormProvine(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch provinces",
+			"message": "Failed to fetch posforms",
 			"error":   err.Error(),
 		})
 	}
@@ -165,17 +165,17 @@ func GetPaginatedPosFormProvine(c *fiber.Ctx) error {
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
-	pagination := map[string]any{
-		"total_pages": totalPages,
-		"page":        page,
-		"page_size":   limit,
-		"length":      dataList,
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
 	}
 
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "All PosForms Successfully",
+		"message":    "posforms retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
@@ -234,10 +234,10 @@ func GetPaginatedPosFormArea(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM.User").
-		Preload("Sup.User").
-		Preload("Dr.User").
-		Preload("Cyclo.User").
+		Preload("ASM").
+		Preload("Sup").
+		Preload("Dr").
+		Preload("Cyclo").
 		Preload("Pos").
 		Preload("PosFormItems").
 		Find(&dataList).Error
@@ -254,17 +254,17 @@ func GetPaginatedPosFormArea(c *fiber.Ctx) error {
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
-	pagination := map[string]any{
-		"total_pages": totalPages,
-		"page":        page,
-		"page_size":   limit,
-		"length":      dataList,
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
 	}
 
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "All PosForms Successfully",
+		"message":    "posform retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
@@ -343,17 +343,17 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
-	pagination := map[string]any{
-		"total_pages": totalPages,
-		"page":        page,
-		"page_size":   limit,
-		"length":      dataList,
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
 	}
 
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "All PosForms Successfully",
+		"message":    "posform retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
@@ -432,17 +432,17 @@ func GetPaginatedPosFormCommune(c *fiber.Ctx) error {
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
-	pagination := map[string]any{
-		"total_pages": totalPages,
-		"page":        page,
-		"page_size":   limit,
-		"length":      dataList,
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
 	}
 
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "All PosForms Successfully",
+		"message":    "posform retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})

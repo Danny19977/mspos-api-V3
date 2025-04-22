@@ -50,6 +50,7 @@ func GetPaginatedRouteplan(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
+		Preload("RoutePlanItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -125,6 +126,7 @@ func GetPaginatedRouthplaByProvinceUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
+		Preload("RoutePlanItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -200,6 +202,7 @@ func GetPaginatedRouthplaByareaUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
+		Preload("RoutePlanItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -275,6 +278,7 @@ func GetPaginatedRouthplaBySubareaUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
+		Preload("RoutePlanItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -350,6 +354,7 @@ func GetPaginatedRouteplaBycommuneUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
+		Preload("RoutePlanItems").
 		Find(&dataList).Error
 
 	if err != nil {

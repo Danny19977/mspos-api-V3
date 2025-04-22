@@ -17,7 +17,7 @@ import (
 	PosFormItem "github.com/danny19977/mspos-api-v3/controllers/posformitem"
 	"github.com/danny19977/mspos-api-v3/controllers/province"
 	"github.com/danny19977/mspos-api-v3/controllers/routeplan.go"
-	"github.com/danny19977/mspos-api-v3/controllers/ruteplanitem"
+	"github.com/danny19977/mspos-api-v3/controllers/RoutePlanItem"
 	Subarea "github.com/danny19977/mspos-api-v3/controllers/subarea"
 	"github.com/danny19977/mspos-api-v3/controllers/sup"
 	"github.com/danny19977/mspos-api-v3/controllers/user"
@@ -142,6 +142,15 @@ func Setup(app *fiber.App) {
 	posf.Put("/update/:uuid", posform.UpdatePosform)
 	posf.Delete("/delete/:uuid", posform.DeletePosform)
 
+	//POSformItem controller
+	posfi := api.Group("/posform-items")
+	posfi.Get("/all/", PosFormItem.GetAllPosFormItems)
+	posfi.Get("/all/paginate", PosFormItem.GetPaginatedPosformItem)
+	// posfi.Get("/get/:uuid", PosFormItem.Get)
+	posfi.Post("/create", PosFormItem.CreatePosformItem)
+	posfi.Put("/update/:uuid", PosFormItem.UpdatePosformItem)
+	posfi.Delete("/delete/:uuid", PosFormItem.DeletePosformItem)
+
 	// Sup controller
 	su := api.Group("/sups")
 	su.Get("/all", sup.GetAllSups)
@@ -206,15 +215,6 @@ func Setup(app *fiber.App) {
 	cy.Put("/update/:uuid", cyclo.UpdateCyclo)
 	cy.Delete("/delete/:uuid", cyclo.DeleteCyclo)
 
-	//POSformItem controller
-	posfi := api.Group("/posform-items")
-	posfi.Get("/all/", PosFormItem.GetAllPosFormItems)
-	posfi.Get("/all/paginate", PosFormItem.GetPaginatedPosformItem)
-	// posfi.Get("/get/:uuid", PosFormItem.Get)
-	posfi.Post("/create", PosFormItem.CreatePosformItem)
-	posfi.Put("/update/:uuid", PosFormItem.UpdatePosformItem)
-	posfi.Delete("/delete/:uuid", PosFormItem.DeletePosformItem)
-
 	//routeplan controller
 	rp := api.Group("/routeplans")
 	rp.Get("/all", routeplan.GetRouteplan)
@@ -231,13 +231,13 @@ func Setup(app *fiber.App) {
 
 	//routeplanitem controller
 	rpi := api.Group("/routeplan-items")
-	rpi.Get("/all", ruteplanitem.GetPaginatedRutePlanItem)
-	rpi.Get("/all/paginate", ruteplanitem.GetPaginatedRutePlanItem)
-	rpi.Get("/all/:id", ruteplanitem.GetAllRutePlanItem)
-	rpi.Get("/get/:uuid", ruteplanitem.GetAllRutePlanItem)
-	rpi.Post("/create", ruteplanitem.CreateRutePlanItem)
-	rpi.Put("/update/:uuid", ruteplanitem.UpdateRutePlanItem)
-	rpi.Delete("/delete/:uuid", ruteplanitem.DeleteRutePlanItem)
+	rpi.Get("/all", RoutePlanItem.GetPaginatedRoutePlanItem)
+	rpi.Get("/all/paginate", RoutePlanItem.GetPaginatedRoutePlanItem)
+	rpi.Get("/all/:id", RoutePlanItem.GetAllRoutePlanItem)
+	rpi.Get("/get/:uuid", RoutePlanItem.GetAllRoutePlanItem)
+	rpi.Post("/create", RoutePlanItem.CreateRoutePlanItem)
+	rpi.Put("/update/:uuid", RoutePlanItem.UpdateRoutePlanItem)
+	rpi.Delete("/delete/:uuid", RoutePlanItem.DeleteRoutePlanItem)
 
 	// Brand controller
 	br := api.Group("/brands")

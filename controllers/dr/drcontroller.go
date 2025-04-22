@@ -47,7 +47,7 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("Asm").
 		Preload("Sup").
-		Preload("User").
+		// Preload("User").
 		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").

@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type RutePlanItem struct {
+type RoutePlanItem struct {
 	gorm.Model
 	UUID string `gorm:"not null;unique" json:"uuid"`
 

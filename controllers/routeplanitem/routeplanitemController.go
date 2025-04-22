@@ -1,4 +1,4 @@
-package ruteplanitem
+package RoutePlanItem
 
 import (
 	"strconv"
@@ -10,7 +10,7 @@ import (
 )
 
 // Paginate
-func GetPaginatedRutePlanItem(c *fiber.Ctx) error {
+func GetPaginatedRoutePlanItem(c *fiber.Ctx) error {
 	db := database.DB
 
 	// Parse query parameters for pagination
@@ -27,11 +27,11 @@ func GetPaginatedRutePlanItem(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.RutePlanItem
+	var dataList []models.RoutePlanItem
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.RutePlanItem{}).
+	db.Model(&models.RoutePlanItem{}).
 		Where("name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
@@ -49,7 +49,7 @@ func GetPaginatedRutePlanItem(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch ruteplanitem",
+			"message": "Failed to fetch RoutePlanItem",
 			"error":   err.Error(),
 		})
 	}
@@ -68,28 +68,28 @@ func GetPaginatedRutePlanItem(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "ruteplanitem retrieved successfully",
+		"message":    "RoutePlanItem retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
 }
 
 // Get All data
-func GetAllRutePlanItem(c *fiber.Ctx) error {
+func GetAllRoutePlanItem(c *fiber.Ctx) error {
 	db := database.DB
 
-	var data []models.RutePlanItem
+	var data []models.RoutePlanItem
 	db.Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "All RutePlanItems",
+		"message": "All RoutePlanItems",
 		"data":    data,
 	})
 }
 
 // Create data
-func CreateRutePlanItem(c *fiber.Ctx) error {
-	p := &models.RutePlanItem{}
+func CreateRoutePlanItem(c *fiber.Ctx) error {
+	p := &models.RoutePlanItem{}
 
 	if err := c.BodyParser(&p); err != nil {
 		return err
@@ -101,14 +101,14 @@ func CreateRutePlanItem(c *fiber.Ctx) error {
 	return c.JSON(
 		fiber.Map{
 			"status":  "success",
-			"message": "RutePlanItem created success",
+			"message": "RoutePlanItem created success",
 			"data":    p,
 		},
 	)
 }
 
 // Update data
-func UpdateRutePlanItem(c *fiber.Ctx) error {
+func UpdateRoutePlanItem(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 	db := database.DB
 
@@ -130,33 +130,33 @@ func UpdateRutePlanItem(c *fiber.Ctx) error {
 		)
 	}
 
-	rutePlanItem := new(models.RutePlanItem)
+	RoutePlanItem := new(models.RoutePlanItem)
 
-	db.Where("uuid = ?", uuid).First(&rutePlanItem)
+	db.Where("uuid = ?", uuid).First(&RoutePlanItem)
 
-	db.Save(&rutePlanItem)
-	rutePlanItem.PosUUID = updateData.PosUUID
-	rutePlanItem.RoutePlanID = updateData.RoutePlanID
+	db.Save(&RoutePlanItem)
+	RoutePlanItem.PosUUID = updateData.PosUUID
+	RoutePlanItem.RoutePlanID = updateData.RoutePlanID
 
 	return c.JSON(
 		fiber.Map{
 			"status":  "success",
 			"message": "stock updated success",
-			"data":    rutePlanItem,
+			"data":    RoutePlanItem,
 		},
 	)
 
 }
 
 // Delete data
-func DeleteRutePlanItem(c *fiber.Ctx) error {
+func DeleteRoutePlanItem(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 
 	db := database.DB
 
-	var rutePlanItems models.RutePlanItem
-	db.Where("uuid = ?", uuid).First(&rutePlanItems)
-	if rutePlanItems.PosUUID == "" {
+	var RoutePlanItems models.RoutePlanItem
+	db.Where("uuid = ?", uuid).First(&RoutePlanItems)
+	if RoutePlanItems.PosUUID == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
@@ -166,7 +166,7 @@ func DeleteRutePlanItem(c *fiber.Ctx) error {
 		)
 	}
 
-	db.Delete(&rutePlanItems)
+	db.Delete(&RoutePlanItems)
 
 	return c.JSON(
 		fiber.Map{
