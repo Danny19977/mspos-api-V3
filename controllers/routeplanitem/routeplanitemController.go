@@ -74,6 +74,35 @@ func GetPaginatedRoutePlanItem(c *fiber.Ctx) error {
 	})
 }
 
+// Get One by route uuid
+func GetOneByRouteUUID(c *fiber.Ctx) error {
+	routeUUID := c.Params("route_uuid")
+	db := database.DB
+
+	var routePlanItem models.RoutePlanItem
+
+	// Fetch the RoutePlanItem by route UUID
+	err := db.Where("route_plan_uuid = ?", routeUUID).
+		Preload("RoutePlan").
+		Preload("Pos").
+		Preload("Status").
+		First(&routePlanItem).Error
+
+	if err != nil {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "RoutePlanItem not found",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "RoutePlanItem retrieved successfully",
+		"data":    routePlanItem,
+	})
+}
+
 // Get All data
 func GetAllRoutePlanItem(c *fiber.Ctx) error {
 	db := database.DB
@@ -114,8 +143,8 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 
 	type UpdateData struct {
 		UUID        string `json:"uuid"`
-		PosUUID     string   `json:"pos_uuid" gorm:"type:varchar(255);not null"`
-		RoutePlanID string   `json:"routeplan_uuid"`
+		PosUUID     string `json:"pos_uuid" gorm:"type:varchar(255);not null"`
+		RoutePlanID string `json:"routeplan_uuid" gorm:"type:varchar(255);not null"`
 	}
 
 	var updateData UpdateData
@@ -136,7 +165,7 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 
 	db.Save(&RoutePlanItem)
 	RoutePlanItem.PosUUID = updateData.PosUUID
-	RoutePlanItem.RoutePlanID = updateData.RoutePlanID
+	RoutePlanItem.RoutePlanUUID = updateData.RoutePlanID
 
 	return c.JSON(
 		fiber.Map{

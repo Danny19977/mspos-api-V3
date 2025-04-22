@@ -27,5 +27,6 @@ type RoutePlan struct {
 	// TotalPOS  int    `json:"total_pos"`
 	Signature string `json:"signature"`
 	
-	RoutePlanItem []RoutePlanItem `gorm:"foreignKey:RoutePlanUUID;references:UUID"`
+	RoutePlanItems []RoutePlanItem `gorm:"foreignKey:RoutePlanUUID;references:UUID"`
+	
 }
