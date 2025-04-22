@@ -17,7 +17,7 @@ import (
 	PosFormItem "github.com/danny19977/mspos-api-v3/controllers/posformitem"
 	"github.com/danny19977/mspos-api-v3/controllers/province"
 	"github.com/danny19977/mspos-api-v3/controllers/routeplan.go"
-	"github.com/danny19977/mspos-api-v3/controllers/RoutePlanItem"
+	RoutePlanItem "github.com/danny19977/mspos-api-v3/controllers/routeplanitem"
 	Subarea "github.com/danny19977/mspos-api-v3/controllers/subarea"
 	"github.com/danny19977/mspos-api-v3/controllers/sup"
 	"github.com/danny19977/mspos-api-v3/controllers/user"
