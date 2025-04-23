@@ -145,6 +145,7 @@ func Setup(app *fiber.App) {
 	//POSformItem controller
 	posfi := api.Group("/posform-items")
 	posfi.Get("/all/", PosFormItem.GetAllPosFormItems)
+	posfi.Get("/all/:posform_uuid", PosFormItem.GetAllPosFormItemsByUUID)
 	posfi.Get("/all/paginate", PosFormItem.GetPaginatedPosformItem)
 	// posfi.Get("/get/:uuid", PosFormItem.Get)
 	posfi.Post("/create", PosFormItem.CreatePosformItem)

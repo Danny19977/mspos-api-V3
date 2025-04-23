@@ -7,7 +7,6 @@ import (
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 // Paginate
@@ -79,6 +78,22 @@ func GetAllPosFormItems(c *fiber.Ctx) error {
 	})
 }
 
+// Get All data
+func GetAllPosFormItemsByUUID(c *fiber.Ctx) error {
+	db := database.DB
+	PosFormUUID := c.Params("pos_form_uuid")
+
+	var data []models.PosFormItems
+	db.
+	Where("pos_form_uuid = ?", PosFormUUID).
+	Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All PosFormItemsByUUID",
+		"data":    data,
+	})
+}
+
 // Create data
 func CreatePosformItem(c *fiber.Ctx) error {
 	p := &models.PosFormItems{}
@@ -87,7 +102,7 @@ func CreatePosformItem(c *fiber.Ctx) error {
 		return err
 	}
 
-	p.UUID = uuid.New().String()
+	// p.UUID = uuid.New().String()
 	database.DB.Create(p)
 
 	return c.JSON(
