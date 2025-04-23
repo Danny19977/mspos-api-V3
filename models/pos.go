@@ -6,7 +6,7 @@ type Pos struct {
 	gorm.Model
 	UUID string `gorm:"not null;unique" json:"uuid"`
 
-	Name      string `gorm:"not null;unique" json:"name"` // Celui qui vend
+	Name      string `gorm:"not null" json:"name"` // Celui qui vend
 	Shop      string `json:"shop"`                        // Nom du shop
 	Postype   string `json:"postype"`                     // Type de POS
 	Gerant    string `json:"gerant"`                      // name of the onwer of the pos
