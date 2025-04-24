@@ -49,7 +49,9 @@ func GetPaginatedCommunes(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
+		Preload("Cyclo").
 		Preload("Pos").
+		Preload("PosForms").
 		Preload("Users").
 		Find(&dataList).Error
 
@@ -124,7 +126,9 @@ func GetPaginatedCommunesByProvinceUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
+		Preload("Cyclo").
 		Preload("Pos").
+		Preload("PosForms").
 		Preload("Users").
 		Find(&dataList).Error
 
@@ -399,14 +403,13 @@ func GetAllCommunesBySubareaUUID(c *fiber.Ctx) error {
 	subAreaUUID := c.Params("subarea_uuid")
 
 	var data []models.Commune
-	db. Where("subarea_uuid = ?", subAreaUUID).Find(&data).Find(&data)
+	db.Where("subarea_uuid = ?", subAreaUUID).Find(&data).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Communes",
 		"data":    data,
 	})
 }
-
 
 // query data
 func GetCountryCommuneByID(c *fiber.Ctx) error {
@@ -502,7 +505,7 @@ func UpdateCommune(c *fiber.Ctx) error {
 	type UpdateData struct {
 		UUID        string `json:"uuid"`
 		Name        string `gorm:"not null" json:"name"`
-		SubAreaUUID string   `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+		SubAreaUUID string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
 		Signature   string `json:"signature"`
 	}
 

@@ -8,7 +8,6 @@ type PosForm struct {
 	UUID string `gorm:"not null;unique" json:"uuid"`
 
 	Price   int    `gorm:"default:0" json:"price"`
-	Sold    int    `gorm:"default:0" json:"sold"`
 	Comment string `json:"comment"`
 
 	Latitude  string `json:"latitude"`  // Latitude of the user

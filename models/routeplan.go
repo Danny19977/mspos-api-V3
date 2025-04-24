@@ -29,4 +29,4 @@ type RoutePlan struct {
 	
 	RoutePlanItems []RoutePlanItem `gorm:"foreignKey:RoutePlanUUID;references:UUID"`
 	
-}
+} 
