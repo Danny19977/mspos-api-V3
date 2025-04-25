@@ -16,7 +16,7 @@ type Dr struct {
 	SubArea      SubArea  `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 
 	AsmUUID string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-	Asm     Asm    `gorm:"foreignKey:AsmUUID;references:UUID"`
+	Asm     Asm    `gorm:"foreignKey:AsmUUID;references:UUID"` 
 	SupUUID string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
 	Sup     Sup    `gorm:"foreignKey:SupUUID;references:UUID"`
 

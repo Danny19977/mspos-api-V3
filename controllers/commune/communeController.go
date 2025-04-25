@@ -49,7 +49,7 @@ func GetPaginatedCommunes(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Cyclo").
+		// Preload("Cyclo").
 		Preload("Pos").
 		Preload("PosForms").
 		Preload("Users").
@@ -126,7 +126,7 @@ func GetPaginatedCommunesByProvinceUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Cyclo").
+		// Preload("Cyclo").
 		Preload("Pos").
 		Preload("PosForms").
 		Preload("Users").
@@ -199,7 +199,7 @@ func GetPaginatedCommunesByAreaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Cyclo").
+		// Preload("Cyclo").
 		Preload("Pos").
 		Preload("PosForms").
 		Preload("Users").
@@ -274,7 +274,7 @@ func GetPaginatedCommunesBySubAreaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Cyclo").
+		// Preload("Cyclo").
 		Preload("Pos").
 		Preload("PosForms").
 		Preload("Users").
@@ -348,7 +348,7 @@ func GetPaginatedCommunesByCyclo(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Cyclo").
+		// Preload("Cyclo").
 		Preload("Pos").
 		Preload("PosForms").
 		Preload("Users").
