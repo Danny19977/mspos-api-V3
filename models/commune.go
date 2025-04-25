@@ -17,13 +17,13 @@ type Commune struct {
 	SubAreaUUID  string   `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
 	SubArea      SubArea  `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 
-	CycloUUID string `json:"cyclo_uuid" gorm:"type:varchar(255);not null"`
-
 	Signature string `json:"signature"`
 
-	RouthePlan []RoutePlan `gorm:"foreignKey:CommuneUUID;references:UUID"`
-	Pos      []Pos     `gorm:"foreignKey:CommuneUUID;references:UUID"`
-	PosForms []PosForm `gorm:"foreignKey:CommuneUUID;references:UUID"`
+	Cyclos []Cyclo `gorm:"foreignKey:CommuneUUID;references:UUID"`
+
+	RouthePlans []RoutePlan `gorm:"foreignKey:CommuneUUID;references:UUID"`
+	Pos         []Pos       `gorm:"foreignKey:CommuneUUID;references:UUID"`
+	PosForms    []PosForm   `gorm:"foreignKey:CommuneUUID;references:UUID"`
 
 	Users []User `gorm:"foreignKey:CommuneUUID;references:UUID"`
 }

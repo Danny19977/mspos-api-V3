@@ -27,7 +27,7 @@ type Area struct {
 	Pos      []Pos     `gorm:"foreignKey:AreaUUID;references:UUID"`
 	PosForms []PosForm `gorm:"foreignKey:AreaUUID;references:UUID"`
 
-	RoutePlan []RoutePlan `gorm:"foreignKey:AreaUUID;references:UUID"`
+	RoutePlans []RoutePlan `gorm:"foreignKey:AreaUUID;references:UUID"`
 
 	Users []User `gorm:"foreignKey:AreaUUID;references:UUID"`
 }

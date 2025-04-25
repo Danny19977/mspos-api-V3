@@ -45,6 +45,8 @@ func GetPaginatedCyclo(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
 		Preload("Asm").
 		Preload("Sup").
 		Preload("Dr"). 
@@ -356,6 +358,8 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
 		Preload("Asm").
 		Preload("Sup").
 		Preload("Dr"). 
