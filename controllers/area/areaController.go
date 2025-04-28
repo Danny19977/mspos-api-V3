@@ -1,7 +1,6 @@
 package area
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/danny19977/mspos-api-v3/database"
@@ -46,6 +45,7 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("SubAreas").
 		Preload("Communes").
+		Preload("Sups").
 		Preload("Drs").
 		Preload("Cyclos").
 		Preload("Pos").
@@ -61,8 +61,6 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
@@ -81,7 +79,7 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 	})
 }
 
-// Paginate Query Area by Province ID
+// Paginate Query Area by Asm ID
 func GetAreaByASM(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -121,6 +119,7 @@ func GetAreaByASM(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("SubAreas").
 		Preload("Communes").
+		Preload("Sups").
 		Preload("Drs").
 		Preload("Cyclos").
 		Preload("Pos").
@@ -136,8 +135,6 @@ func GetAreaByASM(c *fiber.Ctx) error {
 
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
@@ -156,7 +153,7 @@ func GetAreaByASM(c *fiber.Ctx) error {
 	})
 }
 
-// Paginate Query Area by Sups ID
+// Paginate Query Area by Sup ID
 func GetAreaBySups(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -181,15 +178,13 @@ func GetAreaBySups(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Area{}).
-		Joins("JOIN sups ON s.sup_uuid=sups.uuid").
-		Where("areas.uuid = ?", AreaUUID).
+		Where("uuid = ?", AreaUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Joins("JOIN sups ON areas.sup_uuid=sups.uuid").
-		Where("areas.uuid = ?", AreaUUID).
+		Where("uuid = ?", AreaUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -198,6 +193,7 @@ func GetAreaBySups(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("SubAreas").
 		Preload("Communes").
+		Preload("Sups").
 		Preload("Drs").
 		Preload("Cyclos").
 		Preload("Pos").
@@ -213,8 +209,6 @@ func GetAreaBySups(c *fiber.Ctx) error {
 
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{

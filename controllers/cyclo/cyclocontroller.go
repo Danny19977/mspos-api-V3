@@ -49,7 +49,7 @@ func GetPaginatedCyclo(c *fiber.Ctx) error {
 		Preload("Commune").
 		Preload("Asm").
 		Preload("Sup").
-		Preload("Dr"). 
+		Preload("Dr").
 		// Preload("User").
 		Preload("Pos").
 		Preload("PosForms").
@@ -127,7 +127,7 @@ func GetPaginatedCycloProvinceByID(c *fiber.Ctx) error {
 		Preload("Commune").
 		Preload("Asm").
 		Preload("Sup").
-		Preload("Dr"). 
+		Preload("Dr").
 		// Preload("User").
 		Preload("Pos").
 		Preload("PosForms").
@@ -161,7 +161,7 @@ func GetPaginatedCycloProvinceByID(c *fiber.Ctx) error {
 	})
 }
 
-// Paginate  Area by ID
+// Paginate Area by ID
 func GetPaginatedCycloByAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -205,7 +205,7 @@ func GetPaginatedCycloByAreaUUID(c *fiber.Ctx) error {
 		Preload("Commune").
 		Preload("Asm").
 		Preload("Sup").
-		Preload("Dr"). 
+		Preload("Dr").
 		// Preload("User").
 		Preload("Pos").
 		Preload("PosForms").
@@ -239,11 +239,11 @@ func GetPaginatedCycloByAreaUUID(c *fiber.Ctx) error {
 	})
 }
 
-// Paginate SubArea by ID
+// Paginate by SubArea ID
 func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 	db := database.DB
 
-	subAreaUUID := c.Params("subarea_uuid")
+	SubAreaUUID := c.Params("subarea_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -265,13 +265,13 @@ func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
 		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.subarea_uuid = ?", subAreaUUID).
+		Where("cyclos.sub_area_uuid = ?", SubAreaUUID).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
 		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.subarea_uuid = ?", subAreaUUID).
+		Where("cyclos.sub_area_uuid = ?", SubAreaUUID).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -283,10 +283,9 @@ func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 		Preload("Commune").
 		Preload("Asm").
 		Preload("Sup").
-		Preload("Dr"). 
+		Preload("Dr").
 		// Preload("User").
 		Preload("Pos").
-		Preload("PosForms").
 		Preload("PosForms").
 		Find(&dataList).Error
 
@@ -322,7 +321,7 @@ func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 	db := database.DB
 
-	CommuneUUID := c.Params("commune_uuid")
+	UserUUID := c.Params("user_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -344,13 +343,13 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 	// Count total records matching the search query
 	db.Model(&models.Cyclo{}).
 		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.commune_uuid = ?", CommuneUUID).
+		Where("cyclos.user_uuid = ?", UserUUID).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
 		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.commune_uuid = ?", CommuneUUID).
+		Where("cyclos.user_uuid = ?", UserUUID).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -362,7 +361,7 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 		Preload("Commune").
 		Preload("Asm").
 		Preload("Sup").
-		Preload("Dr"). 
+		Preload("Dr").
 		// Preload("User").
 		Preload("Pos").
 		Preload("PosForms").
@@ -395,7 +394,6 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 		"pagination": pagination,
 	})
 }
-
 // Get All data
 func GetAllCyclo(c *fiber.Ctx) error {
 	db := database.DB

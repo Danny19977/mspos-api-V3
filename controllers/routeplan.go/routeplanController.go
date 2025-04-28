@@ -260,14 +260,14 @@ func GetPaginatedRouthplaBySubareaUUID(c *fiber.Ctx) error {
 	// Count total records matching the search query
 	db.Model(&models.RoutePlan{}).
 		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
-		Where("route_plans.subarea_uuid = ?", subareaUUID).
+		Where("route_plans.sub_area_uuid = ?", subareaUUID).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
 		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
-		Where("route_plans.subarea_uuid = ?", subareaUUID).
+		Where("route_plans.sub_area_uuid = ?", subareaUUID).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).

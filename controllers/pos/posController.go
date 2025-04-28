@@ -1,8 +1,8 @@
 package pos
 
 import (
-	"strconv" 
-	
+	"strconv"
+
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
@@ -389,14 +389,14 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("user_uuid = ?", CycloUUID).
+		Where("pos.cyclo_uuid = ?", CycloUUID).
 		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("user_uuid = ?", CycloUUID).
+		Where("pos.cyclo_uuid = ?", CycloUUID).
 		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
@@ -464,7 +464,7 @@ func GetAllPosByManager(c *fiber.Ctx) error {
 
 	var data []models.Pos
 	db.Where("country_uuid = ?", countryUUID).
-	Where("status = ?", true).Find(&data)
+		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",
@@ -480,7 +480,7 @@ func GetAllPosByASM(c *fiber.Ctx) error {
 
 	var data []models.Pos
 	db.Where("province_uuid = ?", provinceUUID).
-	Where("status = ?", true).Find(&data)
+		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",
@@ -496,7 +496,7 @@ func GetAllPosBySup(c *fiber.Ctx) error {
 
 	var data []models.Pos
 	db.Where("area_uuid = ?", areaUUID).
-	Where("status = ?", true).Find(&data)
+		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",
@@ -512,7 +512,7 @@ func GetAllPosByDR(c *fiber.Ctx) error {
 
 	var data []models.Pos
 	db.Where("sub_area_uuid = ?", subAreaUUID).
-	Where("status = ?", true).Find(&data)
+		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",
@@ -524,11 +524,11 @@ func GetAllPosByDR(c *fiber.Ctx) error {
 func GetAllPosByCyclo(c *fiber.Ctx) error {
 	db := database.DB
 
-	userUUID := c.Params("user_uuid")
+	cycloUUID := c.Params("cyclo_uuid")
 
 	var data []models.Pos
-	db.Where("user_uuid = ?", userUUID).
-	Where("status = ?", true).Find(&data)
+	db.Where("cyclo_uuid = ?", cycloUUID).
+		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",

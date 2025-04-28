@@ -330,7 +330,7 @@ func GetAllDataBySubAreaByAreaUUID(c *fiber.Ctx) error {
 		"data":    data,
 	})
 }
-
+ 
 // Get one data
 func GetSubArea(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")

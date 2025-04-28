@@ -83,7 +83,7 @@ func GetPaginatedCommunes(c *fiber.Ctx) error {
 	})
 }
 
-// query data cyclo by Province id
+// query data ASM by Province id
 func GetPaginatedCommunesByProvinceUUID(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -158,7 +158,7 @@ func GetPaginatedCommunesByProvinceUUID(c *fiber.Ctx) error {
 	})
 }
 
-// query data cyclo by Area id
+// query data SUP by Area id
 func GetPaginatedCommunesByAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -197,7 +197,7 @@ func GetPaginatedCommunesByAreaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Cyclo").
+		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
 		Preload("Users").
@@ -233,7 +233,7 @@ func GetPaginatedCommunesByAreaUUID(c *fiber.Ctx) error {
 	})
 }
 
-// query data cyclo by Subaarea id
+// query data DR by Subaarea id
 func GetPaginatedCommunesBySubAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -256,14 +256,15 @@ func GetPaginatedCommunesBySubAreaUUID(c *fiber.Ctx) error {
 	var dataList []models.Commune
 	var totalRecords int64
 
+
 	// Count total records matching the search query
 	db.Model(&models.Commune{}).
-		Where("communes.subarea_uuid = ?", subAreaUUID).
+		Where("communes.sub_area_uuid = ?", subAreaUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("communes.subarea_uuid = ?", subAreaUUID).
+		Where("communes.sub_area_uuid = ?", subAreaUUID).
 		Where("communes.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -272,11 +273,12 @@ func GetPaginatedCommunesBySubAreaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Cyclo").
+		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
 		Preload("Users").
 		Find(&dataList).Error
+
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
@@ -332,12 +334,12 @@ func GetPaginatedCommunesByCyclo(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Commune{}).
-		Where("communes.cyclo_uuid = ?", commueUUID).
+		Where("communes.uuid = ?", commueUUID).
 		Where("name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("communes.cyclo_uuid = ?", commueUUID).
+		Where("communes.uuid = ?", commueUUID).
 		Where("communes.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -346,7 +348,7 @@ func GetPaginatedCommunesByCyclo(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Cyclo").
+		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
 		Preload("Users").
@@ -362,8 +364,6 @@ func GetPaginatedCommunesByCyclo(c *fiber.Ctx) error {
 
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
@@ -394,14 +394,15 @@ func GetAllCommunes(c *fiber.Ctx) error {
 	})
 }
 
-// Get All data
-func GetAllCommunesBySubareaUUID(c *fiber.Ctx) error {
+
+// Get All data by SubArea id
+func GetAllCommunesBySubAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
 	subAreaUUID := c.Params("subarea_uuid")
 
 	var data []models.Commune
-	db.Where("subarea_uuid = ?", subAreaUUID).Find(&data).Find(&data)
+	db.Where("sub_area_uuid = ?", subAreaUUID).Find(&data).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Communes",

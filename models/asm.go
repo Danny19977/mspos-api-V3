@@ -10,6 +10,7 @@ type Asm struct {
 	Country      Country  `gorm:"foreignKey:CountryUUID;references:UUID"`
 	ProvinceUUID string   `json:"province_uuid" gorm:"type:varchar(255);not null"`
 	Province     Province `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	
 
 	Signature string `json:"signature"`
 

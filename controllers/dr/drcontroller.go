@@ -262,13 +262,13 @@ func GetPaginatedDrBySubArea(c *fiber.Ctx) error {
 	// Count total records matching the search query
 	db.Model(&models.Dr{}).
 		Joins("JOIN users ON drs.user_uuid=users.uuid").
-		Where("drs.subarea_uuid = ?", subarea_uuid).
+		Where("drs.sub_area_uuid = ?", subarea_uuid).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
 		Joins("JOIN users ON drs.user_uuid=users.uuid").
-		Where("drs.subarea_uuid = ?", subarea_uuid).
+		Where("drs.sub_area_uuid = ?", subarea_uuid).
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).

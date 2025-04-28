@@ -185,22 +185,23 @@ func GetPaginatedArea(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Sup{}).
-		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
-		Where("provinces.uuid = ?", area_uuid).
-		Where("provinces.name ILIKE ?", "%"+search+"%").
+		Joins("JOIN users ON sups.user_uuid=users.uuid").
+		Where("sups.area_uuid = ?", area_uuid).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
-		Where("provinces.uuid = ?", area_uuid).
-		Where("provinces.name ILIKE ?", "%"+search+"%").
+		Joins("JOIN users ON sups.user_uuid=users.uuid").
+		Where("sups.area_uuid = ?", area_uuid).
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("sups.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
+		Preload("Area").
+		Preload("Asm").
 		// Preload("User").
-		Preload("Sups").
 		Preload("Drs").
 		Preload("Cyclos").
 		Preload("Pos").
