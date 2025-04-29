@@ -138,6 +138,7 @@ func Setup(app *fiber.App) {
 	posf.Get("/all/paginate/area/:area_uuid", posform.GetPaginatedPosFormArea)
 	posf.Get("/all/paginate/subarea/:subarea_uuid", posform.GetPaginatedPosFormSubArea)
 	posf.Get("/all/paginate/:cyclo_uuid", posform.GetPaginatedPosFormCommune)
+	posf.Get("/all/paginate/:pos_uuid", posform.GetPaginatedPosFormByPOS)
 	posf.Post("/create", posform.CreatePosform)
 	posf.Get("/get/:uuid", posform.GetPosform)
 	posf.Put("/update/:uuid", posform.UpdatePosform)
@@ -277,8 +278,14 @@ func Setup(app *fiber.App) {
 	dash := api.Group("/dashboard")
 
 	nd := dash.Group("/numeric-distribution")
-	nd.Get("/table-view/:province/:start_date/:end_date", dashboard.NdTableView)
-	nd.Get("/nd-year/:province", dashboard.NdByYear)
+	nd.Get("/table-view-province", dashboard.NdTableViewProvince)
+	nd.Get("/table-view-area", dashboard.NdTableViewArea)
+	nd.Get("/table-view-subarea", dashboard.NdTableViewSubArea)
+	nd.Get("/table-view-commune", dashboard.NdTableViewCommune)
+	nd.Get("/line-chart-by-month", dashboard.NdTotalByBrandByMonth)
+
+
+
 
 	sum := dash.Group("/sammury")
 	sum.Get("/dr-count", dashboard.DrCount)

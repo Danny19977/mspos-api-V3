@@ -85,8 +85,8 @@ func GetAllPosFormItemsByUUID(c *fiber.Ctx) error {
 
 	var data []models.PosFormItems
 	db.
-	Where("pos_form_uuid = ?", PosFormUUID).
-	Find(&data)
+		Where("pos_form_uuid = ?", PosFormUUID).
+		Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All PosFormItemsByUUID",
@@ -122,9 +122,9 @@ func UpdatePosformItem(c *fiber.Ctx) error {
 	type UpdateData struct {
 		UUID string `json:"uuid"`
 
-		Sold    int    `gorm:"default:0" json:"sold"`
-		NumberFarde int `gorm:"not null" json:"number_farde"`                 // NUMBER Farde
-		Counter     int `gorm:"not null" json:"counter"`                      // Allows to calculate the Sum of the ND Dashboard
+		Sold        int    `gorm:"default:0" json:"sold"`
+		NumberFarde int    `gorm:"not null" json:"number_farde"`                 // NUMBER Farde
+		Counter     int    `gorm:"not null" json:"counter"`                      // Allows to calculate the Sum of the ND Dashboard
 		PosFormUUID string `json:"posform_id" gorm:"type:varchar(255);not null"` // Foreign key (belongs to), tag `index` will create index for this column
 		BrandUUID   string `json:"brand_id" gorm:"type:varchar(255);not null"`   // Foreign key (belongs to), tag `index` will create index for this column
 		PosUUID     string `json:"pos_uuid" gorm:"type:varchar(255);not null"`   // Foreign key (belongs to), tag `index` will create index for this column

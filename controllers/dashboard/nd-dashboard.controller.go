@@ -2,139 +2,201 @@ package dashboard
 
 import (
 	"github.com/danny19977/mspos-api-v3/database"
-	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
 )
 
-//By Area Found here 
-func NdTableView(c *fiber.Ctx) error {
-	province := c.Params("province")
-	start_date := c.Params("start_date")
-	end_date := c.Params("end_date")
+// calculate the ND by Country and Province
+func NdTableViewProvince(c *fiber.Ctx) error {
+	db := database.DB
 
-	sql1 := `
-		SELECT areas.name AS area, 
-			ROUND(SUM(eq1) / COUNT("pos_forms"."id") * 100) AS eq,
-			ROUND(SUM(dhl1) / COUNT("pos_forms"."id") * 100) AS dhl, 
-			ROUND(SUM(ar1) / COUNT("pos_forms"."id") * 100) AS ar, 
-			ROUND(SUM(sbl1)/ COUNT("pos_forms"."id") * 100) AS sbl, 
-			ROUND(SUM(pmf1) / COUNT("pos_forms"."id") * 100) AS pmf,
-			ROUND(SUM(pmm1) / COUNT("pos_forms"."id") * 100) AS pmm, 
-			ROUND(SUM(ticket1) / COUNT("pos_forms"."id") * 100) AS ticket, 
-			ROUND(SUM(mtc1) / COUNT("pos_forms"."id") * 100) AS mtc, 
-			ROUND(SUM(ws1) / COUNT("pos_forms"."id") * 100) AS ws, 
-			ROUND(SUM(mast1) / COUNT("pos_forms"."id") * 100) AS mast,
-			ROUND(SUM(oris1) / COUNT("pos_forms"."id") * 100) AS oris, 
-			ROUND(SUM(elite1) / COUNT("pos_forms"."id") * 100) AS elite,
-			ROUND(SUM(yes1) / COUNT("pos_forms"."id") * 100) AS yes, 
-			ROUND(SUM(time1) / COUNT("pos_forms"."id") * 100) AS time
-		FROM pos_forms
-		INNER JOIN areas ON pos_forms.area_uuid=areas.uuid
-		INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
-		WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"= ? AND "pos_forms"."created_at" BETWEEN ? ::TIMESTAMP 
-			AND ? ::TIMESTAMP 
-		GROUP BY areas.name;
-	`
-	var chartData []models.NDChartData
-	database.DB.Raw(sql1, province, start_date, end_date).Scan(&chartData)
+	country_uuid := c.Query("country_uuid")
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
 
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "chartData data",
-		"data":    chartData,
-	})
-}
-//calculate the ND by Year 
-func NdByYear(c *fiber.Ctx) error {
-	province := c.Params("province")
-	sql1 := `  
-	SELECT EXTRACT(MONTH FROM "pos_forms"."created_at") AS month,
-		ROUND(SUM(eq1) / COUNT(*) * 100) AS eq
-	FROM pos_forms
-	INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
-	WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"=? AND 
-    EXTRACT(YEAR FROM "pos_forms"."created_at") = EXTRACT(YEAR FROM CURRENT_DATE)
-		AND EXTRACT(MONTH FROM "pos_forms"."created_at") BETWEEN 1 AND 12 
-    
-		GROUP BY EXTRACT(MONTH FROM "pos_forms"."created_at")
-		ORDER BY EXTRACT(MONTH FROM "pos_forms"."created_at");
-	`
-	var chartData []models.NdByYear
-	database.DB.Raw(sql1, province).Scan(&chartData)
+	var results []struct {
+		Name       string `json:"name"`
+		BrandName  string `json:"brand_name"`
+		TotalCount int    `json:"total_count"`
+	}
+
+	err := db.Table("pos_form_items").
+		Select("provinces.name AS name, brands.name AS brand_name, SUM(pos_form_items.counter) AS total_count").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Joins("INNER JOIN provinces ON pos_form_items.province_uuid = provinces.uuid").
+		Where("pos_form_items.country_uuid = ?", country_uuid).
+		Where("pos_form_items.created_at BETWEEN ? AND ?", start_date, end_date).
+		Group("provinces.name, brands.name").
+		Order("provinces.name, total_count DESC").
+		Scan(&results).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "chartData data",
-		"data":    chartData,
+		"data":    results,
 	})
 }
 
-//calculate the ND by Country add Total POS at the after the name of the Territoires
-func NdCountryTableView(c *fiber.Ctx) error {
+// calculate the ND by Area Found here
+func NdTableViewArea(c *fiber.Ctx) error {
+	db := database.DB
+
+	country_uuid := c.Query("country_uuid")
+	province_uuid := c.Query("province_uuid")
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
+
+	var results []struct {
+		Name       string `json:"name"`
+		BrandName  string `json:"brand_name"`
+		TotalCount int    `json:"total_count"`
+	}
+	err := db.Table("pos_form_items").
+		Select("areas.name AS name, brands.name AS brand_name, SUM(pos_form_items.counter) AS total_count").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Joins("INNER JOIN areas ON pos_form_items.area_uuid = areas.uuid").
+		Where("pos_form_items.country_uuid = ? AND pos_form_items.province_uuid = ?", country_uuid, province_uuid).
+		Where("pos_form_items.created_at BETWEEN ? AND ?", start_date, end_date).
+		Group("areas.name, brands.name").
+		Order("areas.name, total_count DESC").
+		Scan(&results).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "chartData data",
-		"data":    nil,
+		"data":    results,
 	})
 }
 
-//calculate the ND by Province add Total POS at the after the name of the Territoires
-func NdProvinceTableView(c *fiber.Ctx) error {
+// calculate the ND by Subarea Found here
+func NdTableViewSubArea(c *fiber.Ctx) error {
+	db := database.DB
 
+	country_uuid := c.Query("country_uuid")
+	province_uuid := c.Query("province_uuid")
+	area_uuid := c.Query("area_uuid")
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
+
+	var results []struct {
+		Name       string `json:"name"`
+		BrandName  string `json:"brand_name"`
+		TotalCount int    `json:"total_count"`
+	}
+	err := db.Table("pos_form_items").
+		Select("sub_areas.name AS name, brands.name AS brand_name, SUM(pos_form_items.counter) AS total_count").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Joins("INNER JOIN sub_areas ON pos_form_items.sub_area_uuid = sub_areas.uuid").
+		Where("pos_form_items.country_uuid = ? AND pos_form_items.province_uuid = ? AND pos_form_items.area_uuid = ?", country_uuid, province_uuid, area_uuid).
+		Where("pos_form_items.created_at BETWEEN ? AND ?", start_date, end_date).
+		Group("sub_areas.name, brands.name").
+		Order("sub_areas.name, total_count DESC").
+		Scan(&results).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "chartData data",
-		"data":    nil,
+		"data":    results,
 	})
 }
 
-//calculate the ND by Area add Total POS at the after the name of the Territoires
-func NdAreaTableView(c *fiber.Ctx) error {
+// calculate the ND by Commune Found here
+func NdTableViewCommune(c *fiber.Ctx) error {
+	db := database.DB
 
+	country_uuid := c.Query("country_uuid")
+	province_uuid := c.Query("province_uuid")
+	area_uuid := c.Query("area_uuid")
+	sub_area_uuid := c.Query("sub_area_uuid")
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
+
+	var results []struct {
+		Name       string `json:"name"`
+		BrandName  string `json:"brand_name"`
+		TotalCount int    `json:"total_count"`
+	}
+
+	err := db.Table("pos_form_items").
+		Select("communes.name AS name, brands.name AS brand_name, SUM(pos_form_items.counter) AS total_count").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Joins("INNER JOIN communes ON pos_form_items.commune_uuid = communes.uuid").
+		Where("pos_form_items.country_uuid = ? AND pos_form_items.province_uuid = ? AND pos_form_items.area_uuid = ? AND pos_form_items.sub_area_uuid = ?", country_uuid, province_uuid, area_uuid, sub_area_uuid).
+		Where("pos_form_items.created_at BETWEEN ? AND ?", start_date, end_date).
+		Group("communes.name, brands.name").
+		Order("communes.name, total_count DESC").
+		Scan(&results).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "chartData data",
-		"data":    nil,
+		"data":    results,
 	})
 }
 
-//calculate the ND by AubArea add Total POS at the after the name of the Territoires
-func NdSubAreaTableView(c *fiber.Ctx) error {
+// Line chart for sum brand by month
+func NdTotalByBrandByMonth(c *fiber.Ctx) error {
+	db := database.DB
 
-	
+	country_uuid := c.Query("country_uuid")
+	year := c.Query("year")
+
+	var results []struct {
+		BrandName  string `json:"brand_name"`
+		Month      int    `json:"month"`
+		TotalCount int    `json:"total_count"`
+	}
+
+	err := db.Table("pos_form_items").
+		Select("brands.name AS brand_name, EXTRACT(MONTH FROM pos_form_items.created_at) AS month, SUM(pos_form_items.counter) AS total_count").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Where("pos_form_items.country_uuid = ? AND EXTRACT(YEAR FROM pos_form_items.created_at) = ?", country_uuid, year).
+		Group("brands.name, month").
+		Order("brands.name, month ASC").
+		Scan(&results).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "chartData data",
-		"data":    nil,
+		"message": "Total count by brand grouped by month for the year",
+		"data":    results,
 	})
 }
-
-//calculate the ND by Commune add Total POS at the after the name of the Territoires
-func NdCommuneTableView(c *fiber.Ctx) error {
-
-	
-
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "chartData data",
-		"data":    nil,
-	})
-}
-
-func NdTopBrands(c *fiber.Ctx) error{
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "chartData data",
-		"data":    nil,
-	})
-}
-
-
-
-
-
-
