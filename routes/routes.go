@@ -58,6 +58,7 @@ func Setup(app *fiber.App) {
 	// Province controller
 	prov := api.Group("/provinces")
 	prov.Get("/all", province.GetAllProvinces)
+	prov.Get("/all/:country_uuid", province.GetAllProvinceByCountry)
 	prov.Get("/all/paginate", province.GetPaginatedProvince)
 	prov.Get("/all/paginate/province/:province_uuid", province.GetPaginatedASM)
 	prov.Get("/all/:id", province.GetProvinceByID)

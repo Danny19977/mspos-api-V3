@@ -62,8 +62,6 @@ func GetPaginatedSubArea(c *fiber.Ctx) error {
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
-
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
 		"total_records": totalRecords,
@@ -75,7 +73,7 @@ func GetPaginatedSubArea(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "Subares retrieved successfully",
+		"message":    "Subareas retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
@@ -148,7 +146,7 @@ func GetPaginatedSubAreaByASM(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "Subares retrieved successfully",
+		"message":    "Subares retrieved asm successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
@@ -223,7 +221,7 @@ func GetPaginatedSubAreaBySup(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "Subares retrieved successfully",
+		"message":    "Subares Sup retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
@@ -296,7 +294,7 @@ func GetAllSubAreaDr(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "Subareasretrieved successfully",
+		"message":    "Subareas Dr retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})
@@ -330,7 +328,7 @@ func GetAllDataBySubAreaByAreaUUID(c *fiber.Ctx) error {
 		"data":    data,
 	})
 }
- 
+
 // Get one data
 func GetSubArea(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")

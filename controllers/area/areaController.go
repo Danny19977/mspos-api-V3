@@ -239,7 +239,7 @@ func GetAllAreas(c *fiber.Ctx) error {
 	})
 }
 
-// Get All data
+// Get All data by province uuid Dashboard
 func GetAllAreasByProvinceUUID(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -249,7 +249,7 @@ func GetAllAreasByProvinceUUID(c *fiber.Ctx) error {
 	db. Where("province_uuid = ?", ProvinceUUID).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "All Areas",
+		"message": "All Areas by province",
 		"data":    data,
 	})
 }

@@ -172,6 +172,25 @@ func GetAllProvinces(c *fiber.Ctx) error {
 	})
 }
 
+// Get All data by country Dashboard
+func GetAllProvinceByCountry(c *fiber.Ctx) error {
+	db := database.DB
+
+	countryUUID := c.Params("country_uuid")
+
+
+	var data []models.Province
+
+	db.
+	Where("country_uuid = ?", countryUUID).
+	Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All provinces",
+		"data":    data,
+	})
+}
+
 // query data
 func GetProvinceByID(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
