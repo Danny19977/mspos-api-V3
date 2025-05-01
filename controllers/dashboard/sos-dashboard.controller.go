@@ -2,210 +2,270 @@ package dashboard
 
 import (
 	"github.com/danny19977/mspos-api-v3/database"
-	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
 )
 
 func SosTableViewProvince(c *fiber.Ctx) error {
-	
-	var tabledata []models.SosPieChartArea
+	db := database.DB
+
+	country_uuid := c.Query("country_uuid")
+	province_uuid := c.Query("province_uuid")
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
+
+	var results []struct {
+		Name             string  `json:"name"`
+		BrandName        string  `json:"brand_name"`
+		TotalFarde       int64   `json:"total_farde"`
+		TotalGlobalFarde int64   `json:"total_global_farde"`
+		Percentage       float64 `json:"percentage"`
+		TotalPos         int64   `json:"total_pos"`
+	}
+
+	err := db.Table("pos_form_items").
+		Select(`
+		provinces.name AS name,
+		brands.name AS brand_name, 
+		SUM(pos_form_items.number_farde) AS total_farde,
+		SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
+		ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+		(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
+		 FROM pos_form_items 
+		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+		 WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+		 ) AS total_pos
+	`, country_uuid, province_uuid, start_date, end_date).
+		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Joins("INNER JOIN provinces ON pos_forms.province_uuid = provinces.uuid").
+		Group("provinces.name, brands.name").
+		Scan(&results).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "TableData data",
-		"data":    tabledata,
+		"message": "chartData data",
+		"data":    results,
 	})
 }
 
 func SosTableViewArea(c *fiber.Ctx) error {
-	
-	var tabledata []models.SosPieChartArea
+	db := database.DB
+
+	country_uuid := c.Query("country_uuid")
+	province_uuid := c.Query("province_uuid")
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
+
+	var results []struct {
+		Name             string  `json:"name"`
+		BrandName        string  `json:"brand_name"`
+		TotalFarde       int64   `json:"total_farde"`
+		TotalGlobalFarde int64   `json:"total_global_farde"`
+		Percentage       float64 `json:"percentage"`
+		TotalPos         int64   `json:"total_pos"`
+	}
+
+	err := db.Table("pos_form_items").
+		Select(`
+			areas.name AS name,
+			brands.name AS brand_name, 
+			SUM(pos_form_items.number_farde) AS total_farde,
+			SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
+			ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+			(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
+			FROM pos_form_items 
+			INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+			WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+			) AS total_pos
+		`, country_uuid, province_uuid, start_date, end_date).
+		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Joins("INNER JOIN areas ON pos_forms.area_uuid = areas.uuid").
+		Group("areas.name, brands.name").
+		Scan(&results).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "TableData data",
-		"data":    tabledata,
+		"message": "chartData data",
+		"data":    results,
 	})
 }
 
 func SosTableViewSubArea(c *fiber.Ctx) error {
-	
-	var tabledata []models.SosPieChartArea
+	db := database.DB
+
+	country_uuid := c.Query("country_uuid")
+	province_uuid := c.Query("province_uuid")
+	area_uuid := c.Query("area_uuid")
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
+
+	var results []struct {
+		Name             string  `json:"name"`
+		BrandName        string  `json:"brand_name"`
+		TotalFarde       int64   `json:"total_farde"`
+		TotalGlobalFarde int64   `json:"total_global_farde"`
+		Percentage       float64 `json:"percentage"`
+		TotalPos         int64   `json:"total_pos"`
+	}
+
+	err := db.Table("pos_form_items").
+		Select(`
+			sub_areas.name AS name,
+			brands.name AS brand_name, 
+			SUM(pos_form_items.number_farde) AS total_farde,
+			SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
+			ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+			(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
+			FROM pos_form_items 
+			INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+			WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+			) AS total_pos
+		`, country_uuid, province_uuid, area_uuid, start_date, end_date).
+		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ?", country_uuid, province_uuid, area_uuid).
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Joins("INNER JOIN sub_areas ON pos_forms.sub_area_uuid = sub_areas.uuid").
+		Group("sub_areas.name, brands.name").
+		Scan(&results).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "TableData data",
-		"data":    tabledata,
+		"message": "chartData data",
+		"data":    results,
 	})
 }
 
 func SosTableViewCommune(c *fiber.Ctx) error {
-	
-	var tabledata []models.SosPieChartArea
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "TableData data",
-		"data":    tabledata,
-	})
-}
+	db := database.DB
 
-func SOSByMonth(c *fiber.Ctx) error {
-	province := c.Params("province")
-	sql1 := `  
-	SELECT EXTRACT(MONTH FROM "pos_forms"."created_at") AS month,
-		ROUND(SUM(eq) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-			SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-			SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-			SUM(time) ) * 100) AS eq
-	FROM pos_forms
-	INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
-	WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"=? AND 
-    EXTRACT(YEAR FROM "pos_forms"."created_at") = EXTRACT(YEAR FROM CURRENT_DATE)
-		AND EXTRACT(MONTH FROM "pos_forms"."created_at") BETWEEN 1 AND 12 
-    
-		GROUP BY EXTRACT(MONTH FROM "pos_forms"."created_at")
-		ORDER BY EXTRACT(MONTH FROM "pos_forms"."created_at");
-	`
-	var chartData []models.NdByYear
-	database.DB.Raw(sql1, province).Scan(&chartData)
+	country_uuid := c.Query("country_uuid")
+	province_uuid := c.Query("province_uuid")
+	area_uuid := c.Query("area_uuid")
+	sub_area_uuid := c.Query("sub_area_uuid")
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
 
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "chartData data",
-		"data":    chartData,
-	})
-}
+	var results []struct {
+		Name             string  `json:"name"`
+		BrandName        string  `json:"brand_name"`
+		TotalFarde       int64   `json:"total_farde"`
+		TotalGlobalFarde int64   `json:"total_global_farde"`
+		Percentage       float64 `json:"percentage"`
+		TotalPos         int64   `json:"total_pos"`
+	}
 
+	err := db.Table("pos_form_items").
+		Select(`
+			communes.name AS name,
+			brands.name AS brand_name, 
+			SUM(pos_form_items.number_farde) AS total_farde,
+			SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
+			ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+			(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
+			FROM pos_form_items 
+			INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+			WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+			) AS total_pos
+		`, country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date).
+		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ?", country_uuid, province_uuid, area_uuid, sub_area_uuid).
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Joins("INNER JOIN communes ON pos_forms.commune_uuid = communes.uuid").
+		Group("communes.name, brands.name").
+		Scan(&results).Error
 
-//Version 2.0  
-func SOSPieByArea(c *fiber.Ctx) error {
-	province := c.Params("province")
-	start_date := c.Params("start_date")
-	end_date := c.Params("end_date")
-
-	sql1 := `
-		SELECT "areas"."name" AS area,
-			ROUND(SUM(eq) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-			SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-			SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-			SUM(time) ) * 100) AS eq
-		FROM pos_forms 
-			INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
-			INNER JOIN areas ON pos_forms.area_uuid=areas.uuid
-		WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"=? AND 
-				"pos_forms"."created_at" BETWEEN ? ::TIMESTAMP AND ? ::TIMESTAMP 
-		GROUP BY "areas"."name";
-	`
-
-	var chartData []models.SosPieChartArea
-	database.DB.Raw(sql1, province, start_date, end_date).Scan(&chartData)
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "chartData data",
-		"data":    chartData,
-	})
-}
-
-func SOSByYear(c *fiber.Ctx) error {
-	province := c.Params("province")
-	sql1 := `  
-	SELECT EXTRACT(MONTH FROM "pos_forms"."created_at") AS month,
-		ROUND(SUM(eq) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-			SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-			SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-			SUM(time) ) * 100) AS eq
-	FROM pos_forms
-	INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
-	WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"=? AND 
-    EXTRACT(YEAR FROM "pos_forms"."created_at") = EXTRACT(YEAR FROM CURRENT_DATE)
-		AND EXTRACT(MONTH FROM "pos_forms"."created_at") BETWEEN 1 AND 12 
-    
-		GROUP BY EXTRACT(MONTH FROM "pos_forms"."created_at")
-		ORDER BY EXTRACT(MONTH FROM "pos_forms"."created_at");
-	`
-	var chartData []models.NdByYear
-	database.DB.Raw(sql1, province).Scan(&chartData)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "chartData data",
-		"data":    chartData,
+		"data":    results,
 	})
 }
 
-func SOSTableView(c *fiber.Ctx) error {
-	province := c.Params("province")
-	start_date := c.Params("start_date")
-	end_date := c.Params("end_date")
+func SosTotalByBrandByMonth(c *fiber.Ctx) error {
+	db := database.DB
 
-	sql1 := `
-	SELECT areas.name AS area, 
-		ROUND(SUM(eq) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS eq,
-		ROUND(SUM(dhl) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS dhl, 
-		ROUND(SUM(ar) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS ar, 
-		ROUND(SUM(sbl) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS sbl, 
-		ROUND(SUM(pmf) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS pmf, 
-		ROUND(SUM(pmm) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS pmm, 
-		ROUND(SUM(ticket) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS ticket, 
-		ROUND(SUM(mtc) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS mtc, 
-		ROUND(SUM(ws) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS ws, 
-		ROUND(SUM(mast) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS mast, 
-		ROUND(SUM(oris) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS oris, 
-		ROUND(SUM(elite) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS elite,
-		ROUND(SUM(yes) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS yes,
-		ROUND(SUM(time) / (SUM(eq) + SUM(dhl) + SUM(ar) +
-				SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
-				SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
-				SUM(time) ) * 100) AS time
-		FROM pos_forms
-		INNER JOIN areas ON pos_forms.area_uuid=areas.uuid
-		INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
-		WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"=? AND "pos_forms"."created_at" BETWEEN ? ::TIMESTAMP 
-			AND ? ::TIMESTAMP 
-		GROUP BY areas.name; 
-	`
-	var chartData []models.NDChartData
-	database.DB.Raw(sql1, province, start_date, end_date).Scan(&chartData)
+	country_uuid := c.Query("country_uuid")
+	year := c.Query("year")
+
+	var results []struct {
+		BrandName        string  `json:"brand_name"`
+		Month            int     `json:"month"`
+		TotalFarde       int64   `json:"total_farde"`
+		TotalGlobalFarde int64   `json:"total_global_farde"`
+		Percentage       float64 `json:"percentage"`
+		TotalPos         int64   `json:"total_pos"`
+	}
+
+	err := db.Table("pos_form_items").
+		Select(`
+		brands.name AS brand_name,
+		EXTRACT(MONTH FROM pos_forms.created_at) AS month, 
+		SUM(pos_form_items.number_farde) AS total_farde,
+		SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
+		ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+		(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
+		 FROM pos_form_items 
+		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+		 WHERE pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?
+		 ) AS total_pos
+	`, country_uuid, year).
+		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
+		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+		Where("pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?", country_uuid, year).
+		Group("brands.name, month").
+		Order("brands.name, month ASC").
+		Scan(&results).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch data",
+			"error":   err.Error(),
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "chartData data",
-		"data":    chartData,
+		"message": "results data",
+		"data":    results,
 	})
 }

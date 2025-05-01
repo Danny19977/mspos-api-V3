@@ -119,7 +119,8 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 		Percentage float64 `json:"percentage"`
 	}
 	err := db.Table("pos_form_items").
-		Select(`sub_areas.name AS name, 
+		Select(`
+		sub_areas.name AS name, 
 		brands.name AS brand_name,
 		 SUM(pos_form_items.counter) AS total_count,
 		 ROUND((SUM(pos_form_items.counter) / (SELECT SUM(counter) FROM pos_form_items INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?)) * 100, 2) AS percentage,

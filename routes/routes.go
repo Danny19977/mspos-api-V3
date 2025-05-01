@@ -280,12 +280,21 @@ func Setup(app *fiber.App) {
 
 	dash := api.Group("/dashboard")
 
+	//ND Dashboard
 	nd := dash.Group("/numeric-distribution")
 	nd.Get("/table-view-province", dashboard.NdTableViewProvince)
 	nd.Get("/table-view-area", dashboard.NdTableViewArea)
 	nd.Get("/table-view-subarea", dashboard.NdTableViewSubArea)
 	nd.Get("/table-view-commune", dashboard.NdTableViewCommune)
 	nd.Get("/line-chart-by-month", dashboard.NdTotalByBrandByMonth)
+
+	// SOS Dashboard
+	sos := dash.Group("/share-of-stock")
+	sos.Get("/table-view-province", dashboard.SosTableViewProvince)
+	sos.Get("/table-view-area", dashboard.SosTableViewArea)
+	sos.Get("/table-view-subarea", dashboard.SosTableViewSubArea)
+	sos.Get("/table-view-commune", dashboard.SosTableViewCommune)
+	sos.Get("/line-chart-by-month", dashboard.SosTotalByBrandByMonth)
 
 	sum := dash.Group("/sammury")
 	sum.Get("/dr-count", dashboard.DrCount)
@@ -300,10 +309,5 @@ func Setup(app *fiber.App) {
 	sum.Get("/status-equements/:start_date/:end_date", dashboard.StatusEquipement)
 	sum.Get("/google-maps/:start_date/:end_date", dashboard.GoogleMaps)
 	sum.Get("/price-sales/:start_date/:end_date", dashboard.PriceSale)
-
-	sos := dash.Group("/share-of-stock")
-	sos.Get("/sos-pie/:province/:start_date/:end_date", dashboard.SOSPieByArea)
-	sos.Get("/sos-year/:province", dashboard.SOSByYear)
-	sos.Get("/table-view/:province/:start_date/:end_date", dashboard.SOSTableView)
 
 }
