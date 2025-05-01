@@ -46,8 +46,35 @@ func SosTableViewCommune(c *fiber.Ctx) error {
 	})
 }
 
+func SOSByMonth(c *fiber.Ctx) error {
+	province := c.Params("province")
+	sql1 := `  
+	SELECT EXTRACT(MONTH FROM "pos_forms"."created_at") AS month,
+		ROUND(SUM(eq) / (SUM(eq) + SUM(dhl) + SUM(ar) +
+			SUM(sbl) + SUM(pmf) + SUM(pmm) + SUM(ticket) + SUM(mtc) +
+			SUM(ws) + SUM(mast) + SUM(oris) + SUM(elite) + SUM(yes) +
+			SUM(time) ) * 100) AS eq
+	FROM pos_forms
+	INNER JOIN provinces ON pos_forms.province_uuid=provinces.uuid
+	WHERE "pos_forms"."deleted_at" IS NULL AND "provinces"."name"=? AND 
+    EXTRACT(YEAR FROM "pos_forms"."created_at") = EXTRACT(YEAR FROM CURRENT_DATE)
+		AND EXTRACT(MONTH FROM "pos_forms"."created_at") BETWEEN 1 AND 12 
+    
+		GROUP BY EXTRACT(MONTH FROM "pos_forms"."created_at")
+		ORDER BY EXTRACT(MONTH FROM "pos_forms"."created_at");
+	`
+	var chartData []models.NdByYear
+	database.DB.Raw(sql1, province).Scan(&chartData)
+
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "chartData data",
+		"data":    chartData,
+	})
+}
 
 
+//Version 2.0  
 func SOSPieByArea(c *fiber.Ctx) error {
 	province := c.Params("province")
 	start_date := c.Params("start_date")

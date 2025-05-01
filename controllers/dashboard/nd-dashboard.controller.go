@@ -122,7 +122,7 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 		Select(`sub_areas.name AS name, 
 		brands.name AS brand_name,
 		 SUM(pos_form_items.counter) AS total_count,
-		 ROUND((SUM(pos_form_items.counter) / (SELECT SUM(counter) FROM pos_form_items WHERE country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?)) * 100, 2) AS percentage,
+		 ROUND((SUM(pos_form_items.counter) / (SELECT SUM(counter) FROM pos_form_items INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?)) * 100, 2) AS percentage,
 		 (SELECT SUM(counter) FROM pos_form_items INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?) AS total_pos
 		`, country_uuid, province_uuid, area_uuid, start_date, end_date, country_uuid, province_uuid, area_uuid, start_date, end_date).
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
@@ -172,7 +172,7 @@ func NdTableViewCommune(c *fiber.Ctx) error {
 		communes.name AS name,
 		brands.name AS brand_name,
 		SUM(pos_form_items.counter) AS total_count,
-		ROUND((SUM(pos_form_items.counter) / (SELECT SUM(counter) FROM pos_form_items WHERE country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?)) * 100, 2) AS percentage,
+		ROUND((SUM(pos_form_items.counter) / (SELECT SUM(counter) FROM pos_form_items INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?)) * 100, 2) AS percentage,
 		(SELECT SUM(counter) FROM pos_form_items INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?) AS total_pos
 		`, country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date, country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date).
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
