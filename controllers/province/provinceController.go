@@ -178,12 +178,11 @@ func GetAllProvinceByCountry(c *fiber.Ctx) error {
 
 	countryUUID := c.Params("country_uuid")
 
-
 	var data []models.Province
 
 	db.
-	Where("country_uuid = ?", countryUUID).
-	Find(&data)
+		Where("country_uuid = ?", countryUUID).
+		Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All provinces",
@@ -211,6 +210,30 @@ func GetProvince(c *fiber.Ctx) error {
 	db := database.DB
 	var province models.Province
 	db.Where("uuid = ?", uuid).First(&province)
+	if province.Name == "" {
+		return c.Status(404).JSON(
+			fiber.Map{
+				"status":  "error",
+				"message": "No Province name found",
+				"data":    nil,
+			},
+		)
+	}
+	return c.JSON(
+		fiber.Map{
+			"status":  "success",
+			"message": "Province found",
+			"data":    province,
+		},
+	)
+}
+
+// Get one data by name
+func GetProvinceByName(c *fiber.Ctx) error {
+	name := c.Params("name")
+	db := database.DB
+	var province models.Province
+	db.Where("name = ?", name).First(&province)
 	if province.Name == "" {
 		return c.Status(404).JSON(
 			fiber.Map{

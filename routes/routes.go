@@ -62,7 +62,8 @@ func Setup(app *fiber.App) {
 	prov.Get("/all/paginate", province.GetPaginatedProvince)
 	prov.Get("/all/paginate/province/:province_uuid", province.GetPaginatedASM)
 	prov.Get("/all/:id", province.GetProvinceByID)
-	prov.Get("/get/:uuid", user.GetUser)
+	prov.Get("/get/:uuid", province.GetProvince)
+	prov.Get("/get-by/:name", province.GetProvinceByName)
 	prov.Post("/create", province.CreateProvince)
 	prov.Put("/update/:uuid", province.UpdateProvince)
 	prov.Delete("/delete/:uuid", province.DeleteProvince)
@@ -76,8 +77,9 @@ func Setup(app *fiber.App) {
 	ar.Get("/all/paginate/area/:area_uuid", area.GetAreaBySups)
 	ar.Get("/all/:id", area.GetAreaByID)
 	ar.Get("/all-area/:id", area.GetSupAreaByID)
-	ar.Post("/create", area.CreateArea)
 	ar.Get("/get/:uuid", area.GetArea)
+	ar.Get("/get-by/:name", area.GetAreaByName)
+	ar.Post("/create", area.CreateArea)
 	ar.Put("/update/:uuid", area.UpdateArea)
 	ar.Delete("/delete/:uuid", area.DeleteArea)
 
@@ -90,6 +92,7 @@ func Setup(app *fiber.App) {
 	sa.Get("/all/paginate/area/:area_uuid", Subarea.GetPaginatedSubAreaBySup)
 	sa.Get("/all/paginate/subarea/:subarea_uuid", Subarea.GetAllSubAreaDr)
 	sa.Get("/get/:uuid", Subarea.GetSubArea)
+	sa.Get("/get-by/:name", Subarea.GetSubAreaByName)
 	sa.Post("/create", Subarea.CreateSubArea)
 	sa.Put("/update/:uuid", Subarea.UpdateSubArea)
 	sa.Delete("/delete/:uuid", Subarea.DeleteSubarea)
@@ -283,9 +286,6 @@ func Setup(app *fiber.App) {
 	nd.Get("/table-view-subarea", dashboard.NdTableViewSubArea)
 	nd.Get("/table-view-commune", dashboard.NdTableViewCommune)
 	nd.Get("/line-chart-by-month", dashboard.NdTotalByBrandByMonth)
-
-
-
 
 	sum := dash.Group("/sammury")
 	sum.Get("/dr-count", dashboard.DrCount)

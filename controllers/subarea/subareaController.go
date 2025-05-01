@@ -354,6 +354,35 @@ func GetSubArea(c *fiber.Ctx) error {
 	)
 }
 
+// Get one data by name
+func GetSubAreaByName(c *fiber.Ctx) error {
+	name := c.Params("name")
+	db := database.DB
+
+	var SubArea models.SubArea
+	db.Where("name = ?", name).
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		First(&SubArea)
+	if SubArea.Name == "" {
+		return c.Status(404).JSON(
+			fiber.Map{
+				"status":  "error",
+				"message": "No Subarea name found",
+				"data":    nil,
+			},
+		)
+	}
+	return c.JSON(
+		fiber.Map{
+			"status":  "success",
+			"message": "Subarea found",
+			"data":    SubArea,
+		},
+	)
+}
+
 // Create data
 func CreateSubArea(c *fiber.Ctx) error {
 	p := &models.SubArea{}

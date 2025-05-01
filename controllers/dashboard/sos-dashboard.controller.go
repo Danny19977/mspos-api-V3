@@ -6,6 +6,48 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func SosTableViewProvince(c *fiber.Ctx) error {
+	
+	var tabledata []models.SosPieChartArea
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "TableData data",
+		"data":    tabledata,
+	})
+}
+
+func SosTableViewArea(c *fiber.Ctx) error {
+	
+	var tabledata []models.SosPieChartArea
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "TableData data",
+		"data":    tabledata,
+	})
+}
+
+func SosTableViewSubArea(c *fiber.Ctx) error {
+	
+	var tabledata []models.SosPieChartArea
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "TableData data",
+		"data":    tabledata,
+	})
+}
+
+func SosTableViewCommune(c *fiber.Ctx) error {
+	
+	var tabledata []models.SosPieChartArea
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "TableData data",
+		"data":    tabledata,
+	})
+}
+
+
+
 func SOSPieByArea(c *fiber.Ctx) error {
 	province := c.Params("province")
 	start_date := c.Params("start_date")

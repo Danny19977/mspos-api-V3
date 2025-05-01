@@ -246,7 +246,7 @@ func GetAllAreasByProvinceUUID(c *fiber.Ctx) error {
 	ProvinceUUID := c.Params("province_uuid")
 
 	var data []models.Area
-	db. Where("province_uuid = ?", ProvinceUUID).Find(&data)
+	db.Where("province_uuid = ?", ProvinceUUID).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Areas by province",
@@ -288,6 +288,33 @@ func GetArea(c *fiber.Ctx) error {
 	db := database.DB
 	var area models.Area
 	db.Where("uuid = ?", uuid).First(&area)
+	if area.Name == "" {
+		return c.Status(404).JSON(
+			fiber.Map{
+				"status":  "error",
+				"message": "No area name found",
+				"data":    nil,
+			},
+		)
+	}
+	return c.JSON(
+		fiber.Map{
+			"status":  "success",
+			"message": "area found",
+			"data":    area,
+		},
+	)
+}
+
+// Get one data by name
+func GetAreaByName(c *fiber.Ctx) error {
+	name := c.Params("name")
+	db := database.DB
+	var area models.Area
+	db.Where("name = ?", name).
+		Preload("Country").
+		Preload("Province").
+		First(&area)
 	if area.Name == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
