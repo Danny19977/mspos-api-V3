@@ -296,6 +296,25 @@ func Setup(app *fiber.App) {
 	sos.Get("/table-view-commune", dashboard.SosTableViewCommune)
 	sos.Get("/line-chart-by-month", dashboard.SosTotalByBrandByMonth)
 
+	// Google Map Dashboard
+	gm := dash.Group("/google-map")
+	gm.Get("/view", dashboard.GoogleMaps)
+
+	// Sales Evolution Dashboard
+	sales := dash.Group("/sales-evolution")
+	sales.Get("/table-view-province", dashboard.TypePosTableProvince)
+	sales.Get("/table-view-area", dashboard.TypePosTableArea)
+	sales.Get("/table-view-subarea", dashboard.TypePosTableSubArea)
+	sales.Get("/table-view-commune", dashboard.TypePosTableCommune)
+
+	// Price Evolution Dashboard
+	price := dash.Group("/price-evolution")
+	price.Get("/table-view-province", dashboard.PriceTableProvince)
+	price.Get("/table-view-area", dashboard.PriceTableArea)
+	price.Get("/table-view-subarea", dashboard.PriceTableSubArea)
+	price.Get("/table-view-commune", dashboard.PriceTableCommune)
+
+	// Summary Dashboard
 	sum := dash.Group("/sammury")
 	sum.Get("/dr-count", dashboard.DrCount)
 	sum.Get("/pos-count", dashboard.POSCount)
@@ -307,7 +326,6 @@ func Setup(app *fiber.App) {
 	sum.Get("/better-dr/:start_date/:end_date", dashboard.BetterDR)
 	sum.Get("/better-supervisor/:start_date/:end_date", dashboard.BetterSup)
 	sum.Get("/status-equements/:start_date/:end_date", dashboard.StatusEquipement)
-	sum.Get("/google-maps/:start_date/:end_date", dashboard.GoogleMaps)
 	sum.Get("/price-sales/:start_date/:end_date", dashboard.PriceSale)
 
 }

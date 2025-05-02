@@ -49,6 +49,8 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 		Preload("Drs").
 		Preload("Cyclos").
 		Preload("Pos").
+		Preload("Users").
+		Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -123,6 +125,8 @@ func GetAreaByASM(c *fiber.Ctx) error {
 		Preload("Drs").
 		Preload("Cyclos").
 		Preload("Pos").
+		Preload("Users").
+		Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -197,6 +201,8 @@ func GetAreaBySups(c *fiber.Ctx) error {
 		Preload("Drs").
 		Preload("Cyclos").
 		Preload("Pos").
+		Preload("Users").
+		Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {

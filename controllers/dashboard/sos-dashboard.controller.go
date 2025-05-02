@@ -32,11 +32,12 @@ func SosTableViewProvince(c *fiber.Ctx) error {
 		(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 		 FROM pos_form_items 
 		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
-		 WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+		 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
 		 ) AS total_pos
 	`, country_uuid, province_uuid, start_date, end_date).
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos_forms.deleted_at IS NULL").
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Joins("INNER JOIN provinces ON pos_forms.province_uuid = provinces.uuid").
@@ -85,11 +86,12 @@ func SosTableViewArea(c *fiber.Ctx) error {
 			(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 			FROM pos_form_items 
 			INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
-			WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+			WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
 			) AS total_pos
 		`, country_uuid, province_uuid, start_date, end_date).
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos_forms.deleted_at IS NULL").
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Joins("INNER JOIN areas ON pos_forms.area_uuid = areas.uuid").
@@ -139,11 +141,12 @@ func SosTableViewSubArea(c *fiber.Ctx) error {
 			(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 			FROM pos_form_items 
 			INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
-			WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+			WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
 			) AS total_pos
 		`, country_uuid, province_uuid, area_uuid, start_date, end_date).
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ?", country_uuid, province_uuid, area_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos_forms.deleted_at IS NULL").
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Joins("INNER JOIN sub_areas ON pos_forms.sub_area_uuid = sub_areas.uuid").
@@ -194,11 +197,12 @@ func SosTableViewCommune(c *fiber.Ctx) error {
 			(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 			FROM pos_form_items 
 			INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
-			WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+			WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
 			) AS total_pos
 		`, country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date).
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ?", country_uuid, province_uuid, area_uuid, sub_area_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos_forms.deleted_at IS NULL").
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Joins("INNER JOIN communes ON pos_forms.commune_uuid = communes.uuid").
@@ -245,12 +249,13 @@ func SosTotalByBrandByMonth(c *fiber.Ctx) error {
 		(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 		 FROM pos_form_items 
 		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
-		 WHERE pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?
+		 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?
 		 ) AS total_pos
 	`, country_uuid, year).
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Where("pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?", country_uuid, year).
+		Where("pos_forms.deleted_at IS NULL").
 		Group("brands.name, month").
 		Order("brands.name, month ASC").
 		Scan(&results).Error

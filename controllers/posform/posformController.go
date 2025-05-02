@@ -601,8 +601,8 @@ func UpdatePosform(c *fiber.Ctx) error {
 		Price   int    `gorm:"default:0" json:"price"`
 		Comment string `json:"comment"`
 
-		Latitude  string `json:"latitude"`  // Latitude of the user
-		Longitude string `json:"longitude"` // Longitude of the user
+		Latitude  float64 `json:"latitude"`  // Latitude of the user
+		Longitude float64 `json:"longitude"` // Longitude of the user
 		Signature string `json:"signature"`
 
 		PosUUID      string `json:"pos_uuid" gorm:"type:varchar(255);not null"`

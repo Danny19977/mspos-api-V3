@@ -52,6 +52,8 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 		Preload("Cyclos").
 		Preload("Brands").
 		Preload("Pos").
+		Preload("Users").
+		Preload("PosForms").
 		Find(&province).Error
 
 	if err != nil {
@@ -128,6 +130,8 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 		Preload("Cyclos").
 		Preload("Brands").
 		Preload("Pos").
+		Preload("Users").
+		Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {

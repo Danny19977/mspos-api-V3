@@ -51,6 +51,8 @@ func GetPaginatedCountry(c *fiber.Ctx) error {
 		Preload("Cyclos").
 		Preload("Brands").
 		Preload("Pos").
+		Preload("Users").
+		Preload("PosForms").
 		Find(&countries).Error
 
 	if err != nil {

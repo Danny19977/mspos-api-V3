@@ -18,7 +18,7 @@ type Province struct {
 
 	Brands   []Brand   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 	RoutePlan []RoutePlan `gorm:"foreignKey:ProvinceUUID;references:UUID"`
-	Posforms []PosForm `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	PosForms []PosForm `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 	Pos      []Pos     `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 
 	Asms   []Asm   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
