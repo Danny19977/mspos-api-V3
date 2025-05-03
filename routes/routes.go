@@ -301,18 +301,22 @@ func Setup(app *fiber.App) {
 	gm.Get("/view", dashboard.GoogleMaps)
 
 	// Sales Evolution Dashboard
-	sales := dash.Group("/sales-evolution")
-	sales.Get("/table-view-province", dashboard.TypePosTableProvince)
-	sales.Get("/table-view-area", dashboard.TypePosTableArea)
-	sales.Get("/table-view-subarea", dashboard.TypePosTableSubArea)
-	sales.Get("/table-view-commune", dashboard.TypePosTableCommune)
+	se := dash.Group("/sales-evolution")
+	se.Get("/table-view-province", dashboard.TypePosTableProvince)
+	se.Get("/table-view-area", dashboard.TypePosTableArea)
+	se.Get("/table-view-subarea", dashboard.TypePosTableSubArea)
+	se.Get("/table-view-commune", dashboard.TypePosTableCommune)
+	se.Get("/table-view-province-price", dashboard.PriceTableProvince)
+	se.Get("/table-view-area-price", dashboard.PriceTableArea)
+	se.Get("/table-view-subarea-price", dashboard.PriceTableSubArea)
+	se.Get("/table-view-commune-price", dashboard.PriceTableCommune)
 
-	// Price Evolution Dashboard
-	price := dash.Group("/price-evolution")
-	price.Get("/table-view-province", dashboard.PriceTableProvince)
-	price.Get("/table-view-area", dashboard.PriceTableArea)
-	price.Get("/table-view-subarea", dashboard.PriceTableSubArea)
-	price.Get("/table-view-commune", dashboard.PriceTableCommune)
+	// Kpi Dashboard
+	kp := dash.Group("/kpi")
+	kp.Get("/table-view-province", dashboard.TotalVisitsByProvince)
+	kp.Get("/table-view-area", dashboard.TotalVisitsByArea)
+	kp.Get("/table-view-subarea", dashboard.TotalVisitsBySubArea)
+	kp.Get("/table-view-commune", dashboard.TotalVisitsByCommune)
 
 	// Summary Dashboard
 	sum := dash.Group("/sammury")

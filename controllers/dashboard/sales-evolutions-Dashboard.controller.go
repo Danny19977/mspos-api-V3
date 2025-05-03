@@ -1,8 +1,6 @@
 package dashboard
 
 import (
-	"fmt"
-
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/gofiber/fiber/v2"
 )
@@ -13,26 +11,23 @@ func TypePosTableProvince(c *fiber.Ctx) error {
 
 	country_uuid := c.Query("country_uuid")
 	province_uuid := c.Query("province_uuid")
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
 	var results []struct {
-		TypePos string `json:"type_pos"`
-		Total   int    `json:"total"`
+		Name     string `json:"name"`
+		TypePos  string `json:"type_pos"`
+		TotalPos int    `json:"total_pos"`
 	}
 
 	err := db.Table("pos").
 		Select(`
 		provinces.name AS name,
-		pos.type AS type_pos, 
-		COUNT(*) as total
+		pos.postype AS type_pos, 
+		COUNT(*) as total_pos
 		`).
-		Joins("INNER JOIN provinces ON pos_forms.province_uuid = provinces.uuid").
-		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Joins("INNER JOIN provinces ON pos.province_uuid = provinces.uuid").
+		Where("pos.country_uuid = ? AND pos.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos.deleted_at IS NULL").
-		Group("provinces.name, pos.type").
-		Order("provinces.name, pos.type DESC").
+		Group("provinces.name, pos.postype").
+		Order("provinces.name, pos.postype DESC").
 		Scan(&results).Error
 
 	if err != nil {
@@ -55,26 +50,23 @@ func TypePosTableArea(c *fiber.Ctx) error {
 
 	country_uuid := c.Query("country_uuid")
 	province_uuid := c.Query("province_uuid")
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
 	var results []struct {
-		TypePos string `json:"type_pos"`
-		Total   int    `json:"total"`
+		Name     string `json:"name"`
+		TypePos  string `json:"type_pos"`
+		TotalPos int    `json:"total_pos"`
 	}
 
 	err := db.Table("pos").
 		Select(`
 		areas.name AS name,
-		pos.type AS type_pos, 
-		COUNT(*) as total
+		pos.postype AS type_pos, 
+		COUNT(*) as total_pos
 		`).
-		Joins("INNER JOIN areas ON pos_forms.area_uuid = areas.uuid").
-		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Joins("INNER JOIN areas ON pos.area_uuid = areas.uuid").
+		Where("pos.country_uuid = ? AND pos.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos.deleted_at IS NULL").
-		Group("areas.name, pos.type").
-		Order("areas.name, pos.type DESC").
+		Group("areas.name, pos.postype").
+		Order("areas.name, pos.postype DESC").
 		Scan(&results).Error
 
 	if err != nil {
@@ -98,26 +90,24 @@ func TypePosTableSubArea(c *fiber.Ctx) error {
 	country_uuid := c.Query("country_uuid")
 	province_uuid := c.Query("province_uuid")
 	area_uuid := c.Query("area_uuid")
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
 
 	var results []struct {
-		TypePos string `json:"type_pos"`
-		Total   int    `json:"total"`
+		Name     string `json:"name"`
+		TypePos  string `json:"type_pos"`
+		TotalPos int    `json:"total_pos"`
 	}
 
 	err := db.Table("pos").
 		Select(`
 		sub_areas.name AS name, 
-		pos.type AS type_pos, 
-		COUNT(*) as total
+		pos.postype AS type_pos, 
+		COUNT(*) as total_pos
 		`).
-		Joins("INNER JOIN sub_areas ON pos_forms.sub_area_uuid = sub_areas.uuid").
-		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ?", country_uuid, province_uuid, area_uuid).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Joins("INNER JOIN sub_areas ON pos.sub_area_uuid = sub_areas.uuid").
+		Where("pos.country_uuid = ? AND pos.province_uuid = ? AND pos.area_uuid = ?", country_uuid, province_uuid, area_uuid).
 		Where("pos.deleted_at IS NULL").
-		Group("sub_areas.name, pos.type").
-		Order("sub_areas.name, pos.type DESC").
+		Group("sub_areas.name, pos.postype").
+		Order("sub_areas.name, pos.postype DESC").
 		Scan(&results).Error
 
 	if err != nil {
@@ -142,26 +132,24 @@ func TypePosTableCommune(c *fiber.Ctx) error {
 	province_uuid := c.Query("province_uuid")
 	area_uuid := c.Query("area_uuid")
 	sub_area_uuid := c.Query("sub_area_uuid")
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
 
 	var results []struct {
-		TypePos string `json:"type_pos"`
-		Total   int    `json:"total"`
+		Name     string `json:"name"`
+		TypePos  string `json:"type_pos"`
+		TotalPos int    `json:"total_pos"`
 	}
 
 	err := db.Table("pos").
 		Select(`
 		communes.name AS name,
-		pos.type AS type_pos, 
-		COUNT(*) as total
+		pos.postype AS type_pos, 
+		COUNT(*) as total_pos
 		`).
-		Joins("INNER JOIN communes ON pos_forms.commune_uuid = communes.uuid").
-		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ?", country_uuid, province_uuid, area_uuid, sub_area_uuid).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Joins("INNER JOIN communes ON pos.commune_uuid = communes.uuid").
+		Where("pos.country_uuid = ? AND pos.province_uuid = ? AND pos.area_uuid = ? AND pos_forms.sub_area_uuid = ?", country_uuid, province_uuid, area_uuid, sub_area_uuid).
 		Where("pos.deleted_at IS NULL").
-		Group("communes.name, pos.type").
-		Order("communes.name, pos.type DESC").
+		Group("communes.name, pos.postype").
+		Order("communes.name, pos.postype DESC").
 		Scan(&results).Error
 
 	if err != nil {
@@ -179,7 +167,7 @@ func TypePosTableCommune(c *fiber.Ctx) error {
 	})
 }
 
-// Price table for POS per tige
+// Price table for POS_Forms per tige
 func PriceTableProvince(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -189,20 +177,24 @@ func PriceTableProvince(c *fiber.Ctx) error {
 	end_date := c.Query("end_date")
 
 	var results []struct {
-		Price string `json:"price"`
+		Name       string `json:"name"`
+		Price      string `json:"price"`
+		CountPrice int    `json:"count_price"`
+		Sold       int    `json:"sold"`
 	}
 
 	err := db.Table("pos_forms").
 		Select(`
 		provinces.name AS name,
-		SELECT price AS price,
-		COUNT(*)
-		FROM pos_forms  
+		price AS price,
+		COUNT(*) AS count_price,
+		SUM(pos_forms.sold) AS sold   
 		`).
+		Joins("INNER JOIN provinces ON pos_forms.province_uuid = provinces.uuid").
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("pos.deleted_at IS NULL").
-		Group("pos_forms.price").
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos_forms.deleted_at IS NULL").
+		Group("provinces.name, pos_forms.price").
 		Order("provinces.name, pos_forms.price DESC").
 		Scan(&results).Error
 
@@ -230,20 +222,22 @@ func PriceTableArea(c *fiber.Ctx) error {
 	end_date := c.Query("end_date")
 
 	var results []struct {
-		Price string `json:"price"`
+		Name       string `json:"name"`
+		Price      string `json:"price"`
+		CountPrice int    `json:"count_price"`
+		Sold       int    `json:"sold"`
 	}
-
 	err := db.Table("pos_forms").
 		Select(`
 		areas.name AS name,
-		SELECT price AS price,
-		COUNT(*)
-		FROM pos_forms  
+		price AS price,
+		COUNT(*) AS count_price,
+		SUM(pos_forms.sold) AS sold   
 		`).
 		Joins("INNER JOIN areas ON pos_forms.area_uuid = areas.uuid").
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("pos.deleted_at IS NULL").
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos_forms.deleted_at IS NULL").
 		Group("areas.name, pos_forms.price").
 		Order("areas.name, pos_forms.price DESC").
 		Scan(&results).Error
@@ -273,20 +267,23 @@ func PriceTableSubArea(c *fiber.Ctx) error {
 	end_date := c.Query("end_date")
 
 	var results []struct {
-		Price string `json:"price"`
+		Name       string `json:"name"`
+		Price      string `json:"price"`
+		CountPrice int    `json:"count_price"`
+		Sold       int    `json:"sold"`
 	}
 
 	err := db.Table("pos_forms").
 		Select(`
 		sub_areas.name AS name,
-		SELECT price AS price,
-		COUNT(*)
-		FROM pos_forms  
+		price AS price,
+		COUNT(*) AS count_price,
+		SUM(pos_forms.sold) AS sold  
 		`).
 		Joins("INNER JOIN sub_areas ON pos_forms.sub_area_uuid = sub_areas.uuid").
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ?", country_uuid, province_uuid, area_uuid).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("pos.deleted_at IS NULL").
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos_forms.deleted_at IS NULL").
 		Group("sub_areas.name, pos_forms.price").
 		Order("sub_areas.name, pos_forms.price DESC").
 		Scan(&results).Error
@@ -317,20 +314,22 @@ func PriceTableCommune(c *fiber.Ctx) error {
 	end_date := c.Query("end_date")
 
 	var results []struct {
-		Price string `json:"price"`
+		Name       string `json:"name"`
+		Price      string `json:"price"`
+		CountPrice int    `json:"count_price"`
+		Sold       int    `json:"sold"`
 	}
-
 	err := db.Table("pos_forms").
 		Select(`
 		communes.name AS name,
-		SELECT price AS price,
-		COUNT(*)
-		FROM pos_forms  
+		price AS price,
+		COUNT(*) AS count_price,
+		SUM(pos_forms.sold) AS sold 
 		`).
 		Joins("INNER JOIN communes ON pos_forms.commune_uuid = communes.uuid").
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ?", country_uuid, province_uuid, area_uuid, sub_area_uuid).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("pos.deleted_at IS NULL").
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos_forms.deleted_at IS NULL").
 		Group("communes.name, pos_forms.price").
 		Order("communes.name, pos_forms.price DESC").
 		Scan(&results).Error
@@ -347,40 +346,5 @@ func PriceTableCommune(c *fiber.Ctx) error {
 		"status":  "success",
 		"message": "chartData data",
 		"data":    results,
-	})
-}
-
-
-// Total Stock Found per POS Fruads numbers filtered by date KPI Summary
-func StockTableView(c *fiber.Ctx) error {
-	db := database.DB
-	start_date := c.Params("start_date")
-	end_date := c.Params("end_date")
-
-	fmt.Println("db: ", db)
-	fmt.Println("start_date: ", start_date)
-	fmt.Println("end_date: ", end_date)
-
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "chartData data",
-		"data":    "",
-	})
-}
-
-// Total stock Cyclo,DR,Sup and ASM sold to POS per month
-func SoldTableView(c *fiber.Ctx) error {
-	db := database.DB
-	start_date := c.Params("start_date")
-	end_date := c.Params("end_date")
-
-	fmt.Println("db: ", db)
-	fmt.Println("start_date: ", start_date)
-	fmt.Println("end_date: ", end_date)
-
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "chartData data",
-		"data":    "",
 	})
 }
