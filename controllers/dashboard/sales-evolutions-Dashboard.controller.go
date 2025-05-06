@@ -183,13 +183,14 @@ func PriceTableProvince(c *fiber.Ctx) error {
 		Sold       int    `json:"sold"`
 	}
 
-	err := db.Table("pos_forms").
+	err := db.Table("pos_form_items").
 		Select(`
 		provinces.name AS name,
 		price AS price,
 		COUNT(*) AS count_price,
-		SUM(sold) AS sold   
+		SUM(pos_form_items.sold) AS sold   
 		`).
+		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN provinces ON pos_forms.province_uuid = provinces.uuid").
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
