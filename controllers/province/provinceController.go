@@ -14,6 +14,7 @@ import (
 func GetPaginatedProvince(c *fiber.Ctx) error {
 	db := database.DB
 
+
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -28,7 +29,7 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var province []models.Province
+	var dataList []models.Province
 	var totalRecords int64
 
 	// Count total records matching the search query
@@ -54,7 +55,7 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 		Preload("Pos").
 		Preload("Users").
 		Preload("PosForms").
-		Find(&province).Error
+		Find(&dataList).Error
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -67,6 +68,8 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
+	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
+
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
 		"total_records": totalRecords,
@@ -78,8 +81,8 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "Provinces retrieved successfully",
-		"data":       province,
+		"message":    "Get all Provinces Paginate success",
+		"data":       dataList,
 		"pagination": pagination,
 	})
 }
@@ -171,42 +174,28 @@ func GetAllProvinces(c *fiber.Ctx) error {
 	db.Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "All provinces",
+		"message": "All provinces support",
 		"data":    data,
 	})
 }
 
 // Get All data by country Dashboard
-func GetAllProvinceByCountry(c *fiber.Ctx) error {
-	db := database.DB
+// func GetAllProvinceByCountry(c *fiber.Ctx) error {
+// 	db := database.DB
 
-	countryUUID := c.Params("country_uuid")
+// 	countryUUID := c.Params("country_uuid")
 
-	var data []models.Province
+// 	var data []models.Province
 
-	db.
-		Where("country_uuid = ?", countryUUID).
-		Find(&data)
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "All provinces",
-		"data":    data,
-	})
-}
-
-// query data
-func GetProvinceByID(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-	db := database.DB
-	var provinces []models.Province
-	db.Where("country_uuid = ?", uuid).Find(&provinces)
-
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "provinces by uuid found",
-		"data":    provinces,
-	})
-}
+// 	db.
+// 		Where("country_uuid = ?", countryUUID).
+// 		Find(&data)
+// 	return c.JSON(fiber.Map{
+// 		"status":  "success",
+// 		"message": "All province by country",
+// 		"data":    data,
+// 	})
+// }
 
 // Get one data
 func GetProvince(c *fiber.Ctx) error {

@@ -83,7 +83,7 @@ func GetPaginatedSups(c *fiber.Ctx) error {
 }
 
 // Paginate by Province ID
-func GetPaginatedProvince(c *fiber.Ctx) error {
+func GetPaginatedSupProvince(c *fiber.Ctx) error {
 	db := database.DB
 
 	province_uuid := c.Params("province_uuid")
@@ -160,7 +160,7 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 }
 
 // Paginate by Area ID
-func GetPaginatedArea(c *fiber.Ctx) error {
+func GetPaginatedSupArea(c *fiber.Ctx) error {
 	db := database.DB
 
 	area_uuid := c.Params("area_uuid")

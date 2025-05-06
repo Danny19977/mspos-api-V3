@@ -314,20 +314,20 @@ func GetAllSubArea(c *fiber.Ctx) error {
 }
 
 // Get All data by Subarea UUID
-func GetAllDataBySubAreaByAreaUUID(c *fiber.Ctx) error {
-	db := database.DB
+// func GetAllDataBySubAreaByAreaUUID(c *fiber.Ctx) error {
+// 	db := database.DB
 
-	areaUUID := c.Params("area_uuid")
+// 	areaUUID := c.Params("area_uuid")
 
-	var data []models.SubArea
-	db.
-		Where("area_uuid = ?", areaUUID).Find(&data)
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "All Subarea",
-		"data":    data,
-	})
-}
+// 	var data []models.SubArea
+// 	db.
+// 		Where("area_uuid = ?", areaUUID).Find(&data)
+// 	return c.JSON(fiber.Map{
+// 		"status":  "success",
+// 		"message": "All Subarea",
+// 		"data":    data,
+// 	})
+// }
 
 // Get one data
 func GetSubArea(c *fiber.Ctx) error {

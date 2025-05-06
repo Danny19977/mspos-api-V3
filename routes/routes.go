@@ -55,13 +55,22 @@ func Setup(app *fiber.App) {
 	u.Put("/update/:uuid", user.UpdateUser)
 	u.Delete("/delete/:uuid", user.DeleteUser)
 
+	// Countries controller
+	co := api.Group("/countries")
+	co.Get("/all", country.GetAllCountry)
+	co.Get("/all/paginate", country.GetPaginatedCountry)
+	// co.Get("/all/dropdown", country.GetCountryDropdown)
+	co.Get("/get/:uuid", country.GetCountry)
+	co.Post("/create", country.CreateCountry)
+	co.Put("/update/:uuid", country.UpdateCountry)
+	co.Delete("/delete/:uuid", country.DeleteCountry)
+
 	// Province controller
 	prov := api.Group("/provinces")
 	prov.Get("/all", province.GetAllProvinces)
-	prov.Get("/all/:country_uuid", province.GetAllProvinceByCountry)
+	// prov.Get("/all/:country_uuid", province.GetAllProvinceByCountry)
 	prov.Get("/all/paginate", province.GetPaginatedProvince)
 	prov.Get("/all/paginate/province/:province_uuid", province.GetPaginatedASM)
-	prov.Get("/all/:id", province.GetProvinceByID)
 	prov.Get("/get/:uuid", province.GetProvince)
 	prov.Get("/get-by/:name", province.GetProvinceByName)
 	prov.Post("/create", province.CreateProvince)
@@ -71,7 +80,7 @@ func Setup(app *fiber.App) {
 	// Areas controller
 	ar := api.Group("/areas")
 	ar.Get("/all", area.GetAllAreas)
-	ar.Get("/all/province_uuid", area.GetAllAreasByProvinceUUID)
+	// ar.Get("/all/:province_uuid", area.GetAllAreasByProvinceUUID)
 	ar.Get("/all/paginate", area.GetPaginatedAreas)
 	ar.Get("/all/paginate/province/:province_uuid", area.GetAreaByASM)
 	ar.Get("/all/paginate/area/:area_uuid", area.GetAreaBySups)
@@ -86,7 +95,7 @@ func Setup(app *fiber.App) {
 	//SubArea controller
 	sa := api.Group("/subareas")
 	sa.Get("/all", Subarea.GetAllSubArea)
-	sa.Get("/all/:area_uuid", Subarea.GetAllDataBySubAreaByAreaUUID)
+	// sa.Get("/all/:area_uuid", Subarea.GetAllDataBySubAreaByAreaUUID)
 	sa.Get("/all/paginate", Subarea.GetPaginatedSubArea)
 	sa.Get("/all/paginate/province/:province_uuid", Subarea.GetPaginatedSubAreaByASM)
 	sa.Get("/all/paginate/area/:area_uuid", Subarea.GetPaginatedSubAreaBySup)
@@ -100,7 +109,7 @@ func Setup(app *fiber.App) {
 	// Commune controller
 	com := api.Group("/communes")
 	com.Get("/all", commune.GetAllCommunes)
-	com.Get("/all/:subarea_uuid", commune.GetAllCommunesBySubAreaUUID)
+	// com.Get("/all/:subarea_uuid", commune.GetAllCommunesBySubAreaUUID)
 	com.Get("/all/paginate", commune.GetPaginatedCommunes)
 	com.Get("/all/paginate/province/:province_uuid", commune.GetPaginatedCommunesByProvinceUUID)
 	com.Get("/all/paginate/area/:area_uuid", commune.GetPaginatedCommunesByAreaUUID)
@@ -161,8 +170,8 @@ func Setup(app *fiber.App) {
 	su := api.Group("/sups")
 	su.Get("/all", sup.GetAllSups)
 	su.Get("/all/paginate", sup.GetPaginatedSups)
-	su.Get("/all/paginate/province/:province_uuid", sup.GetPaginatedProvince)
-	su.Get("/all/paginate/area/:area_uuid", sup.GetPaginatedArea)
+	su.Get("/all/paginate/province/:province_uuid", sup.GetPaginatedSupProvince)
+	su.Get("/all/paginate/area/:area_uuid", sup.GetPaginatedSupArea)
 	su.Post("/create", sup.CreateSup)
 	su.Get("/get/:uuid", sup.GetSup)
 	su.Put("/update/:uuid", sup.UpdateSup)
@@ -185,16 +194,6 @@ func Setup(app *fiber.App) {
 	po.Get("/get/:uuid", pos.GetPos)
 	po.Put("/update/:uuid", pos.UpdatePos)
 	po.Delete("/delete/:uuid", pos.DeletePos)
-
-	// Countries controller
-	co := api.Group("/countries")
-	co.Get("/all", country.GetAllCountry)
-	co.Get("/all/paginate", country.GetPaginatedCountry)
-	// co.Get("/all/dropdown", country.GetCountryDropdown)
-	co.Get("/get/:uuid", country.GetCountry)
-	co.Post("/create", country.CreateCountry)
-	co.Put("/update/:uuid", country.UpdateCountry)
-	co.Delete("/delete/:uuid", country.DeleteCountry)
 
 	// DR Controller
 	d := api.Group("/drs")
