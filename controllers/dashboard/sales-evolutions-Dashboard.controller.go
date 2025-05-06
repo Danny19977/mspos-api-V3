@@ -228,13 +228,14 @@ func PriceTableArea(c *fiber.Ctx) error {
 		CountPrice int    `json:"count_price"`
 		Sold       int    `json:"sold"`
 	}
-	err := db.Table("pos_forms").
+	err := db.Table("pos_form_items").
 		Select(`
 		areas.name AS name,
 		price AS price,
 		COUNT(*) AS count_price,
-		SUM(pos_forms.sold) AS sold   
+		SUM(pos_form_items.sold) AS sold   
 		`).
+		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN areas ON pos_forms.area_uuid = areas.uuid").
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
@@ -274,13 +275,14 @@ func PriceTableSubArea(c *fiber.Ctx) error {
 		Sold       int    `json:"sold"`
 	}
 
-	err := db.Table("pos_forms").
+	err := db.Table("pos_form_items").
 		Select(`
 		sub_areas.name AS name,
 		price AS price,
 		COUNT(*) AS count_price,
-		SUM(pos_forms.sold) AS sold  
+		SUM(pos_form_items.sold) AS sold  
 		`).
+		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN sub_areas ON pos_forms.sub_area_uuid = sub_areas.uuid").
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ?", country_uuid, province_uuid, area_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
@@ -320,13 +322,14 @@ func PriceTableCommune(c *fiber.Ctx) error {
 		CountPrice int    `json:"count_price"`
 		Sold       int    `json:"sold"`
 	}
-	err := db.Table("pos_forms").
+	err := db.Table("pos_form_items").
 		Select(`
 		communes.name AS name,
 		price AS price,
 		COUNT(*) AS count_price,
-		SUM(pos_forms.sold) AS sold 
+		SUM(pos_form_items.sold) AS sold 
 		`).
+		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN communes ON pos_forms.commune_uuid = communes.uuid").
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ?", country_uuid, province_uuid, area_uuid, sub_area_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
