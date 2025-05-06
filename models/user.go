@@ -13,7 +13,7 @@ type User struct {
 	UUID string `gorm:"type:text;not null;unique" json:"uuid"` // Explicitly set type:text
 
 	Fullname        string `gorm:"not null" json:"fullname"`
-	Email           string `json:"email" gorm:"unique;not null"`
+	Email           string `json:"email" gorm:"unique"`
 	Title           string `json:"title"`
 	Phone           string `json:"phone" gorm:"not null;unique"` // Added unique constraint
 	Password        string `json:"password" validate:"required"`
