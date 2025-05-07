@@ -396,19 +396,19 @@ func GetAllCommunes(c *fiber.Ctx) error {
 
 
 // Get All data by SubArea id
-// func GetAllCommunesBySubAreaUUID(c *fiber.Ctx) error {
-// 	db := database.DB
+func GetAllCommunesBySubAreaUUID(c *fiber.Ctx) error {
+	db := database.DB
 
-// 	subAreaUUID := c.Params("subarea_uuid")
+	subAreaUUID := c.Params("subarea_uuid")
 
-// 	var data []models.Commune
-// 	db.Where("sub_area_uuid = ?", subAreaUUID).Find(&data).Find(&data)
-// 	return c.JSON(fiber.Map{
-// 		"status":  "success",
-// 		"message": "All Communes",
-// 		"data":    data,
-// 	})
-// }
+	var data []models.Commune
+	db.Where("sub_area_uuid = ?", subAreaUUID).Find(&data).Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Communes",
+		"data":    data,
+	})
+}
 
 // query data
 func GetCountryCommuneByID(c *fiber.Ctx) error {

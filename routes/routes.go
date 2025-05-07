@@ -95,7 +95,7 @@ func Setup(app *fiber.App) {
 	//SubArea controller
 	sa := api.Group("/subareas")
 	sa.Get("/all", Subarea.GetAllSubArea)
-	// sa.Get("/all/:area_uuid", Subarea.GetAllDataBySubAreaByAreaUUID)
+	sa.Get("/all/:area_uuid", Subarea.GetAllDataBySubAreaByAreaUUID)
 	sa.Get("/all/paginate", Subarea.GetPaginatedSubArea)
 	sa.Get("/all/paginate/province/:province_uuid", Subarea.GetPaginatedSubAreaByASM)
 	sa.Get("/all/paginate/area/:area_uuid", Subarea.GetPaginatedSubAreaBySup)
@@ -109,7 +109,7 @@ func Setup(app *fiber.App) {
 	// Commune controller
 	com := api.Group("/communes")
 	com.Get("/all", commune.GetAllCommunes)
-	// com.Get("/all/:subarea_uuid", commune.GetAllCommunesBySubAreaUUID)
+	com.Get("/all/:subarea_uuid", commune.GetAllCommunesBySubAreaUUID)
 	com.Get("/all/paginate", commune.GetPaginatedCommunes)
 	com.Get("/all/paginate/province/:province_uuid", commune.GetPaginatedCommunesByProvinceUUID)
 	com.Get("/all/paginate/area/:area_uuid", commune.GetPaginatedCommunesByAreaUUID)
