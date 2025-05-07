@@ -246,19 +246,19 @@ func GetAllAreas(c *fiber.Ctx) error {
 }
 
 // Get All data by province uuid Dashboard
-// func GetAllAreasByProvinceUUID(c *fiber.Ctx) error {
-// 	db := database.DB
+func GetAllAreasByProvinceUUID(c *fiber.Ctx) error {
+	db := database.DB
 
-// 	ProvinceUUID := c.Params("province_uuid")
+	ProvinceUUID := c.Params("province_uuid")
 
-// 	var data []models.Area
-// 	db.Where("province_uuid = ?", ProvinceUUID).Find(&data)
-// 	return c.JSON(fiber.Map{
-// 		"status":  "success",
-// 		"message": "All Areas by province",
-// 		"data":    data,
-// 	})
-// }
+	var data []models.Area
+	db.Where("province_uuid = ?", ProvinceUUID).Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All Areas by province",
+		"data":    data,
+	})
+}
 
 // query data
 func GetAreaByID(c *fiber.Ctx) error {

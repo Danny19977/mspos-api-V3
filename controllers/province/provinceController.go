@@ -180,22 +180,22 @@ func GetAllProvinces(c *fiber.Ctx) error {
 }
 
 // Get All data by country Dashboard
-// func GetAllProvinceByCountry(c *fiber.Ctx) error {
-// 	db := database.DB
+func GetAllProvinceByCountry(c *fiber.Ctx) error {
+	db := database.DB
 
-// 	countryUUID := c.Params("country_uuid")
+	countryUUID := c.Params("country_uuid")
 
-// 	var data []models.Province
+	var data []models.Province
 
-// 	db.
-// 		Where("country_uuid = ?", countryUUID).
-// 		Find(&data)
-// 	return c.JSON(fiber.Map{
-// 		"status":  "success",
-// 		"message": "All province by country",
-// 		"data":    data,
-// 	})
-// }
+	db.
+		Where("country_uuid = ?", countryUUID).
+		Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All province by country",
+		"data":    data,
+	})
+}
 
 // Get one data
 func GetProvince(c *fiber.Ctx) error {
