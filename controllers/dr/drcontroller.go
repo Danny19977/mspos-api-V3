@@ -45,6 +45,7 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
+		Preload("SubArea").
 		Preload("Asm").
 		Preload("Sup").
 		// Preload("User").
