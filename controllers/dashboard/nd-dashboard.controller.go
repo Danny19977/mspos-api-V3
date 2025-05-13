@@ -85,7 +85,7 @@ func NdTableViewArea(c *fiber.Ctx) error {
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
-		Group("a.name, brands.name").
+		Group("areas.name, brands.name").
 		Order("areas.name, total_count DESC").
 		Scan(&results).Error
 

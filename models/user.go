@@ -82,16 +82,16 @@ type UserResponse struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 
-	CountryName  string `json:"country_name" gorm:"-"`
-	ProvinceName string `json:"province_name" gorm:"-"`
-	AreaName     string `json:"area_name" gorm:"-"`
-	SubAreaName  string `json:"subarea_name" gorm:"-"`
-	CommuneName  string `json:"commune_name" gorm:"-"` 
+	// CountryName  string `json:"country_name" gorm:"-"`
+	// ProvinceName string `json:"province_name" gorm:"-"`
+	// AreaName     string `json:"area_name" gorm:"-"`
+	// SubAreaName  string `json:"subarea_name" gorm:"-"`
+	// CommuneName  string `json:"commune_name" gorm:"-"` 
 
-	Asm          Asm   `json:"asm"`
-	Sup          Sup   `json:"sup"`
-	Dr           Dr    `json:"dr"`
-	Cyclo        Cyclo `json:"cyclo"`
+	Asm          Asm   
+	Sup          Sup   
+	Dr           Dr    
+	Cyclo        Cyclo 
 }
 
 type Login struct {

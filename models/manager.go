@@ -10,6 +10,6 @@ type Manager struct {
 	CountryUUID string  `json:"country_uuid" gorm:"type:varchar(255);not null"`
 	Country     Country `gorm:"foreignKey:CountryUUID;references:UUID"`
 	UserUUID    string  `json:"user_uuid" gorm:"type:varchar(255);not null"` // Corrected field name
-	User        User    `gorm:"foreignKey:UserUUID"`
+	User        User    `gorm:"foreignKey:UserUUID;references:UUID"`
 	Signature   string  `json:"signature"`
 }

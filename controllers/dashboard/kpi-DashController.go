@@ -30,21 +30,21 @@ func TotalVisitsByProvince(c *fiber.Ctx) error {
 		pos_forms.signature AS signature,
 		users.title AS title, 
 		COUNT(pos_forms.signature) AS total_visits,
-		COUNT(pos_forms.signature) / (
+		(COUNT(pos_forms.signature) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
-					WHEN users.title = 'SUP'  THEN 20 
+					WHEN users.title = 'Supervisor'  THEN 20 
 					WHEN users.title = 'DR'   THEN 40 
-					WHEN users.title = 'CYCLO' THEN 40
+					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
-		) * 100 AS objectif,
+		)) * 100 AS objectif,
 		(
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
-					WHEN users.title = 'SUP'  THEN 20 
+					WHEN users.title = 'Supervisor'  THEN 20 
 					WHEN users.title = 'DR'   THEN 40 
-					WHEN users.title = 'CYCLO' THEN 40
+					WHEN users.title = 'Cyclos' THEN 40
 					ELSE 1 
 			END
 		) AS target
@@ -100,18 +100,18 @@ func TotalVisitsByArea(c *fiber.Ctx) error {
 		COUNT(pos_forms.signature) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
-					WHEN users.title = 'SUP'  THEN 20 
+					WHEN users.title = 'Supervisor'  THEN 20 
 					WHEN users.title = 'DR'   THEN 40 
-					WHEN users.title = 'CYCLO' THEN 40
+					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
 		) * 100 AS objectif,
 		(
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
-					WHEN users.title = 'SUP'  THEN 20 
+					WHEN users.title = 'Supervisor'  THEN 20 
 					WHEN users.title = 'DR'   THEN 40 
-					WHEN users.title = 'CYCLO' THEN 40
+					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
 		) AS target
@@ -168,18 +168,18 @@ func TotalVisitsBySubArea(c *fiber.Ctx) error {
 		COUNT(pos_forms.signature) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
-					WHEN users.title = 'SUP'  THEN 20 
+					WHEN users.title = 'Supervisor'  THEN 20 
 					WHEN users.title = 'DR'   THEN 40 
-					WHEN users.title = 'CYCLO' THEN 40
+					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
 		) * 100 AS objectif,
 		(
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
-					WHEN users.title = 'SUP'  THEN 20 
+					WHEN users.title = 'Supervisor'  THEN 20 
 					WHEN users.title = 'DR'   THEN 40 
-					WHEN users.title = 'CYCLO' THEN 40
+					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
 		) AS target
@@ -237,18 +237,18 @@ func TotalVisitsByCommune(c *fiber.Ctx) error {
 		COUNT(pos_forms.signature) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
-					WHEN users.title = 'SUP'  THEN 20 
+					WHEN users.title = 'Supervisor'  THEN 20 
 					WHEN users.title = 'DR'   THEN 40 
-					WHEN users.title = 'CYCLO' THEN 40
+					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
 		) * 100 AS objectif,
 		(
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
-					WHEN users.title = 'SUP'  THEN 20 
+					WHEN users.title = 'Supervisor'  THEN 20 
 					WHEN users.title = 'DR'   THEN 40 
-					WHEN users.title = 'CYCLO' THEN 40
+					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
 		) AS target

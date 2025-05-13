@@ -1,7 +1,6 @@
 package manager
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/danny19977/mspos-api-v3/database"
@@ -56,8 +55,6 @@ func GetPaginatedManager(c *fiber.Ctx) error {
 
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
