@@ -39,6 +39,7 @@ func GetPaginatedManager(c *fiber.Ctx) error {
 	err = db.
 		Where("title ILIKE ?", "%"+search+"%").
 		Offset(offset).
+
 		Limit(limit).
 		Order("updated_at DESC").
 		Preload("Country").
@@ -177,12 +178,12 @@ func UpdateManager(c *fiber.Ctx) error {
 
 // Delete data
 func DeleteManager(c *fiber.Ctx) error {
-	id := c.Params("id")
+	uuid := c.Params("uuid")
 
 	db := database.DB
 
 	var manager models.Manager
-	db.First(&manager, id)
+	db.Where("uuid = ?", uuid).First(&manager)
 	if manager.Title == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
