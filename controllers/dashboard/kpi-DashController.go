@@ -38,7 +38,7 @@ func TotalVisitsByProvince(c *fiber.Ctx) error {
 					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
-		)) * 100 AS objectif,
+		) ::numeric) * 100 AS objectif,
 		(
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
@@ -97,7 +97,7 @@ func TotalVisitsByArea(c *fiber.Ctx) error {
 		pos_forms.signature AS signature,
 		users.title AS title, 
 		COUNT(pos_forms.signature) AS total_visits,
-		COUNT(pos_forms.signature) / (
+		(COUNT(pos_forms.signature) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
 					WHEN users.title = 'Supervisor'  THEN 20 
@@ -105,7 +105,7 @@ func TotalVisitsByArea(c *fiber.Ctx) error {
 					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
-		) * 100 AS objectif,
+		) ::numeric) * 100 AS objectif,
 		(
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
@@ -165,7 +165,7 @@ func TotalVisitsBySubArea(c *fiber.Ctx) error {
 		pos_forms.signature AS signature,
 		users.title AS title, 
 		COUNT(pos_forms.signature) AS total_visits,
-		COUNT(pos_forms.signature) / (
+		(COUNT(pos_forms.signature) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
 					WHEN users.title = 'Supervisor'  THEN 20 
@@ -173,7 +173,7 @@ func TotalVisitsBySubArea(c *fiber.Ctx) error {
 					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
-		) * 100 AS objectif,
+		) ::numeric) * 100 AS objectif,
 		(
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
@@ -234,7 +234,7 @@ func TotalVisitsByCommune(c *fiber.Ctx) error {
 		pos_forms.signature AS signature,
 		users.title AS title, 
 		COUNT(pos_forms.signature) AS total_visits,
-		COUNT(pos_forms.signature) / (
+		(COUNT(pos_forms.signature) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
 					WHEN users.title = 'Supervisor'  THEN 20 
@@ -242,7 +242,7 @@ func TotalVisitsByCommune(c *fiber.Ctx) error {
 					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
-		) * 100 AS objectif,
+		) ::numeric) * 100 AS objectif,
 		(
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 
