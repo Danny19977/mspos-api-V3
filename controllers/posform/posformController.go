@@ -2,7 +2,7 @@ package posform
 
 import (
 	"strconv"
-	
+
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
@@ -285,7 +285,7 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 		end_date = "2100-01-01T00:00:00Z" // Default end date
 	}
 
-	subareaUUID := c.Params("sub_area_uuid")
+	DrUUID := c.Params("dr_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -305,14 +305,14 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 
 	db.Model(&models.PosForm{}).
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.sub_area_uuid = ?", subareaUUID).
+		Where("pos_forms.dr_uuid = ?", DrUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where(" pos.name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
-		Where("pos_forms.sub_area_uuid = ?", subareaUUID).
+		Where("pos_forms.dr_uuid = ?", DrUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where(" pos.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
@@ -603,7 +603,7 @@ func UpdatePosform(c *fiber.Ctx) error {
 
 		Latitude  float64 `json:"latitude"`  // Latitude of the user
 		Longitude float64 `json:"longitude"` // Longitude of the user
-		Signature string `json:"signature"`
+		Signature string  `json:"signature"`
 
 		PosUUID      string `json:"pos_uuid" gorm:"type:varchar(255);not null"`
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`

@@ -43,39 +43,6 @@ type PosForm struct {
 	Sync bool `json:"sync"`
 
 	PosFormItems []PosFormItems `gorm:"foreignKey:PosFormUUID;references:UUID"`
-
-	// IdUnique string `json:"id_unique"`
-	// Eq      int64 `gorm:"default: 0" json:"eq"`
-	// Eq1     int64 `gorm:"default: 0" json:"eq1"`
-	// Sold    int64 `gorm:"default: 0" json:"sold"`
-	// Dhl     int64 `gorm:"default: 0" json:"dhl"`
-	// Dhl1    int64 `gorm:"default: 0" json:"dhl1"`
-	// Ar      int64 `gorm:"default: 0" json:"ar"`
-	// Ar1     int64 `gorm:"default: 0" json:"ar1"`
-	// Sbl     int64 `gorm:"default: 0" json:"sbl"`
-	// Sbl1    int64 `gorm:"default: 0" json:"sbl1"`
-	// Pmf     int64 `gorm:"default: 0" json:"pmf"`
-	// Pmf1    int64 `gorm:"default: 0" json:"pmf1"`
-	// Pmm     int64 `gorm:"default: 0" json:"pmm"`
-	// Pmm1    int64 `gorm:"default: 0" json:"pmm1"`
-	// Ticket  int64 `gorm:"default: 0" json:"ticket"`
-	// Ticket1 int64 `gorm:"default: 0" json:"ticket1"`
-	// Mtc     int64 `gorm:"default: 0" json:"mtc"`
-	// Mtc1    int64 `gorm:"default: 0" json:"mtc1"`
-	// Ws      int64 `gorm:"default: 0" json:"ws"`
-	// Ws1     int64 `gorm:"default: 0" json:"ws1"`
-	// Mast    int64 `gorm:"default: 0" json:"mast"`
-	// Mast1   int64 `gorm:"default: 0" json:"mast1"`
-	// Oris    int64 `gorm:"default: 0" json:"oris"`
-	// Oris1   int64 `gorm:"default: 0" json:"oris1"`
-	// Elite   int64 `gorm:"default: 0" json:"elite"`
-	// Elite1  int64 `gorm:"default: 0" json:"elite1"`
-	// Yes     int64 `gorm:"default: 0" json:"yes"`
-	// Yes1    int64 `gorm:"default: 0" json:"yes1"`
-	// Time    int64 `gorm:"default: 0" json:"time"`
-	// Time1   int64 `gorm:"default: 0" json:"time1"`
-
-	// Sm       int64 `gorm:"default: 0" json:"sm"`
 	// Sm1      int64 `gorm:"default: 0" json:"sm1"`
 	// Br       int64 `gorm:"default: 0" json:"br"`
 	// Br1      int64 `gorm:"default: 0" json:"br1"`
@@ -134,36 +101,3 @@ type PosForm struct {
 
 }
 
-type PosFormPaginate struct {
-	Id       string `json:"id"`
-	IdUnique string `json:"id_unique"`
-	Eq       int64  `json:"eq"`
-	Sold     int64  `json:"sold"`
-	Dhl      int64  `json:"dhl"`
-	Ar       int64  `json:"ar"`
-	Sbl      int64  `json:"sbl"`
-	Pmf      int64  `json:"pmf"`
-	Pmm      int64  `json:"pmm"`
-	Ticket   int64  `json:"ticket"`
-	Mtc      int64  `json:"mtc"`
-	Ws       int64  `json:"ws"`
-	Mast     int64  `json:"mast"`
-	Oris     int64  `json:"oris"`
-	Elite    int64  `json:"elite"`
-	Yes      int64  `json:"yes"`
-	Time     int64  `json:"time"`
-	Comment  string `json:"comment"`
-
-	Province string `json:"province"`
-	User     string `json:"user"`
-	Area     string `json:"area"`
-	Sup      string `json:"sup"`
-	Pos      string `json:"pos"`
-
-	Latitude  string `json:"latitude"`
-	Longitude string `json:"longitude"`
-
-	Price string `json:"price"`
-
-	Signature string `json:"signature"`
-}

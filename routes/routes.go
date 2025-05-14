@@ -148,7 +148,7 @@ func Setup(app *fiber.App) {
 	posf.Get("/all/paginate", posform.GetPaginatedPosForm)
 	posf.Get("/all/paginate/province/:province_uuid", posform.GetPaginatedPosFormProvine)
 	posf.Get("/all/paginate/area/:area_uuid", posform.GetPaginatedPosFormArea)
-	posf.Get("/all/paginate/subarea/:subarea_uuid", posform.GetPaginatedPosFormSubArea)
+	posf.Get("/all/paginate/subarea/:dr_uuid", posform.GetPaginatedPosFormSubArea)
 	posf.Get("/all/paginate/:cyclo_uuid", posform.GetPaginatedPosFormCommune)
 	posf.Get("/all/paginate/:pos_uuid", posform.GetPaginatedPosFormByPOS)
 	posf.Post("/create", posform.CreatePosform)
