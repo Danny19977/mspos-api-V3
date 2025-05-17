@@ -291,28 +291,81 @@ func NdTotalByBrandByMonth(c *fiber.Ctx) error {
 		Pourcent float64 `json:"pourcent"`
 	}
 
-	err := db.Table("pos_form_items").
-		Select(`
-		brands.name AS brand,
-		EXTRACT(MONTH FROM pos_forms.created_at) AS month, 
-		SUM(pos_form_items.counter) AS presence,
-       ROUND((SUM(pos_form_items.counter) / (SELECT SUM(counter) FROM pos_form_items 
-	   INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? 
-	   AND EXTRACT(YEAR FROM pos_forms.created_at) = ?)) * 100, 2) AS percentage
-		`, country_uuid, year).
-		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
-		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
-		Where("pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?", country_uuid, year).
-		Where("pos_forms.deleted_at IS NULL").
-		Group("brands.name, month").
-		Order("brands.name, month ASC").
-		Scan(&results).Error
+	// err := db.Table("pos_form_items").
+	// 	Select(`
+	// 	brands.name AS brand,
+	// 	EXTRACT(MONTH FROM pos_forms.created_at) AS month, 
+	// 	SUM(pos_form_items.counter) AS presence,
+    //    ROUND((SUM(pos_form_items.counter) / (SELECT SUM(counter) FROM pos_form_items 
+	//    INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? 
+	//    AND EXTRACT(YEAR FROM pos_forms.created_at) = ?)) * 100, 2) AS percentage
+	// 	`, country_uuid, year).
+	// 	Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
+	// 	Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
+	// 	Where("pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?", country_uuid, year).
+	// 	Where("pos_forms.deleted_at IS NULL").
+	// 	Group("brands.name, month").
+	// 	Order("brands.name, month ASC").
+	// 	Scan(&results).Error
 
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"status":  "error",
+	// 		"message": "Failed to fetch data",
+	// 		"error":   err.Error(),
+	// 	})
+	// }
+
+	sqlQuery := `
+		SELECT
+			brands.name AS brand,
+			EXTRACT(MONTH FROM pos_forms.created_at) AS month,
+			COUNT(brands.name) AS presence,
+			(COUNT(brands.name) * 100 / (
+				SELECT COUNT(pos_forms.uuid) FROM pos_forms 
+				WHERE pos_forms.country_uuid = ? 
+				AND EXTRACT(YEAR FROM pos_forms.created_at) = ?
+				AND pos_forms.deleted_at IS NULL
+			)) AS pourcent
+		FROM pos_form_items 
+		INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+		INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid
+		INNER JOIN provinces ON pos_forms.province_uuid = provinces.uuid
+		WHERE pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?
+		AND pos_forms.deleted_at IS NULL
+		GROUP BY brands.name, month
+		ORDER BY brands.name, month ASC;
+	`
+	rows, err := db.Raw(sqlQuery, country_uuid, year, country_uuid, year).Rows()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
 			"message": "Failed to fetch data",
 			"error":   err.Error(),
+		})
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var brand string
+		var month, presence int
+		var pourcent float64
+		if err := rows.Scan(&brand, &month, &presence, &pourcent); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"status":  "error",
+				"message": "Failed to scan data",
+				"error":   err.Error(),
+			})
+		}
+		results = append(results, struct {
+			Brand    string  `json:"brand"`
+			Month    int     `json:"month"`
+			Presence int     `json:"presence"`
+			Pourcent float64 `json:"pourcent"`
+		}{
+			Brand:    brand,
+			Month:    month,
+			Presence: presence,
+			Pourcent: pourcent,
 		})
 	}
 
