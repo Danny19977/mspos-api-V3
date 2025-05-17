@@ -55,7 +55,7 @@ type User struct {
 	ProvinceName string `json:"province_name" gorm:"-"`
 	AreaName     string `json:"area_name" gorm:"-"`
 	SubAreaName  string `json:"subarea_name" gorm:"-"`
-	CommuneName  string `json:"commune_name" gorm:"-"` 
+	CommuneName  string `json:"commune_name" gorm:"-"`
 }
 
 type UserResponse struct {
@@ -82,16 +82,10 @@ type UserResponse struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 
-	// CountryName  string `json:"country_name" gorm:"-"`
-	// ProvinceName string `json:"province_name" gorm:"-"`
-	// AreaName     string `json:"area_name" gorm:"-"`
-	// SubAreaName  string `json:"subarea_name" gorm:"-"`
-	// CommuneName  string `json:"commune_name" gorm:"-"` 
-
-	Asm          Asm   
-	Sup          Sup   
-	Dr           Dr    
-	Cyclo        Cyclo 
+	Asm   Asm   `gorm:"foreignKey:UserUUID;references:UUID"`
+	Sup   Sup   `gorm:"foreignKey:UserUUID;references:UUID"`
+	Dr    Dr    `gorm:"foreignKey:UserUUID;references:UUID"`
+	Cyclo Cyclo `gorm:"foreignKey:UserUUID;references:UUID"`
 }
 
 type Login struct {

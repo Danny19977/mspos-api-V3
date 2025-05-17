@@ -15,7 +15,8 @@ type Asm struct {
 	Signature string `json:"signature"`
 
 	UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
-	// User   User `gorm:"foreignKey:UserUUID"`
+
+	// User   User `gorm:"foreignKey:references:UUID"`
 
 	Sups   []Sup   `gorm:"foreignKey:AsmUUID;references:UUID"`
 	Drs    []Dr    `gorm:"foreignKey:AsmUUID;references:UUID"`

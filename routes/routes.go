@@ -184,7 +184,7 @@ func Setup(app *fiber.App) {
 	po.Get("/all/paginate/province/:province_uuid", pos.GetPaginatedPosByProvinceUUID)
 	po.Get("/all/paginate/area/:area_uuid", pos.GetPaginatedPosByAreaUUID)
 	po.Get("/all/paginate/subarea/:subarea_uuid", pos.GetPaginatedPosBySubAreaUUID)
-	po.Get("/all/paginate/:commune_uuid", pos.GetPaginatedPosByCommuneUUID)
+	po.Get("/all/paginate/commune/:commune_uuid", pos.GetPaginatedPosByCommuneUUID)
 	po.Get("/all/countries/:country_uuid", pos.GetAllPosByManager)
 	po.Get("/all/provinces/:province_uuid", pos.GetAllPosByASM)
 	po.Get("/all/areas/:area_uuid", pos.GetAllPosBySup)

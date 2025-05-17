@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -144,30 +145,28 @@ func AuthUser(c *fiber.Ctx) error {
 	u := models.User{}
 
 	database.DB.
-		// Joins("LEFT JOIN countries ON users.country_uuid = countries.uuid").
-		// Joins("LEFT JOIN provinces ON users.province_uuid = provinces.uuid").
-		// Joins("LEFT JOIN areas ON users.area_uuid = areas.uuid").
-		// Joins("LEFT JOIN sub_areas ON users.sub_area_uuid = sub_areas.uuid").
-		// Joins("LEFT JOIN communes ON users.commune_uuid = communes.uuid").
+		Joins("LEFT JOIN countries ON countries.uuid = users.country_uuid").
+		Joins("LEFT JOIN provinces ON provinces.uuid = users.province_uuid").
+		Joins("LEFT JOIN areas ON areas.uuid = users.area_uuid").
+		Joins("LEFT JOIN sub_areas ON sub_areas.uuid = users.sub_area_uuid").
+		Joins("LEFT JOIN communes ON communes.uuid = users.commune_uuid").
+		Joins("LEFT JOIN asms ON asms.user_uuid = users.uuid").
+		Joins("LEFT JOIN sups ON sups.user_uuid = users.uuid").
+		Joins("LEFT JOIN drs ON drs.user_uuid = users.uuid").
+		Joins("LEFT JOIN cyclos ON cyclos.user_uuid = users.uuid").
 		Where("users.uuid = ?", UserUUID).
-		// 	Select(`
-		// 		users.*,
-
-		// 		countries.uuid as country_uuid,
-		// 		countries.name as country_name,
-
-		// 		provinces.uuid as province_uuid,
-		// 		provinces.name as province_name,
-
-		// 		areas.uuid as area_uuid,
-		// 		areas.name as area_name,
-
-		// 		sub_areas.uuid as subarea_uuid,
-		// 		sub_areas.name as subarea_name,
-
-		// 		communes.uuid as commune_uuid,
-		// 		communes.name as commune_name
-		// `).
+		Select(`
+			users.*, 
+			countries.name as country_name, 
+			provinces.name as province_name, 
+			areas.name as area_name, 
+			sub_areas.name as subarea_name, 
+			communes.name as commune_name,
+			asms.uuid as asm_uuid,
+			sups.uuid as sup_uuid,
+			drs.uuid as dr_uuid,
+			cyclos.uuid as cyclo_uuid
+		`).
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
@@ -201,17 +200,24 @@ func AuthUser(c *fiber.Ctx) error {
 		Commune:      u.Commune,
 		CreatedAt:    u.CreatedAt,
 		UpdatedAt:    u.UpdatedAt,
-
-		// CountryName:  u.Country.Name,
-		// ProvinceName: u.Province.Name,
-		// AreaName:     u.Area.Name,
-		// SubAreaName:  u.SubArea.Name,
-		// CommuneName:  u.Commune.Name,
-		Asm:   u.Asm,
-		Sup:   u.Sup,
-		Dr:    u.Dr,
-		Cyclo: u.Cyclo,
+		Asm:          u.Asm,
+		Sup:          u.Sup,
+		Dr:           u.Dr,
+		Cyclo:        u.Cyclo,
 	}
+
+	json, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		fmt.Println("error", err)
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "error",
+			"errors":  err.Error(),
+		})
+	}
+
+	fmt.Println("user", string(json))
+
 	return c.JSON(r)
 }
 
