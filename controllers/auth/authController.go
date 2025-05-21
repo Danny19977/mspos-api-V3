@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -206,17 +205,17 @@ func AuthUser(c *fiber.Ctx) error {
 		Cyclo:        u.Cyclo,
 	}
 
-	json, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		fmt.Println("error", err)
-		return c.Status(500).JSON(fiber.Map{
-			"status":  "error",
-			"message": "error",
-			"errors":  err.Error(),
-		})
-	}
+	// json, err := json.MarshalIndent(r, "", "  ")
+	// if err != nil {
+	// 	fmt.Println("error", err)
+	// 	return c.Status(500).JSON(fiber.Map{
+	// 		"status":  "error",
+	// 		"message": "error",
+	// 		"errors":  err.Error(),
+	// 	})
+	// }
 
-	fmt.Println("user", string(json))
+	// fmt.Println("user", string(json))
 
 	return c.JSON(r)
 }
