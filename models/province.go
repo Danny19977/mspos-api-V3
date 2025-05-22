@@ -21,8 +21,8 @@ type Province struct {
 	PosForms []PosForm `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 	Pos      []Pos     `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 
-	Asms   []Asm   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
-	Sups   []Sup   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
-	Drs    []Dr    `gorm:"foreignKey:ProvinceUUID;references:UUID"`
-	Cyclos []Cyclo `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	// Asms   []Asm   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	// Sups   []Sup   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	// Drs    []Dr    `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	// Cyclos []Cyclo `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 }

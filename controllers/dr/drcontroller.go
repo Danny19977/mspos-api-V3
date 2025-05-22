@@ -46,9 +46,9 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Asm").
-		Preload("Sup").
-		// Preload("User").
+		// Preload("Asm").
+		// Preload("Sup").
+		Preload("Users").
 		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
@@ -124,9 +124,9 @@ func GetPaginatedDrByProvince(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Asm").
-		Preload("Sup").
-		// Preload("User").
+		// Preload("Asm").
+		// Preload("Sup").
+		Preload("Users").
 		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
@@ -201,9 +201,9 @@ func GetPaginatedDrByArea(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Asm").
-		Preload("Sup").
-		// Preload("User").
+		// Preload("Asm").
+		// Preload("Sup").
+		Preload("Users").
 		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
@@ -278,9 +278,9 @@ func GetPaginatedDrBySubArea(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Asm").
-		Preload("Sup").
-		// Preload("User").
+		// Preload("Asm").
+		// Preload("Sup").
+		Preload("Users").
 		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
@@ -414,7 +414,7 @@ func UpdateDr(c *fiber.Ctx) error {
 	// Dr.AsmUUID = updateData.AsmUUID
 	// Dr.SupUUID = updateData.SupUUID
 	Dr.Signature = updateData.Signature
-	Dr.UserUUID = updateData.UserUUID
+	// Dr.UserUUID = updateData.UserUUID
 
 	db.Save(&Dr)
 

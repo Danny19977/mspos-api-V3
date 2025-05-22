@@ -13,17 +13,19 @@ type Sup struct {
 	AreaUUID     string   `json:"area_uuid" gorm:"type:varchar(255);not null"`
 	Area         Area     `gorm:"foreignKey:AreaUUID;references:UUID"`
 
-	AsmUUID string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-	Asm     Asm    `gorm:"foreignKey:AsmUUID;references:UUID"`
+	// AsmUUID string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
+	// Asm     Asm    `gorm:"foreignKey:AsmUUID;references:UUID"`
 
-	UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
+	// UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
 	// User   User `gorm:"foreignKey:UserUUID"`
 
 	Signature string `json:"signature"`
 
-	Drs    []Dr    `gorm:"foreignKey:SupUUID;references:UUID"`
-	Cyclos []Cyclo `gorm:"foreignKey:SupUUID;references:UUID"`
+	// Drs    []Dr    `gorm:"foreignKey:SupUUID;references:UUID"`
+	// Cyclos []Cyclo `gorm:"foreignKey:SupUUID;references:UUID"`
+
+	Users []User `gorm:"foreignKey:SupUUID;references:UUID"`
 
 	PosForms []PosForm `gorm:"foreignKey:SupUUID;references:UUID"`
-	Pos      []Pos     `gorm:"foreignKey:SupUUID;references:UUID"`
+	// Pos      []Pos     `gorm:"foreignKey:SupUUID;references:UUID"`
 }

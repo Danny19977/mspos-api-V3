@@ -81,7 +81,6 @@ func GetPaginatedUsers(c *fiber.Ctx) error {
 	})
 }
 
-
 func GetPaginatedNoSerach(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -283,13 +282,16 @@ func UpdateUser(c *fiber.Ctx) error {
 		Permission      string `json:"permission"`
 		Image           string `json:"image"`
 		Status          bool   `json:"status"`
-		CountryUUID     string `json:"country_uuid" gorm:"type:varchar(255);not null"`
-		ProvinceUUID    string `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		AreaUUID        string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-		SubAreaUUID     string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
-		CommuneUUID     string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
-		// IsManager  bool   `json:"is_manager"`
-		Signature string `json:"signature"`
+		CountryUUID     string `json:"country_uuid"`
+		ProvinceUUID    string `json:"province_uuid"`
+		AreaUUID        string `json:"area_uuid"`
+		SubAreaUUID     string `json:"subarea_uuid"`
+		CommuneUUID     string `json:"commune_uuid"`
+		AsmUUID         string `json:"asm_uuid"`
+		SupUUID         string `json:"sup_uuid"`
+		DrUUID          string `json:"dr_uuid"`
+		CycloUUID       string `json:"cyclo_uuid"`
+		Signature       string `json:"signature"`
 	}
 	var updateData UpdateDataInput
 
@@ -319,6 +321,10 @@ func UpdateUser(c *fiber.Ctx) error {
 	user.AreaUUID = updateData.AreaUUID
 	user.SubAreaUUID = updateData.SubAreaUUID
 	user.CommuneUUID = updateData.CommuneUUID
+	user.AsmUUID = updateData.AsmUUID
+	user.SupUUID = updateData.SupUUID
+	user.DrUUID = updateData.DrUUID
+	user.CycloUUID = updateData.CycloUUID
 	user.Signature = updateData.Signature
 
 	db.Save(&user)

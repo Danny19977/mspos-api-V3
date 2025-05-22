@@ -57,10 +57,11 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		// Preload("ASM").
+		// Preload("Sup").
+		// Preload("Dr").
+		// Preload("Cyclo").
+		Preload("Users").
 		Preload("Pos").
 		Preload("PosFormItems").
 		Find(&dataList).Error

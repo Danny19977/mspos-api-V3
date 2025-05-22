@@ -15,18 +15,20 @@ type Dr struct {
 	SubAreaUUID  string   `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
 	SubArea      SubArea  `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 
-	AsmUUID string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-	Asm     Asm    `gorm:"foreignKey:AsmUUID;references:UUID"` 
-	SupUUID string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
-	Sup     Sup    `gorm:"foreignKey:SupUUID;references:UUID"`
+	// AsmUUID string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
+	// Asm     Asm    `gorm:"foreignKey:AsmUUID;references:UUID"` 
+	// SupUUID string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
+	// Sup     Sup    `gorm:"foreignKey:SupUUID;references:UUID"`
 
 	Signature string `json:"signature"`
 
-	UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
+	// UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
 	// User   User `gorm:"foreignKey:UserUUID"`
 
-	PosForms []PosForm `gorm:"foreignKey:DrUUID;references:UUID"`
-	Pos      []Pos     `gorm:"foreignKey:DrUUID;references:UUID"`
+	Users []User `gorm:"foreignKey:DrUUID;references:UUID"`
 
-	Cyclos []Cyclo `gorm:"foreignKey:DrUUID;references:UUID"`
+	PosForms []PosForm `gorm:"foreignKey:DrUUID;references:UUID"`
+	// Pos      []Pos     `gorm:"foreignKey:DrUUID;references:UUID"`
+
+	// Cyclos []Cyclo `gorm:"foreignKey:DrUUID;references:UUID"`
 }

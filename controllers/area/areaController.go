@@ -45,9 +45,9 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Sups").
+		// Preload("Drs").
+		// Preload("Cyclos").
 		Preload("Pos").
 		Preload("Users").
 		Preload("PosForms").
@@ -121,9 +121,9 @@ func GetAreaByASM(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Sups").
+		// Preload("Drs").
+		// Preload("Cyclos").
 		Preload("Pos").
 		Preload("Users").
 		Preload("PosForms").
@@ -197,9 +197,9 @@ func GetAreaBySups(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Sups").
+		// Preload("Drs").
+		// Preload("Cyclos").
 		Preload("Pos").
 		Preload("Users").
 		Preload("PosForms").

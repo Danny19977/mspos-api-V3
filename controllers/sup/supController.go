@@ -46,10 +46,10 @@ func GetPaginatedSups(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		Preload("Asm").
-		// Preload("User").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Asm").
+		Preload("Users").
+		// Preload("Drs").
+		// Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -123,10 +123,10 @@ func GetPaginatedSupProvince(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		Preload("Asm").
-		// Preload("User").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Asm").
+		Preload("Users").
+		// Preload("Drs").
+		// Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -200,10 +200,10 @@ func GetPaginatedSupArea(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		Preload("Asm").
-		// Preload("User").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Asm").
+		Preload("Users").
+		// Preload("Drs").
+		// Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -352,8 +352,8 @@ func UpdateSup(c *fiber.Ctx) error {
 		CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null"`
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
 		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-		AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-		UserUUID     string `json:"user_uuid"`
+		// AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
+		// UserUUID     string `json:"user_uuid"`
 		Signature    string `json:"signature"`
 	}
 
@@ -375,8 +375,8 @@ func UpdateSup(c *fiber.Ctx) error {
 	sup.CountryUUID = updateData.CountryUUID
 	sup.ProvinceUUID = updateData.ProvinceUUID
 	sup.AreaUUID = updateData.AreaUUID
-	sup.AsmUUID = updateData.AsmUUID
-	sup.UserUUID = updateData.UserUUID
+	// sup.AsmUUID = updateData.AsmUUID
+	// sup.UserUUID = updateData.UserUUID
 	sup.Signature = updateData.Signature
 
 	db.Save(&sup)

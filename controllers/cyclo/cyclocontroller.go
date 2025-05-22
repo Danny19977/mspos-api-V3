@@ -47,10 +47,10 @@ func GetPaginatedCyclo(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		// Preload("User").
+		// Preload("Asm").
+		// Preload("Sup").
+		// Preload("Dr").
+		Preload("Users").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -125,10 +125,10 @@ func GetPaginatedCycloProvinceByID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		// Preload("User").
+		// Preload("Asm").
+		// Preload("Sup").
+		// Preload("Dr").
+		Preload("Users").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -203,10 +203,10 @@ func GetPaginatedCycloByAreaUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		// Preload("User").
+		// Preload("Asm").
+		// Preload("Sup").
+		// Preload("Dr").
+		Preload("Users").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -281,10 +281,10 @@ func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		// Preload("User").
+		// Preload("Asm").
+		// Preload("Sup").
+		// Preload("Dr").
+		Preload("Users").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -359,10 +359,10 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		// Preload("User").
+		// Preload("Asm").
+		// Preload("Sup").
+		// Preload("Dr").
+		Preload("Users").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -402,9 +402,10 @@ func GetAllCyclo(c *fiber.Ctx) error {
 	db.
 		Preload("Province").
 		Preload("Area").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
+		// Preload("Asm").
+		// Preload("Sup").
+		// Preload("Dr").
+		Preload("Users").
 		Order("Cyclo.updated_at DESC").
 		Find(&data)
 	return c.JSON(fiber.Map{
@@ -471,9 +472,9 @@ func UpdateCyclo(c *fiber.Ctx) error {
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
 		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
 		CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
-		AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-		SupUUID      string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
-		DrUUID       string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
+		// AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
+		// SupUUID      string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
+		// DrUUID       string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
 		Signature    string `json:"signature"`
 		UserUUID     string `json:"user_uuid"`
 	}
@@ -496,11 +497,11 @@ func UpdateCyclo(c *fiber.Ctx) error {
 	cyclo.CountryUUID = updateData.CountryUUID
 	cyclo.ProvinceUUID = updateData.ProvinceUUID
 	cyclo.SubAreaUUID = updateData.SubAreaUUID
-	cyclo.AsmUUID = updateData.AsmUUID
-	cyclo.SupUUID = updateData.SupUUID
-	cyclo.DrUUID = updateData.DrUUID
+	// cyclo.AsmUUID = updateData.AsmUUID
+	// cyclo.SupUUID = updateData.SupUUID
+	// cyclo.DrUUID = updateData.DrUUID
 	cyclo.Signature = updateData.Signature
-	cyclo.UserUUID = updateData.UserUUID
+	// cyclo.UserUUID = updateData.UserUUID
 
 	db.Save(&cyclo)
 

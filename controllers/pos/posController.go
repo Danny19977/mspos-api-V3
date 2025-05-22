@@ -407,11 +407,11 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("User").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("Users").
+		// Preload("Asm").
+		// Preload("Sup").
+		// Preload("Dr").
+		// Preload("Cyclo").
 		Preload("PosForms").
 		Preload("PosEquipments").
 		Find(&dataList).Error

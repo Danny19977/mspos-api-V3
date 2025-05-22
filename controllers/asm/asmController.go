@@ -46,9 +46,10 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		// Preload("User").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Sups").
+		// Preload("Drs").
+		// Preload("Cyclos").
+		Preload("Users").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -123,9 +124,10 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 		Preload("Country").
 		Preload("Province").
 		// Preload("User").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Sups").
+		// Preload("Drs").
+		// Preload("Cyclos").
+		Preload("Users").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -140,9 +142,7 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
-
+ 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
 		"total_records": totalRecords,
@@ -242,7 +242,7 @@ func UpdateAsm(c *fiber.Ctx) error {
 
 	type UpdateData struct {
 		CountryUUID string `json:"country_uuid" gorm:"type:varchar(255);not null"`
-		// ProvinceUUID string   `json:"province_uuid" gorm:"type:varchar(255);not null"`
+		ProvinceUUID string   `json:"province_uuid" gorm:"type:varchar(255);not null"`
 		Signature string `json:"signature"`
 		UserUUID  string `json:"user_uuid"`
 	}
@@ -263,9 +263,9 @@ func UpdateAsm(c *fiber.Ctx) error {
 
 	db.Where("uuid = ?", uuid).First(&asm)
 	asm.CountryUUID = updateData.CountryUUID
-	// asm.ProvinceUUID = updateData.ProvinceUUID
+	asm.ProvinceUUID = updateData.ProvinceUUID
 	asm.Signature = updateData.Signature
-	asm.UserUUID = updateData.UserUUID
+	// asm.UserUUID = updateData.UserUUID
 
 	db.Save(&asm)
 

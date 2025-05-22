@@ -14,14 +14,16 @@ type Asm struct {
 
 	Signature string `json:"signature"`
 
-	UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
+	// UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
 
 	// User   User `gorm:"foreignKey:references:UUID"`
 
-	Sups   []Sup   `gorm:"foreignKey:AsmUUID;references:UUID"`
-	Drs    []Dr    `gorm:"foreignKey:AsmUUID;references:UUID"`
-	Cyclos []Cyclo `gorm:"foreignKey:AsmUUID;references:UUID"`
+	// Sups   []Sup   `gorm:"foreignKey:AsmUUID;references:UUID"`
+	// Drs    []Dr    `gorm:"foreignKey:AsmUUID;references:UUID"`
+	// Cyclos []Cyclo `gorm:"foreignKey:AsmUUID;references:UUID"`
 
-	Pos      []Pos     `gorm:"foreignKey:AsmUUID;references:UUID"`
+	Users []User `gorm:"foreignKey:AsmUUID;references:UUID"`
+
+	// Pos      []Pos     `gorm:"foreignKey:AsmUUID;references:UUID"`
 	PosForms []PosForm `gorm:"foreignKey:AsmUUID;references:UUID"`
 }

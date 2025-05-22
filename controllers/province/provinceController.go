@@ -47,10 +47,10 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 		Preload("Areas").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Asms").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Asms").
+		// Preload("Sups").
+		// Preload("Drs").
+		// Preload("Cyclos").
 		Preload("Brands").
 		Preload("Pos").
 		Preload("Users").
@@ -127,10 +127,10 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 		Preload("Areas").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Asms").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
+		// Preload("Asms").
+		// Preload("Sups").
+		// Preload("Drs").
+		// Preload("Cyclos").
 		Preload("Brands").
 		Preload("Pos").
 		Preload("Users").
