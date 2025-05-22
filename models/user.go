@@ -40,12 +40,9 @@ type User struct {
 	Asm   Asm   `gorm:"foreignKey:UserUUID;references:UUID"`
 	Sup   Sup   `gorm:"foreignKey:UserUUID;references:UUID"`
 	Dr    Dr    `gorm:"foreignKey:UserUUID;references:UUID"`
-	Cyclo Cyclo `gorm:"foreignKey:UserUUID;references:UUID"`
+	Cyclo Cyclo `gorm:"foreignKey:UserUUID;references:UUID"` 
 
-	// Asms   []Asm   `gorm:"foreignKey:UserUUID"`
-	// Sups   []Sup   `gorm:"foreignKey:UserUUID"`
-	// Drs    []Dr    `gorm:"foreignKey:UserUUID"`
-	// Cyclos []Cyclo `gorm:"foreignKey:UserUUID"`
+	
 
 	RoutePlan []RoutePlan `gorm:"foreignKey:UserUUID;references:UUID"`
 	Managers  []Manager   `gorm:"foreignKey:UserUUID;references:UUID"`

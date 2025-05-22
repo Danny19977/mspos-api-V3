@@ -144,28 +144,7 @@ func AuthUser(c *fiber.Ctx) error {
 	u := models.User{}
 
 	database.DB.
-		Joins("LEFT JOIN countries ON countries.uuid = users.country_uuid").
-		Joins("LEFT JOIN provinces ON provinces.uuid = users.province_uuid").
-		Joins("LEFT JOIN areas ON areas.uuid = users.area_uuid").
-		Joins("LEFT JOIN sub_areas ON sub_areas.uuid = users.sub_area_uuid").
-		Joins("LEFT JOIN communes ON communes.uuid = users.commune_uuid").
-		Joins("LEFT JOIN asms ON asms.user_uuid = users.uuid").
-		Joins("LEFT JOIN sups ON sups.user_uuid = users.uuid").
-		Joins("LEFT JOIN drs ON drs.user_uuid = users.uuid").
-		Joins("LEFT JOIN cyclos ON cyclos.user_uuid = users.uuid").
 		Where("users.uuid = ?", UserUUID).
-		Select(`
-			users.*, 
-			countries.name as country_name, 
-			provinces.name as province_name, 
-			areas.name as area_name, 
-			sub_areas.name as subarea_name, 
-			communes.name as commune_name,
-			asms.uuid as asm_uuid,
-			sups.uuid as sup_uuid,
-			drs.uuid as dr_uuid,
-			cyclos.uuid as cyclo_uuid
-		`).
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").

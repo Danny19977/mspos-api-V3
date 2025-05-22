@@ -43,7 +43,6 @@ func GetPaginatedRoutePlanItem(c *fiber.Ctx) error {
 		Order("updated_at DESC").
 		Preload("RoutePlan").
 		Preload("Pos").
-		Preload("Status").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -74,18 +73,37 @@ func GetPaginatedRoutePlanItem(c *fiber.Ctx) error {
 	})
 }
 
-// Get One by route uuid
-func GetOneByRouteUUID(c *fiber.Ctx) error {
-	routeUUID := c.Params("route_uuid")
+
+// Get All data
+func GetAllRoutePlanItem(c *fiber.Ctx) error {
+	db := database.DB
+
+	routePlanUUID := c.Params("route_plan_uuid")
+
+	var data []models.RoutePlanItem
+	db.
+	Where("route_plan_uuid = ?", routePlanUUID).
+	Preload("RoutePlan").
+	Preload("Pos").
+	Find(&data)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All RoutePlanItems",
+		"data":    data,
+	})
+}
+
+// Get One data
+func GetOneByRouteItermUUID(c *fiber.Ctx) error {
+	UUID := c.Params("uuid")
 	db := database.DB
 
 	var routePlanItem models.RoutePlanItem
 
 	// Fetch the RoutePlanItem by route UUID
-	err := db.Where("route_plan_uuid = ?", routeUUID).
+	err := db.Where("uuid = ?", UUID).
 		Preload("RoutePlan").
 		Preload("Pos").
-		Preload("Status").
 		First(&routePlanItem).Error
 
 	if err != nil {
@@ -100,19 +118,6 @@ func GetOneByRouteUUID(c *fiber.Ctx) error {
 		"status":  "success",
 		"message": "RoutePlanItem retrieved successfully",
 		"data":    routePlanItem,
-	})
-}
-
-// Get All data
-func GetAllRoutePlanItem(c *fiber.Ctx) error {
-	db := database.DB
-
-	var data []models.RoutePlanItem
-	db.Find(&data)
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "All RoutePlanItems",
-		"data":    data,
 	})
 }
 

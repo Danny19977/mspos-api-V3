@@ -414,6 +414,31 @@ func GetAllRouteplanBySearch(c *fiber.Ctx) error {
 	})
 }
 
+// Get one data by user id
+func GetRouteplanByUserUUID(c *fiber.Ctx) error {
+	userUUID := c.Params("user_uuid")
+	db := database.DB
+
+	var routeplan models.RoutePlan
+	db.Where("user_uuid = ?", userUUID).First(&routeplan)
+	if routeplan.UUID == "00000000-0000-0000-0000-000000000000" {
+		return c.Status(404).JSON(
+			fiber.Map{
+				"status":  "error",
+				"message": "No Routeplan name found",
+				"data":    nil,	
+			},
+		)
+	}
+	return c.JSON(
+		fiber.Map{
+			"status":  "success",
+			"message": "All Routeplan",
+			"data":    routeplan,
+		},
+	)
+}
+
 // Get one data
 func GetRouteplan(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
