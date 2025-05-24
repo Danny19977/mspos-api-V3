@@ -6,6 +6,10 @@ type Sup struct {
 	gorm.Model
 	UUID string `gorm:"type:text;not null;unique" json:"uuid"`
 
+	Title       string `gorm:"not null;default:''" json:"title"`
+	Fullname    string `gorm:"-" json:"fullname"`
+	AsmFullname string `gorm:"-" json:"asm_fullname"`
+
 	CountryUUID  string   `json:"country_uuid" gorm:"type:varchar(255);not null"`
 	Country      Country  `gorm:"foreignKey:CountryUUID;references:UUID"`
 	ProvinceUUID string   `json:"province_uuid" gorm:"type:varchar(255);not null"`
@@ -13,19 +17,15 @@ type Sup struct {
 	AreaUUID     string   `json:"area_uuid" gorm:"type:varchar(255);not null"`
 	Area         Area     `gorm:"foreignKey:AreaUUID;references:UUID"`
 
-	// AsmUUID string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-	// Asm     Asm    `gorm:"foreignKey:AsmUUID;references:UUID"`
-
-	// UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
-	// User   User `gorm:"foreignKey:UserUUID"`
+	AsmUUID string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
+	Asm     Asm    `gorm:"foreignKey:AsmUUID;references:UUID"`
 
 	Signature string `json:"signature"`
 
-	// Drs    []Dr    `gorm:"foreignKey:SupUUID;references:UUID"`
-	// Cyclos []Cyclo `gorm:"foreignKey:SupUUID;references:UUID"`
-
-	Users []User `gorm:"foreignKey:SupUUID;references:UUID"`
+	Users  []User  `gorm:"foreignKey:SupUUID;references:UUID"`
+	Drs    []Dr    `gorm:"foreignKey:SupUUID;references:UUID"`
+	Cyclos []Cyclo `gorm:"foreignKey:SupUUID;references:UUID"`
 
 	PosForms []PosForm `gorm:"foreignKey:SupUUID;references:UUID"`
-	// Pos      []Pos     `gorm:"foreignKey:SupUUID;references:UUID"`
+	Pos      []Pos     `gorm:"foreignKey:SupUUID;references:UUID"`
 }

@@ -24,8 +24,8 @@ type SubArea struct {
 	Pos      []Pos     `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 	Posforms []PosForm `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 
-	// Drs    []Dr    `gorm:"foreignKey:SubAreaUUID;references:UUID"`
-	// Cyclos []Cyclo `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	Drs    []Dr    `gorm:"foreignKey:SubAreaUUID;references:UUID"`
+	Cyclos []Cyclo `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 
 	RoutePlan []RoutePlan `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 

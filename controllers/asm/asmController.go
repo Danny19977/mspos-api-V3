@@ -1,7 +1,6 @@
 package asm
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/danny19977/mspos-api-v3/database"
@@ -28,28 +27,32 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Asm
+	var dataList []struct {
+		models.Asm
+		Fullname string `json:"fullname"`
+	}
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Asm{}).
-		Joins("JOIN users ON asms.user_uuid=users.uuid").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	db.Table("asms").
+		Joins("LEFT JOIN users ON users.asm_uuid = asms.uuid").
+		Where("asms.title ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
-	err = db.
-		Joins("JOIN users ON asms.user_uuid=users.uuid").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	err = db.Table("asms").
+		Joins("LEFT JOIN users ON users.asm_uuid = asms.uuid").
+		Where("asms.title ILIKE ?", "%"+search+"%").
+		Select(`
+			asms.*,
+			users.fullname AS fullname
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("asms.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		// Preload("User").
-		// Preload("Sups").
-		// Preload("Drs").
-		// Preload("Cyclos").
-		Preload("Users").
+		Preload("Drs").
+		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -65,10 +68,8 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
-
 	// Prepare pagination metadata
-	pagination := map[string]interface{}{
+	pagination := map[string]any{
 		"total_records": totalRecords,
 		"total_pages":   totalPages,
 		"current_page":  page,
@@ -108,25 +109,34 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Asm{}).
-		Joins("JOIN provinces ON asms.province_uuid=provinces.uuid").
+
+	db.Table("users").
+		Joins("JOIN provinces ON users.province_uuid=provinces.uuid").
+		Joins("JOIN asms ON users.asm_uuid=asms.uuid").
+		Where("asms.title = ?", "ASM").
 		Where("provinces.uuid = ?", province_uuid).
-		Where("provinces.name ILIKE ?", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
-	err = db.
-		Joins("JOIN provinces ON asms.province_uuid=provinces.uuid").
+	err = db.Table("users").
+		Joins("JOIN provinces ON users.province_uuid=provinces.uuid").
+		Joins("JOIN asms ON users.asm_uuid=asms.uuid").
+		Where("asms.title = ?", "ASM").
 		Where("provinces.uuid = ?", province_uuid).
-		Where("provinces.name ILIKE ?", "%"+search+"%").
+		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Select(` 
+			asms.uuid AS uuid,
+			asms.title AS title,
+			users.fullname AS fullname
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("asms.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		// Preload("User").
-		// Preload("Sups").
-		// Preload("Drs").
-		// Preload("Cyclos").
+		Preload("Sups").
+		Preload("Drs").
+		Preload("Cyclos").
 		Preload("Users").
 		Preload("Pos").
 		Preload("PosForms").
@@ -142,7 +152,7 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
- 
+
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
 		"total_records": totalRecords,
@@ -167,7 +177,7 @@ func GetAllAsms(c *fiber.Ctx) error {
 	db.
 		// Preload("User").
 		Find(&data)
-		
+
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Asms",
@@ -241,10 +251,10 @@ func UpdateAsm(c *fiber.Ctx) error {
 	db := database.DB
 
 	type UpdateData struct {
-		CountryUUID string `json:"country_uuid" gorm:"type:varchar(255);not null"`
-		ProvinceUUID string   `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		Signature string `json:"signature"`
-		UserUUID  string `json:"user_uuid"`
+		CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null"`
+		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
+		Signature    string `json:"signature"`
+		UserUUID     string `json:"user_uuid"`
 	}
 
 	var updateData UpdateData
@@ -296,7 +306,7 @@ func DeleteAsm(c *fiber.Ctx) error {
 			},
 		)
 	}
- 
+
 	db.Delete(&asm)
 
 	return c.JSON(

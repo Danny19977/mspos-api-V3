@@ -50,7 +50,7 @@ func GetPaginatedUsers(c *fiber.Ctx) error {
 		Preload("Dr").
 		Preload("Sup").
 		Preload("Asm").
-		Preload("Managers").
+		// Preload("Managers").
 		Find(&users).Error
 
 	if err != nil {
@@ -114,7 +114,7 @@ func GetPaginatedNoSerach(c *fiber.Ctx) error {
 		Preload("Dr").
 		Preload("Sup").
 		Preload("Asm").
-		Preload("Managers").
+		// Preload("Managers").
 		Find(&users).Error
 
 	if err != nil {

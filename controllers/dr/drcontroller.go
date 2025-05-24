@@ -32,13 +32,20 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Dr{}).
-		Joins("JOIN users ON drs.user_uuid=users.uuid").
+		Joins("JOIN drs ON users.dr_uuid=drs.uuid").
+		Where("drs.title = ?", "DR").
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
-	err = db.
-		Joins("JOIN users ON drs.user_uuid=users.uuid").
+	err = db.Table("users").
+		Joins("JOIN drs ON users.dr_uuid=drs.uuid").
+		Where("drs.title = ?", "DR").
 		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Select(` 
+			drs.uuid AS uuid,
+			drs.title AS title,
+			users.fullname AS fullname,
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("drs.updated_at DESC").
@@ -46,9 +53,9 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Asm").
-		// Preload("Sup").
-		Preload("Users").
+		Preload("Asm").
+		Preload("Sup").
+		// Preload("Users").
 		Preload("Cyclos").
 		Preload("Pos").
 		Preload("PosForms").

@@ -21,9 +21,9 @@ type Area struct {
 	SubAreas []SubArea `gorm:"foreignKey:AreaUUID;references:UUID"`
 	Communes []Commune `gorm:"foreignKey:AreaUUID;references:UUID"`
 
-	// Sups   []Sup   `gorm:"foreignKey:AreaUUID;references:UUID"`
-	// Drs    []Dr    `gorm:"foreignKey:AreaUUID;references:UUID"`
-	// Cyclos []Cyclo `gorm:"foreignKey:AreaUUID;references:UUID"`
+	Sups   []Sup   `gorm:"foreignKey:AreaUUID;references:UUID"`
+	Drs    []Dr    `gorm:"foreignKey:AreaUUID;references:UUID"`
+	Cyclos []Cyclo `gorm:"foreignKey:AreaUUID;references:UUID"`
 
 	Pos      []Pos     `gorm:"foreignKey:AreaUUID;references:UUID"`
 	PosForms []PosForm `gorm:"foreignKey:AreaUUID;references:UUID"`

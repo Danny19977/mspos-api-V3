@@ -19,7 +19,7 @@ type Commune struct {
 
 	Signature string `json:"signature"`
 
-	// Cyclos []Cyclo `gorm:"foreignKey:CommuneUUID;references:UUID"`
+	Cyclos []Cyclo `gorm:"foreignKey:CommuneUUID;references:UUID"`
 
 	RouthePlans []RoutePlan `gorm:"foreignKey:CommuneUUID;references:UUID"`
 	Pos         []Pos       `gorm:"foreignKey:CommuneUUID;references:UUID"`

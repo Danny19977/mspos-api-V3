@@ -57,10 +57,10 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		// Preload("ASM").
-		// Preload("Sup").
-		// Preload("Dr").
-		// Preload("Cyclo").
+		Preload("ASM").
+		Preload("Sup").
+		Preload("Dr").
+		Preload("Cyclo").
 		Preload("Users").
 		Preload("Pos").
 		Preload("PosFormItems").
@@ -610,40 +610,8 @@ func UpdatePosform(c *fiber.Ctx) error {
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
 		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
 		SubAreaUUID  string `json:"sub_area_uuid" gorm:"type:varchar(255);not null"`
-		AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-		SupUUID      string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
-		DrUUID       string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
-		CycloUUID    string `json:"cyclo_uuid" gorm:"type:varchar(255);not null"`
 
-		// Eq        int64  `json:"eq"`
-		// Eq1       int64  `json:"eq1"`
-		// Sold      int64  `json:"sold"`
-		// Dhl       int64  `json:"dhl"`
-		// Dhl1      int64  `json:"dhl1"`
-		// Ar        int64  `json:"ar"`
-		// Ar1       int64  `json:"ar1"`
-		// Sbl       int64  `json:"sbl"`
-		// Sbl1      int64  `json:"sbl1"`
-		// Pmf       int64  `json:"pmf"`
-		// Pmf1      int64  `json:"pmf1"`
-		// Pmm       int64  `json:"pmm"`
-		// Pmm1      int64  `json:"pmm1"`
-		// Ticket    int64  `json:"ticket"`
-		// Ticket1   int64  `json:"ticket1"`
-		// Mtc       int64  `json:"mtc"`
-		// Mtc1      int64  `json:"mtc1"`
-		// Ws        int64  `json:"ws"`
-		// Ws1       int64  `json:"ws1"`
-		// Mast      int64  `json:"mast"`
-		// Mast1     int64  `json:"mast1"`
-		// Oris      int64  `json:"oris"`
-		// Oris1     int64  `json:"oris1"`
-		// Elite     int64  `json:"elite"`
-		// Elite1    int64  `json:"elite1"`
-		// Yes       int64  `json:"yes"`
-		// Yes1      int64  `json:"yes1"`
-		// Time      int64  `json:"time"`
-		// Time1     int64  `json:"time1"`
+		
 
 	}
 
@@ -671,41 +639,7 @@ func UpdatePosform(c *fiber.Ctx) error {
 	posform.PosUUID = updateData.PosUUID
 	posform.ProvinceUUID = updateData.ProvinceUUID
 	posform.AreaUUID = updateData.AreaUUID
-	posform.SubAreaUUID = updateData.SubAreaUUID
-	posform.AsmUUID = updateData.AsmUUID
-	posform.SupUUID = updateData.SupUUID
-	posform.DrUUID = updateData.DrUUID
-	posform.CycloUUID = updateData.CycloUUID
-
-	// posform.Eq = updateData.Eq
-	// posform.Eq1 = updateData.Eq1
-	// posform.Sold = updateData.Sold
-	// posform.Dhl = updateData.Dhl
-	// posform.Dhl1 = updateData.Dhl1
-	// posform.Ar = updateData.Ar
-	// posform.Ar1 = updateData.Ar1
-	// posform.Sbl = updateData.Sbl
-	// posform.Sbl1 = updateData.Sbl1
-	// posform.Pmf = updateData.Pmf
-	// posform.Pmf1 = updateData.Pmf1
-	// posform.Pmm = updateData.Pmm
-	// posform.Pmm1 = updateData.Pmm1
-	// posform.Ticket = updateData.Ticket
-	// posform.Ticket1 = updateData.Ticket1
-	// posform.Mtc = updateData.Mtc
-	// posform.Mtc1 = updateData.Mtc1
-	// posform.Ws = updateData.Ws
-	// posform.Ws1 = updateData.Ws1
-	// posform.Mast = updateData.Mast
-	// posform.Mast1 = updateData.Mast1
-	// posform.Oris = updateData.Oris
-	// posform.Oris1 = updateData.Oris1
-	// posform.Elite = updateData.Elite
-	// posform.Elite1 = updateData.Elite1
-	// posform.Yes = updateData.Yes
-	// posform.Yes1 = updateData.Yes1
-	// posform.Time = updateData.Time
-	// posform.Time1 = updateData.Time1
+	posform.SubAreaUUID = updateData.SubAreaUUID  
 
 	db.Save(&posform)
 

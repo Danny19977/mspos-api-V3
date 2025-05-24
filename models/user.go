@@ -47,14 +47,11 @@ type User struct {
 	Cyclo     Cyclo  `gorm:"foreignKey:CycloUUID;references:UUID"`
 
 	RoutePlan []RoutePlan `gorm:"foreignKey:UserUUID;references:UUID"`
-	Managers  []Manager   `gorm:"foreignKey:UserUUID;references:UUID"`
-	UserLogs  []UserLogs  `gorm:"foreignKey:UserUUID;references:UUID"`
+	Pos       []Pos       `gorm:"foreignKey:UserUUID;references:UUID"`
+	PosForms  []PosForm   `gorm:"foreignKey:UserUUID;references:UUID"`
+	// Managers  []Manager   `gorm:"foreignKey:UserUUID;references:UUID"`
+	// UserLogs  []UserLogs  `gorm:"foreignKey:UserUUID;references:UUID"`
 
-	CountryName  string `json:"country_name" gorm:"-"`
-	ProvinceName string `json:"province_name" gorm:"-"`
-	AreaName     string `json:"area_name" gorm:"-"`
-	SubAreaName  string `json:"subarea_name" gorm:"-"`
-	CommuneName  string `json:"commune_name" gorm:"-"`
 }
 
 type UserResponse struct {

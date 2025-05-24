@@ -32,24 +32,38 @@ func GetPaginatedSups(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Sup{}).
-		Joins("JOIN users ON sups.user_uuid=users.uuid").
+
+	db.Table("users").
+		Joins("JOIN asms ON users.asm_uuid=asms.uuid").
+		Joins("JOIN sups ON users.sup_uuid=sups.uuid").
+		Where("sups.title = ?", "Supervisor").
 		Where("users.fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
-	err = db.
-		Joins("JOIN users ON sups.user_uuid=users.uuid").
+	err = db.Table("users").
+		Joins("JOIN sups ON users.sup_uuid=sups.uuid").
+		Where("sups.title = ?", "Supervisor").
 		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Select(`
+			sups.uuid AS uuid,
+			sups.title AS title,
+			users.fullname AS fullname,
+			(
+				SELECT u2.fullname
+				FROM users u2
+				WHERE u2.asm_uuid = sups.asm_uuid
+				LIMIT 1
+			) AS asm_fullname
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("sups.updated_at DESC").
+		Order("asms.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		Preload("Area").
-		// Preload("Asm").
-		Preload("Users").
-		// Preload("Drs").
-		// Preload("Cyclos").
+		Preload("Asm").
+		Preload("Drs").
+		Preload("Cyclos").
+		// Preload("Users").
 		Preload("Pos").
 		Preload("PosForms").
 		Find(&dataList).Error
@@ -354,7 +368,7 @@ func UpdateSup(c *fiber.Ctx) error {
 		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
 		// AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
 		// UserUUID     string `json:"user_uuid"`
-		Signature    string `json:"signature"`
+		Signature string `json:"signature"`
 	}
 
 	var updateData UpdateData
