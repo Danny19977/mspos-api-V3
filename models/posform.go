@@ -1,11 +1,17 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type PosForm struct {
-	gorm.Model
+	UUID string `gorm:"type:text;not null;unique;primaryKey" json:"uuid"`
 
-	UUID string `gorm:"not null;unique" json:"uuid"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	Price   int    `gorm:"default:0" json:"price"`
 	Comment string `json:"comment"`
@@ -22,13 +28,17 @@ type PosForm struct {
 	SubAreaUUID  string `json:"sub_area_uuid" gorm:"type:varchar(255);not null;default:''"`
 	CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null;default:''"`
 
-	AsmUUID   string `json:"asm_uuid" gorm:"type:varchar(255);not null;default:''"`
-	SupUUID   string `json:"sup_uuid" gorm:"type:varchar(255);not null;default:''"`
-	DrUUID    string `json:"dr_uuid" gorm:"type:varchar(255);not null;default:''"`
-	CycloUUID string `json:"cyclo_uuid" gorm:"type:varchar(255);not null;default:''"`
-
 	UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null;default:''"`
 	User     User   `gorm:"foreignKey:UserUUID;references:UUID"`
+
+	AsmUUID   string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
+	Asm       string `json:"asm" gorm:"default:''"`
+	SupUUID   string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
+	Sup       string `json:"sup" gorm:"default:''"`
+	DrUUID    string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
+	Dr        string `json:"dr" gorm:"default:''"`
+	CycloUUID string `json:"cyclo_uuid" gorm:"type:varchar(255);not null"`
+	Cyclo     string `json:"cyclo" gorm:"default:''"`
 
 	Pos Pos `gorm:"foreignKey:PosUUID;references:UUID"`
 
@@ -38,10 +48,7 @@ type PosForm struct {
 	SubArea  SubArea  `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 	Commune  Commune  `gorm:"foreignKey:CommuneUUID;references:UUID"`
 
-	ASM   Asm   `gorm:"foreignKey:AsmUUID;references:UUID"`
-	Sup   Sup   `gorm:"foreignKey:SupUUID;references:UUID"`
-	Dr    Dr    `gorm:"foreignKey:DrUUID;references:UUID"`
-	Cyclo Cyclo `gorm:"foreignKey:CycloUUID;references:UUID"`
+ 
 
 	Sync bool `json:"sync" gorm:"default:false"`
 

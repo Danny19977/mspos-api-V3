@@ -5,8 +5,8 @@ import (
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
+	"github.com/danny19977/mspos-api-v3/utils"
+	"github.com/gofiber/fiber/v2" 
 )
 
 // Paginate
@@ -73,7 +73,6 @@ func GetPaginatedRoutePlanItem(c *fiber.Ctx) error {
 	})
 }
 
-
 // Get All data
 func GetAllRoutePlanItem(c *fiber.Ctx) error {
 	db := database.DB
@@ -82,10 +81,10 @@ func GetAllRoutePlanItem(c *fiber.Ctx) error {
 
 	var data []models.RoutePlanItem
 	db.
-	Where("route_plan_uuid = ?", routePlanUUID).
-	Preload("RoutePlan").
-	Preload("Pos").
-	Find(&data)
+		Where("route_plan_uuid = ?", routePlanUUID).
+		Preload("RoutePlan").
+		Preload("Pos").
+		Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All RoutePlanItems",
@@ -129,7 +128,7 @@ func CreateRoutePlanItem(c *fiber.Ctx) error {
 		return err
 	}
 
-	p.UUID = uuid.New().String()
+	p.UUID = utils.GenerateUUID()
 	database.DB.Create(p)
 
 	return c.JSON(
@@ -147,9 +146,10 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 	db := database.DB
 
 	type UpdateData struct {
-		UUID        string `json:"uuid"`
-		PosUUID     string `json:"pos_uuid" gorm:"type:varchar(255);not null"`
-		RoutePlanID string `json:"routeplan_uuid" gorm:"type:varchar(255);not null"`
+		UUID          string `json:"uuid"`
+		RoutePlanUUID string `json:"routeplan_uuid"`
+		PosUUID       string `json:"pos_uuid"`
+		Status        bool   `json:"status"`
 	}
 
 	var updateData UpdateData
@@ -170,7 +170,8 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 
 	db.Save(&RoutePlanItem)
 	RoutePlanItem.PosUUID = updateData.PosUUID
-	RoutePlanItem.RoutePlanUUID = updateData.RoutePlanID
+	RoutePlanItem.RoutePlanUUID = updateData.RoutePlanUUID
+	RoutePlanItem.Status = updateData.Status
 
 	return c.JSON(
 		fiber.Map{

@@ -32,16 +32,44 @@ func GetPaginatedCommunes(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Commune{}).
-		Joins("JOIN provinces ON communes.province_uuid = provinces.uuid").
-		Joins("JOIN areas ON communes.area_uuid = areas.uuid").
-		Where("provinces.name ILIKE ? OR areas.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	db.Model(&models.Commune{}). 
+		Where("communes.name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
-	err = db.
-		Joins("JOIN provinces ON communes.province_uuid = provinces.uuid").
-		Joins("JOIN areas ON communes.area_uuid = areas.uuid").
-		Where("provinces.name ILIKE ? OR areas.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	err = db. 
+		Where("communes.name ILIKE ?", "%"+search+"%").
+		Select(` 
+			communes.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = communes.country_uuid
+				AND u2.province_uuid = communes.province_uuid
+				AND u2.area_uuid = communes.area_uuid
+				AND u2.sub_area_uuid = communes.sub_area_uuid
+				AND u2.commune_uuid = communes.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = communes.country_uuid 
+				AND p.province_uuid = communes.province_uuid
+				AND p.area_uuid = communes.area_uuid
+				AND p.sub_area_uuid = communes.sub_area_uuid
+				AND p.commune_uuid = communes.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = communes.country_uuid
+				AND ps.province_uuid = communes.province_uuid
+				AND ps.area_uuid = communes.area_uuid
+				AND ps.sub_area_uuid = communes.sub_area_uuid
+				AND ps.commune_uuid = communes.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("communes.updated_at DESC").
@@ -49,10 +77,9 @@ func GetPaginatedCommunes(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Cyclo").
-		Preload("Pos").
-		Preload("PosForms").
-		Preload("Users").
+		// Preload("Pos").
+		// Preload("PosForms").
+		// Preload("Users").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -107,16 +134,46 @@ func GetPaginatedCommunesByProvinceUUID(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Commune{}).
-		Joins("JOIN provinces ON communes.province_uuid = provinces.uuid").
+	db.Model(&models.Commune{}). 
 		Where("communes.province_uuid = ?", ProvinceUUID).
-		Where("provinces.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%").
+		Where("communes.name ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
-	err = db.
-		Joins("JOIN provinces ON communes.province_uuid = provinces.uuid").
+	err = db. 
 		Where("communes.province_uuid = ?", ProvinceUUID).
-		Where("provinces.name ILIKE ? OR communes.name ILIKE ?", "%"+search+"%", "%"+search+"%").
+		Where("communes.name ILIKE ?", "%"+search+"%").
+		Select(` 
+			communes.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = communes.country_uuid
+				AND u2.province_uuid = communes.province_uuid
+				AND u2.area_uuid = communes.area_uuid
+				AND u2.sub_area_uuid = communes.sub_area_uuid
+				AND u2.commune_uuid = communes.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = communes.country_uuid 
+				AND p.province_uuid = communes.province_uuid
+				AND p.area_uuid = communes.area_uuid
+				AND p.sub_area_uuid = communes.sub_area_uuid
+				AND p.commune_uuid = communes.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = communes.country_uuid
+				AND ps.province_uuid = communes.province_uuid
+				AND ps.area_uuid = communes.area_uuid
+				AND ps.sub_area_uuid = communes.sub_area_uuid
+				AND ps.commune_uuid = communes.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("communes.updated_at DESC").
@@ -124,10 +181,9 @@ func GetPaginatedCommunesByProvinceUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Cyclos").
-		Preload("Pos").
-		Preload("PosForms").
-		Preload("Users").
+		// Preload("Pos").
+		// Preload("PosForms").
+		// Preload("Users").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -190,6 +246,38 @@ func GetPaginatedCommunesByAreaUUID(c *fiber.Ctx) error {
 	err = db.
 		Where("communes.area_uuid = ?", AreaUUID).
 		Where("communes.name ILIKE ?", "%"+search+"%").
+		Select(` 
+			communes.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = communes.country_uuid
+				AND u2.province_uuid = communes.province_uuid
+				AND u2.area_uuid = communes.area_uuid
+				AND u2.sub_area_uuid = communes.sub_area_uuid
+				AND u2.commune_uuid = communes.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = communes.country_uuid 
+				AND p.province_uuid = communes.province_uuid
+				AND p.area_uuid = communes.area_uuid
+				AND p.sub_area_uuid = communes.sub_area_uuid
+				AND p.commune_uuid = communes.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = communes.country_uuid
+				AND ps.province_uuid = communes.province_uuid
+				AND ps.area_uuid = communes.area_uuid
+				AND ps.sub_area_uuid = communes.sub_area_uuid
+				AND ps.commune_uuid = communes.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("communes.updated_at DESC").
@@ -197,10 +285,9 @@ func GetPaginatedCommunesByAreaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Cyclos").
-		Preload("Pos").
-		Preload("PosForms").
-		Preload("Users").
+		// Preload("Pos").
+		// Preload("PosForms").
+		// Preload("Users").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -212,9 +299,7 @@ func GetPaginatedCommunesByAreaUUID(c *fiber.Ctx) error {
 	}
 
 	// Calculate total pages
-	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit)) 
 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
@@ -237,7 +322,7 @@ func GetPaginatedCommunesByAreaUUID(c *fiber.Ctx) error {
 func GetPaginatedCommunesBySubAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	subAreaUUID := c.Params("subarea_uuid")
+	subAreaUUID := c.Params("sub_area_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -266,6 +351,38 @@ func GetPaginatedCommunesBySubAreaUUID(c *fiber.Ctx) error {
 	err = db.
 		Where("communes.sub_area_uuid = ?", subAreaUUID).
 		Where("communes.name ILIKE ?", "%"+search+"%").
+		Select(` 
+			communes.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = communes.country_uuid
+				AND u2.province_uuid = communes.province_uuid
+				AND u2.area_uuid = communes.area_uuid
+				AND u2.sub_area_uuid = communes.sub_area_uuid
+				AND u2.commune_uuid = communes.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = communes.country_uuid 
+				AND p.province_uuid = communes.province_uuid
+				AND p.area_uuid = communes.area_uuid
+				AND p.sub_area_uuid = communes.sub_area_uuid
+				AND p.commune_uuid = communes.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = communes.country_uuid
+				AND ps.province_uuid = communes.province_uuid
+				AND ps.area_uuid = communes.area_uuid
+				AND ps.sub_area_uuid = communes.sub_area_uuid
+				AND ps.commune_uuid = communes.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("communes.updated_at DESC").
@@ -273,10 +390,9 @@ func GetPaginatedCommunesBySubAreaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Cyclos").
-		Preload("Pos").
-		Preload("PosForms").
-		Preload("Users").
+		// Preload("Pos").
+		// Preload("PosForms").
+		// Preload("Users").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -341,6 +457,38 @@ func GetPaginatedCommunesByCyclo(c *fiber.Ctx) error {
 	err = db.
 		Where("communes.uuid = ?", commueUUID).
 		Where("communes.name ILIKE ?", "%"+search+"%").
+		Select(` 
+			communes.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = communes.country_uuid
+				AND u2.province_uuid = communes.province_uuid
+				AND u2.area_uuid = communes.area_uuid
+				AND u2.sub_area_uuid = communes.sub_area_uuid
+				AND u2.commune_uuid = communes.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = communes.country_uuid 
+				AND p.province_uuid = communes.province_uuid
+				AND p.area_uuid = communes.area_uuid
+				AND p.sub_area_uuid = communes.sub_area_uuid
+				AND p.commune_uuid = communes.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = communes.country_uuid
+				AND ps.province_uuid = communes.province_uuid
+				AND ps.area_uuid = communes.area_uuid
+				AND ps.sub_area_uuid = communes.sub_area_uuid
+				AND ps.commune_uuid = communes.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("communes.updated_at DESC").
@@ -348,10 +496,9 @@ func GetPaginatedCommunesByCyclo(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Cyclos").
-		Preload("Pos").
-		Preload("PosForms").
-		Preload("Users").
+		// Preload("Pos").
+		// Preload("PosForms").
+		// Preload("Users").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -399,7 +546,7 @@ func GetAllCommunes(c *fiber.Ctx) error {
 func GetAllCommunesBySubAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	subAreaUUID := c.Params("subarea_uuid")
+	subAreaUUID := c.Params("sub_area_uuid")
 
 	var data []models.Commune
 	db.Where("sub_area_uuid = ?", subAreaUUID).Find(&data).Find(&data)
@@ -504,7 +651,7 @@ func UpdateCommune(c *fiber.Ctx) error {
 	type UpdateData struct {
 		UUID        string `json:"uuid"`
 		Name        string `gorm:"not null" json:"name"`
-		SubAreaUUID string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+		SubAreaUUID string `json:"sub_area_uuid" gorm:"type:varchar(255);not null"`
 		Signature   string `json:"signature"`
 	}
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
+	"github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -48,7 +49,7 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 	err = db.
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where(" pos.name ILIKE ?", "%"+search+"%").
+		Where("pos.name ILIKE ?", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("pos_forms.updated_at DESC").
@@ -57,11 +58,11 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
-		Preload("Users").
+		Preload("Asm.User").
+		Preload("Sup.User").
+		Preload("Dr.User").
+		Preload("Cyclo.User").
+		Preload("User").
 		Preload("Pos").
 		Preload("PosFormItems").
 		Find(&dataList).Error
@@ -137,7 +138,7 @@ func GetPaginatedPosFormProvine(c *fiber.Ctx) error {
 		Joins("JOIN pos ON pos_forms.pos_uuid=pos.uuid").
 		Where("pos_forms.province_uuid = ?", provinceUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("pos.name ILIKE ?", "%"+search+"%").
+		Where("pos.name ILIKE ? OR pos.shop ILIKE ?", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
 		Order("pos_forms.updated_at DESC").
@@ -146,10 +147,11 @@ func GetPaginatedPosFormProvine(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("Asm.User").
+		Preload("Sup.User").
+		Preload("Dr.User").
+		Preload("Cyclo.User").
+		Preload("User").
 		Preload("Pos").
 		Preload("PosFormItems").
 		Find(&dataList).Error
@@ -235,10 +237,11 @@ func GetPaginatedPosFormArea(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("Asm.User").
+		Preload("Sup.User").
+		Preload("Dr.User").
+		Preload("Cyclo.User").
+		Preload("User").
 		Preload("Pos").
 		Preload("PosFormItems").
 		Find(&dataList).Error
@@ -324,11 +327,11 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
-		Preload("Pos").
+		Preload("Asm.User").
+		Preload("Sup.User").
+		Preload("Dr.User").
+		Preload("Cyclo.User").
+		Preload("User").
 		Preload("PosFormItems").
 		Find(&dataList).Error
 
@@ -413,10 +416,11 @@ func GetPaginatedPosFormCommune(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM.User").
+		Preload("Asm.User").
 		Preload("Sup.User").
 		Preload("Dr.User").
 		Preload("Cyclo.User").
+		Preload("User").
 		Preload("Pos").
 		Preload("PosFormItems").
 		Find(&dataList).Error
@@ -501,10 +505,11 @@ func GetPaginatedPosFormByPOS(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("ASM").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("Asm.User").
+		Preload("Sup.User").
+		Preload("Dr.User").
+		Preload("Cyclo.User").
+		Preload("User").
 		Preload("Pos").
 		Preload("PosFormItems").
 		Find(&dataList).Error
@@ -555,7 +560,7 @@ func GetPosform(c *fiber.Ctx) error {
 	db := database.DB
 	var posform models.PosForm
 	db.Where("uuid = ?", uuid).First(&posform)
-	if posform.ID == 0 {
+	if posform.UUID == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
@@ -581,7 +586,7 @@ func CreatePosform(c *fiber.Ctx) error {
 		return err
 	}
 
-	// p.UUID = uuid.New().String()
+	p.UUID = utils.GenerateUUID()
 	database.DB.Create(p)
 
 	return c.JSON(
@@ -606,13 +611,16 @@ func UpdatePosform(c *fiber.Ctx) error {
 		Longitude float64 `json:"longitude"` // Longitude of the user
 		Signature string  `json:"signature"`
 
-		PosUUID      string `json:"pos_uuid" gorm:"type:varchar(255);not null"`
-		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-		SubAreaUUID  string `json:"sub_area_uuid" gorm:"type:varchar(255);not null"`
+		PosUUID      string `json:"pos_uuid"`
+		ProvinceUUID string `json:"province_uuid"`
+		AreaUUID     string `json:"area_uuid"`
+		SubAreaUUID  string `json:"sub_area_uuid"`
 
-		
-
+		AsmUUID   string `json:"asm_uuid"`
+		SupUUID   string `json:"sup_uuid"`
+		DrUUID    string `json:"dr_uuid"`
+		CycloUUID string `json:"cyclo_uuid"`
+		UserUUID  string `json:"user_uuid"`
 	}
 
 	var updateData UpdateData
@@ -639,7 +647,12 @@ func UpdatePosform(c *fiber.Ctx) error {
 	posform.PosUUID = updateData.PosUUID
 	posform.ProvinceUUID = updateData.ProvinceUUID
 	posform.AreaUUID = updateData.AreaUUID
-	posform.SubAreaUUID = updateData.SubAreaUUID  
+	posform.SubAreaUUID = updateData.SubAreaUUID
+	posform.AsmUUID = updateData.AsmUUID
+	posform.SupUUID = updateData.SupUUID
+	posform.DrUUID = updateData.DrUUID
+	posform.CycloUUID = updateData.CycloUUID
+	posform.UserUUID = updateData.UserUUID
 
 	db.Save(&posform)
 
@@ -661,7 +674,7 @@ func DeletePosform(c *fiber.Ctx) error {
 
 	var posform models.PosForm
 	db.Where("uuid = ?", uuid).First(&posform)
-	if posform.ID == 0 {
+	if posform.UUID == "0000000-0000-0000-0000-000000000000" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",

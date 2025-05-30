@@ -5,8 +5,7 @@ import (
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
+	"github.com/gofiber/fiber/v2" 
 )
 
 // Paginate
@@ -27,32 +26,62 @@ func GetPaginatedCyclo(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Cyclo
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Cyclo{}).
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	db.
+		Where("role = ?", "Cyclo").
+		Where(`
+		title ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND users.fullname ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM communes WHERE users.commune_uuid = communes.uuid AND communes.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	Where("role = ?", "Cyclo").
+		Where(`
+		title ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND users.fullname ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM communes WHERE users.commune_uuid = communes.uuid AND communes.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Select(`
+			users.*,
+			  (
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE users.province_uuid = p.province_uuid
+				AND users.area_uuid = p.area_uuid
+				AND users.sub_area_uuid = p.sub_area_uuid
+				AND users.commune_uuid = p.commune_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+				AND users.area_uuid = ps.area_uuid
+				AND users.sub_area_uuid = ps.sub_area_uuid
+				AND users.commune_uuid = ps.commune_uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("cyclos.updated_at DESC").
+		Order("updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
-		// Preload("Asm").
-		// Preload("Sup").
-		// Preload("Dr").
-		Preload("Users").
-		Preload("Pos").
-		Preload("PosForms").
+		Preload("Commune"). 
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -103,34 +132,58 @@ func GetPaginatedCycloProvinceByID(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Cyclo
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Cyclo{}).
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.province_uuid = ?", ProvinceUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	db.
+	Where("role = ?", "Cyclo").
+		Where("province_uuid = ?", ProvinceUUID).
+		Where("title ILIKE ? OR EXISTS (SELECT 1 FROM users WHERE users.cyclo_uuid = uuid AND users.fullname ILIKE ?)", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.province_uuid = ?", ProvinceUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	Where("role = ?", "Cyclo").
+		Where("province_uuid = ?", ProvinceUUID).
+		Where(`
+		title ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND users.fullname ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM communes WHERE users.commune_uuid = communes.uuid AND communes.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Select(`
+			users.*,
+			  (
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE users.province_uuid = p.province_uuid
+				AND users.area_uuid = p.area_uuid
+				AND users.sub_area_uuid = p.sub_area_uuid
+				AND users.commune_uuid = p.commune_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+				AND users.area_uuid = ps.area_uuid
+				AND users.sub_area_uuid = ps.sub_area_uuid
+				AND users.commune_uuid = ps.commune_uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("cyclos.updated_at DESC").
+		Order("updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
-		// Preload("Asm").
-		// Preload("Sup").
-		// Preload("Dr").
-		Preload("Users").
-		Preload("Pos").
-		Preload("PosForms").
+		Preload("Commune"). 
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -181,34 +234,58 @@ func GetPaginatedCycloByAreaUUID(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Cyclo
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Cyclo{}).
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.area_uuid = ?", AreaUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	db.
+	Where("role = ?", "Cyclo").
+		Where("area_uuid = ?", AreaUUID).
+		Where("title ILIKE ? OR EXISTS (SELECT 1 FROM users WHERE users.cyclo_uuid = uuid AND users.fullname ILIKE ?)", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.area_uuid = ?", AreaUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	Where("role = ?", "Cyclo").
+		Where("area_uuid = ?", AreaUUID).
+		Where(`
+		title ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND users.fullname ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM communes WHERE users.commune_uuid = communes.uuid AND communes.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Select(`
+			users.*,
+			  (
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE users.province_uuid = p.province_uuid
+				AND users.area_uuid = p.area_uuid
+				AND users.sub_area_uuid = p.sub_area_uuid
+				AND users.commune_uuid = p.commune_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+				AND users.area_uuid = ps.area_uuid
+				AND users.sub_area_uuid = ps.sub_area_uuid
+				AND users.commune_uuid = ps.commune_uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("cyclos.updated_at DESC").
+		Order("updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
-		// Preload("Asm").
-		// Preload("Sup").
-		// Preload("Dr").
-		Preload("Users").
-		Preload("Pos").
-		Preload("PosForms").
+		Preload("Commune"). 
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -259,34 +336,58 @@ func GetPaginatedSubAreaByID(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Cyclo
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Cyclo{}).
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.sub_area_uuid = ?", SubAreaUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	db.
+	Where("role = ?", "Cyclo").
+		Where("sub_area_uuid = ?", SubAreaUUID).
+		Where("title ILIKE ? OR EXISTS (SELECT 1 FROM users WHERE users.cyclo_uuid = uuid AND users.fullname ILIKE ?)", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.sub_area_uuid = ?", SubAreaUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	Where("role = ?", "Cyclo").
+		Where("sub_area_uuid = ?", SubAreaUUID).
+		Where(`
+		title ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND users.fullname ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM communes WHERE users.commune_uuid = communes.uuid AND communes.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Select(`
+			users.*,
+			  (
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE users.province_uuid = p.province_uuid
+				AND users.area_uuid = p.area_uuid
+				AND users.sub_area_uuid = p.sub_area_uuid
+				AND users.commune_uuid = p.commune_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+				AND users.area_uuid = ps.area_uuid
+				AND users.sub_area_uuid = ps.sub_area_uuid
+				AND users.commune_uuid = ps.commune_uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("cyclos.updated_at DESC").
+		Order("updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
-		// Preload("Asm").
-		// Preload("Sup").
-		// Preload("Dr").
-		Preload("Users").
-		Preload("Pos").
-		Preload("PosForms").
+		Preload("Commune"). 
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -337,34 +438,58 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Cyclo
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Cyclo{}).
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.user_uuid = ?", UserUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	db.
+	Where("role = ?", "Cyclo").
+		Where("(SELECT uuid FROM users WHERE users.cyclo_uuid = uuid) = ?", UserUUID).
+		Where("title ILIKE ? OR EXISTS (SELECT 1 FROM users WHERE users.cyclo_uuid = uuid AND users.fullname ILIKE ?)", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON cyclos.user_uuid=users.uuid").
-		Where("cyclos.user_uuid = ?", UserUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	Where("role = ?", "Cyclo").
+		Where("(SELECT uuid FROM users WHERE users.cyclo_uuid = uuid) = ?", UserUUID).
+		Where(`
+		title ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND users.fullname ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM communes WHERE users.commune_uuid = communes.uuid AND communes.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Select(`
+			users.*,
+			  (
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE users.province_uuid = p.province_uuid
+				AND users.area_uuid = p.area_uuid
+				AND users.sub_area_uuid = p.sub_area_uuid
+				AND users.commune_uuid = p.commune_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+				AND users.area_uuid = ps.area_uuid
+				AND users.sub_area_uuid = ps.sub_area_uuid
+				AND users.commune_uuid = ps.commune_uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("cyclos.updated_at DESC").
+		Order("updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
-		// Preload("Asm").
-		// Preload("Sup").
-		// Preload("Dr").
-		Preload("Users").
-		Preload("Pos").
-		Preload("PosForms").
+		Preload("Commune"). 
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -393,153 +518,4 @@ func GetPaginatedCycloCommune(c *fiber.Ctx) error {
 		"data":       dataList,
 		"pagination": pagination,
 	})
-}
-// Get All data
-func GetAllCyclo(c *fiber.Ctx) error {
-	db := database.DB
-
-	var data []models.Cyclo
-	db.
-		Preload("Province").
-		Preload("Area").
-		// Preload("Asm").
-		// Preload("Sup").
-		// Preload("Dr").
-		Preload("Users").
-		Order("Cyclo.updated_at DESC").
-		Find(&data)
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "All Cyclos",
-		"data":    data,
-	})
-}
-
-// Get one data
-func GetOneCyclo(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-	db := database.DB
-
-	var cyclo models.Cyclo
-	db.Where("uuid = ?", uuid).First(&cyclo)
-	if cyclo.Signature == "" {
-		return c.Status(404).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "No cyclo signature found",
-				"data":    nil,
-			},
-		)
-	}
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "cyclo found",
-			"data":    cyclo,
-		},
-	)
-}
-
-// Create data
-func CreateCyclo(c *fiber.Ctx) error {
-	p := &models.Cyclo{}
-
-	if err := c.BodyParser(&p); err != nil {
-		return err
-	}
-
-	p.UUID = uuid.New().String()
-	database.DB.Create(p)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "Cyclo created success",
-			"data":    p,
-		},
-	)
-}
-
-// Update data
-func UpdateCyclo(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-	db := database.DB
-
-	type UpdateData struct {
-		UUID string `json:"uuid"`
-
-		CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null"`
-		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
-		CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
-		// AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-		// SupUUID      string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
-		// DrUUID       string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
-		Signature    string `json:"signature"`
-		UserUUID     string `json:"user_uuid"`
-	}
-
-	var updateData UpdateData
-
-	if err := c.BodyParser(&updateData); err != nil {
-		return c.Status(500).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "Review your iunput",
-				"data":    nil,
-			},
-		)
-	}
-
-	cyclo := new(models.Cyclo)
-
-	db.Where("uuid = ?", uuid).First(&cyclo)
-	cyclo.CountryUUID = updateData.CountryUUID
-	cyclo.ProvinceUUID = updateData.ProvinceUUID
-	cyclo.SubAreaUUID = updateData.SubAreaUUID
-	// cyclo.AsmUUID = updateData.AsmUUID
-	// cyclo.SupUUID = updateData.SupUUID
-	// cyclo.DrUUID = updateData.DrUUID
-	cyclo.Signature = updateData.Signature
-	// cyclo.UserUUID = updateData.UserUUID
-
-	db.Save(&cyclo)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "cyclo updated success",
-			"data":    cyclo,
-		},
-	)
-
-}
-
-// Delete data
-func DeleteCyclo(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-
-	db := database.DB
-
-	var cyclo models.Cyclo
-	db.Where("uuid = ?", uuid).First(&cyclo)
-	if cyclo.Signature == "" {
-		return c.Status(404).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "No Cyclo name found",
-				"data":    nil,
-			},
-		)
-	}
-
-	db.Delete(&cyclo)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "cyclo deleted success",
-			"data":    nil,
-		},
-	)
 }

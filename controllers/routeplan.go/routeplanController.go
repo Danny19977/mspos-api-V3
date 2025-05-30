@@ -5,8 +5,8 @@ import (
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
-	"github.com/gofiber/fiber/v2"
-	// "github.com/google/uuid"
+	"github.com/danny19977/mspos-api-v3/utils"
+	"github.com/gofiber/fiber/v2" 
 )
 
 // Paginate
@@ -48,7 +48,7 @@ func GetPaginatedRouteplan(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
+		Preload("Commune"). 
 		Preload("User").
 		Preload("RoutePlanItems").
 		Find(&dataList).Error
@@ -124,7 +124,7 @@ func GetPaginatedRouthplaByProvinceUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
+		Preload("Commune"). 
 		Preload("User").
 		Preload("RoutePlanItems").
 		Find(&dataList).Error
@@ -200,7 +200,7 @@ func GetPaginatedRouthplaByareaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
+		Preload("Commune"). 
 		Preload("User").
 		Preload("RoutePlanItems").
 		Find(&dataList).Error
@@ -276,7 +276,7 @@ func GetPaginatedRouthplaBySubareaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
+		Preload("Commune"). 
 		Preload("User").
 		Preload("RoutePlanItems").
 		Find(&dataList).Error
@@ -352,7 +352,7 @@ func GetPaginatedRouteplaBycommuneUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
+		Preload("Commune"). 
 		Preload("User").
 		Preload("RoutePlanItems").
 		Find(&dataList).Error
@@ -426,7 +426,7 @@ func GetRouteplanByUserUUID(c *fiber.Ctx) error {
 			fiber.Map{
 				"status":  "error",
 				"message": "No Routeplan name found",
-				"data":    nil,	
+				"data":    nil,
 			},
 		)
 	}
@@ -472,7 +472,7 @@ func CreateRouteplan(c *fiber.Ctx) error {
 		return err
 	}
 
-	// p.UUID = uuid.New().String()
+	p.UUID = utils.GenerateUUID()
 	database.DB.Create(p)
 
 	return c.JSON(
@@ -493,12 +493,17 @@ func UpdateRouteplan(c *fiber.Ctx) error {
 		UUID string `json:"uuid"`
 
 		UserUUID     string `json:"user_uuid"`
-		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
-		CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
-		TotalPOS     int    `json:"total_pos"`
-		Signature    string `json:"signature"`
+		ProvinceUUID string `json:"province_uuid"`
+		AreaUUID     string `json:"area_uuid"`
+		SubAreaUUID  string `json:"subarea_uuid"`
+		CommuneUUID  string `json:"commune_uuid"`
+
+		AsmUUID   string `json:"asm_uuid"`
+		SupUUID   string `json:"sup_uuid"`
+		DrUUID    string `json:"dr_uuid"`
+		CycloUUID string `json:"cyclo_uuid"`
+
+		Signature string `json:"signature"`
 	}
 
 	var updateData UpdateData
@@ -520,7 +525,10 @@ func UpdateRouteplan(c *fiber.Ctx) error {
 	RoutePlan.AreaUUID = updateData.AreaUUID
 	RoutePlan.SubAreaUUID = updateData.SubAreaUUID
 	RoutePlan.CommuneUUID = updateData.CommuneUUID
-	// RoutePlan.TotalPOS = updateData.TotalPOS
+	RoutePlan.AsmUUID = updateData.AsmUUID
+	RoutePlan.SupUUID = updateData.SupUUID
+	RoutePlan.DrUUID = updateData.DrUUID
+	RoutePlan.CycloUUID = updateData.CycloUUID  
 	RoutePlan.Signature = updateData.Signature
 
 	db.Save(&RoutePlan)

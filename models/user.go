@@ -8,9 +8,11 @@ import (
 )
 
 type User struct {
-	gorm.Model
+	UUID string `gorm:"type:text;not null;unique;primaryKey" json:"uuid"`
 
-	UUID string `gorm:"type:text;not null;unique" json:"uuid"` // Explicitly set type:text
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	Fullname        string `gorm:"not null;default:''" json:"fullname"`
 	Email           string `json:"email" gorm:"unique;default:''"`
@@ -37,21 +39,29 @@ type User struct {
 	SubArea  SubArea  `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 	Commune  Commune  `gorm:"foreignKey:CommuneUUID;references:UUID"`
 
-	AsmUUID   string `json:"asm_uuid" gorm:"type:varchar(255);not null;default:''"`
-	Asm       Asm    `gorm:"foreignKey:AsmUUID;references:UUID"`
-	SupUUID   string `json:"sup_uuid" gorm:"type:varchar(255);not null;default:''"`
-	Sup       Sup    `gorm:"foreignKey:SupUUID;references:UUID"`
-	DrUUID    string `json:"dr_uuid" gorm:"type:varchar(255);not null;default:''"`
-	Dr        Dr     `gorm:"foreignKey:DrUUID;references:UUID"`
-	CycloUUID string `json:"cyclo_uuid" gorm:"type:varchar(255);not null;default:''"`
-	Cyclo     Cyclo  `gorm:"foreignKey:CycloUUID;references:UUID"`
+	ManagerUUID string `json:"manager_uuid" gorm:"type:varchar(255);not null"`
+	Manager     string `json:"manager" gorm:"default:''"`
+	SupportUUID string `json:"support_uuid" gorm:"type:varchar(255);not null"`
+	Support     string `json:"support" gorm:"default:''"`
+	AsmUUID     string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
+	Asm         string `json:"asm" gorm:"default:''"`
+	SupUUID     string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
+	Sup         string `json:"sup" gorm:"default:''"`
+	DrUUID      string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
+	Dr          string `json:"dr" gorm:"default:''"`
+	CycloUUID   string `json:"cyclo_uuid" gorm:"type:varchar(255);not null"`
+	Cyclo       string `json:"cyclo" gorm:"default:''"`
+
+	TotalSup      int64 `json:"total_sup"`
+	TotalDr       int64 `json:"total_dr"`
+	TotalCyclo    int64 `json:"total_cyclo"`
+	TotalPos      int64 `json:"total_pos"`
+	TotalPosForms int64 `json:"total_posforms"`
 
 	RoutePlan []RoutePlan `gorm:"foreignKey:UserUUID;references:UUID"`
 	Pos       []Pos       `gorm:"foreignKey:UserUUID;references:UUID"`
 	PosForms  []PosForm   `gorm:"foreignKey:UserUUID;references:UUID"`
-	// Managers  []Manager   `gorm:"foreignKey:UserUUID;references:UUID"`
-	// UserLogs  []UserLogs  `gorm:"foreignKey:UserUUID;references:UUID"`
-
+	UserLogs  []UserLogs  `gorm:"foreignKey:UserUUID;references:UUID"`
 }
 
 type UserResponse struct {
@@ -62,15 +72,15 @@ type UserResponse struct {
 	Phone        string `json:"phone"`
 	Title        string `json:"title"`
 	Role         string `json:"role"`
-	CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null"`
+	CountryUUID  string `json:"country_uuid"`
 	Country      Country
-	ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
+	ProvinceUUID string `json:"province_uuid"`
 	Province     Province
-	AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
+	AreaUUID     string `json:"area_uuid"`
 	Area         Area
-	SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+	SubAreaUUID  string `json:"subarea_uuid"`
 	SubArea      SubArea
-	CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
+	CommuneUUID  string `json:"commune_uuid"`
 	Commune      Commune
 	Permission   string `json:"permission"`
 	Status       bool   `json:"status"`
@@ -78,10 +88,18 @@ type UserResponse struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 
-	Asm   Asm   `gorm:"foreignKey:UserUUID;references:UUID"`
-	Sup   Sup   `gorm:"foreignKey:UserUUID;references:UUID"`
-	Dr    Dr    `gorm:"foreignKey:UserUUID;references:UUID"`
-	Cyclo Cyclo `gorm:"foreignKey:UserUUID;references:UUID"`
+	ManagerUUID string `json:"manager_uuid"`
+	Manager     string `json:"manager" gorm:"default:''"`
+	SupportUUID string `json:"support_uuid"`
+	Support     string `json:"support" gorm:"default:''"`
+	AsmUUID     string `json:"asm_uuid"`
+	Asm         string `json:"asm" gorm:"default:''"`
+	SupUUID     string `json:"sup_uuid"`
+	Sup         string `json:"sup" gorm:"default:''"`
+	DrUUID      string `json:"dr_uuid"`
+	Dr          string `json:"dr" gorm:"default:''"`
+	CycloUUID   string `json:"cyclo_uuid"`
+	Cyclo       string `json:"cyclo" gorm:"default:''"`
 }
 
 type Login struct {

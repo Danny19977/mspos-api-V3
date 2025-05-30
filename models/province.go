@@ -1,10 +1,17 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Province struct {
-	gorm.Model
-	UUID string `gorm:"type:text;not null;unique" json:"uuid"`
+	UUID string `gorm:"type:text;not null;unique;primaryKey" json:"uuid"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	Name        string  `json:"name"`
 	CountryUUID string  `json:"country_uuid" gorm:"type:varchar(255);not null"`
@@ -16,13 +23,13 @@ type Province struct {
 	SubAreas []SubArea `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 	Communes []Commune `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 
-	Brands   []Brand   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	Brands    []Brand     `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 	RoutePlan []RoutePlan `gorm:"foreignKey:ProvinceUUID;references:UUID"`
-	PosForms []PosForm `gorm:"foreignKey:ProvinceUUID;references:UUID"`
-	Pos      []Pos     `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	// PosForms  []PosForm   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	// Pos       []Pos       `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 
-	Asms   []Asm   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
-	Sups   []Sup   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
-	Drs    []Dr    `gorm:"foreignKey:ProvinceUUID;references:UUID"`
-	Cyclos []Cyclo `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	TotalUsers    int64 `json:"total_users"`
+	TotalPos      int64 `json:"total_pos"`
+	TotalPosForms int64 `json:"total_posforms"`
+
 }

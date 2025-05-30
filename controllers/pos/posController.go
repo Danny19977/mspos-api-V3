@@ -58,11 +58,7 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("Commune").  
 		Preload("User").
 		Preload("PosForms").
 		Preload("PosEquipments").
@@ -150,10 +146,6 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
 		Preload("User").
 		Preload("PosForms").
 		Preload("PosEquipments").
@@ -232,11 +224,7 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("Commune"). 
 		Preload("User").
 		Preload("PosEquipments").
 		Preload("PosForms").
@@ -315,11 +303,7 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		Preload("Commune"). 
 		Preload("User").
 		Preload("PosEquipments").
 		Preload("PosForms").
@@ -406,12 +390,8 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		Preload("Commune").
-		Preload("Users").
-		// Preload("Asm").
-		// Preload("Sup").
-		// Preload("Dr").
-		// Preload("Cyclo").
+		Preload("Commune").  
+		Preload("User").
 		Preload("PosForms").
 		Preload("PosEquipments").
 		Find(&dataList).Error
@@ -602,6 +582,11 @@ func UpdatePos(c *fiber.Ctx) error {
 		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
 		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
 		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+		
+		AsmUUID    string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
+		SupUUID    string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
+		DrUUID     string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
+		CycloUUID  string `json:"cyclo_uuid" gorm:"type:varchar(255);not null"`
 
 		UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
 
@@ -636,6 +621,10 @@ func UpdatePos(c *fiber.Ctx) error {
 	pos.ProvinceUUID = updateData.ProvinceUUID
 	pos.AreaUUID = updateData.AreaUUID
 	pos.SubAreaUUID = updateData.SubAreaUUID
+	pos.AsmUUID = updateData.AsmUUID
+	pos.SupUUID = updateData.SupUUID
+	pos.DrUUID = updateData.DrUUID
+	pos.CycloUUID = updateData.CycloUUID
 	pos.UserUUID = updateData.UserUUID
 	pos.Status = updateData.Status
 	pos.Signature = updateData.Signature

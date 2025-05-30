@@ -1,15 +1,22 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Pos struct {
-	gorm.Model
-	UUID string `gorm:"not null;unique" json:"uuid"`
+	UUID string `gorm:"type:text;not null;unique;primaryKey" json:"uuid"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	Name      string `gorm:"not null" json:"name"` // Celui qui vend
-	Shop      string `json:"shop"`                        // Nom du shop
-	Postype   string `json:"postype"`                     // Type de POS
-	Gerant    string `json:"gerant"`                      // name of the onwer of the pos
+	Shop      string `json:"shop"`                 // Nom du shop
+	Postype   string `json:"postype"`              // Type de POS
+	Gerant    string `json:"gerant"`               // name of the onwer of the pos
 	Avenue    string `json:"avenue"`
 	Quartier  string `json:"quartier"`
 	Reference string `json:"reference"`
@@ -31,13 +38,13 @@ type Pos struct {
 	User     User   `gorm:"foreignKey:UserUUID;references:UUID"`
 
 	AsmUUID   string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-	Asm       Asm    `gorm:"foreignKey:AsmUUID;references:UUID"`
+	Asm       string `json:"asm" gorm:"default:''"`
 	SupUUID   string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
-	Sup       Sup    `gorm:"foreignKey:SupUUID;references:UUID"`
+	Sup       string `json:"sup" gorm:"default:''"`
 	DrUUID    string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
-	Dr        Dr     `gorm:"foreignKey:DrUUID;references:UUID"`
+	Dr        string `json:"dr" gorm:"default:''"`
 	CycloUUID string `json:"cyclo_uuid" gorm:"type:varchar(255);not null"`
-	Cyclo     Cyclo  `gorm:"foreignKey:CycloUUID;references:UUID"`
+	Cyclo     string `json:"cyclo" gorm:"default:''"`
 
 	Status    bool   `json:"status"`
 	Signature string `json:"signature"`

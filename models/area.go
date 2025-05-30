@@ -2,13 +2,18 @@ package models
 
 import (
 	// "github.com/lib/pq"
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type Area struct {
-	gorm.Model
+	UUID string `gorm:"type:text;not null;unique;primaryKey" json:"uuid"`
 
-	UUID string `gorm:"not null;unique" json:"uuid"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	
 	Name string `gorm:"not null" json:"name"`
 
 	CountryUUID  string   `json:"country_uuid" gorm:"type:varchar(255);not null"`
@@ -21,14 +26,14 @@ type Area struct {
 	SubAreas []SubArea `gorm:"foreignKey:AreaUUID;references:UUID"`
 	Communes []Commune `gorm:"foreignKey:AreaUUID;references:UUID"`
 
-	Sups   []Sup   `gorm:"foreignKey:AreaUUID;references:UUID"`
-	Drs    []Dr    `gorm:"foreignKey:AreaUUID;references:UUID"`
-	Cyclos []Cyclo `gorm:"foreignKey:AreaUUID;references:UUID"`
+	// Pos      []Pos     `gorm:"foreignKey:AreaUUID;references:UUID"`
+	// PosForms []PosForm `gorm:"foreignKey:AreaUUID;references:UUID"`
 
-	Pos      []Pos     `gorm:"foreignKey:AreaUUID;references:UUID"`
-	PosForms []PosForm `gorm:"foreignKey:AreaUUID;references:UUID"`
+	// RoutePlans []RoutePlan `gorm:"foreignKey:AreaUUID;references:UUID"`
 
-	RoutePlans []RoutePlan `gorm:"foreignKey:AreaUUID;references:UUID"`
+	// Users []User `gorm:"foreignKey:AreaUUID;references:UUID"`
 
-	Users []User `gorm:"foreignKey:AreaUUID;references:UUID"`
+	TotalUsers    int64 `json:"total_users"`
+	TotalPos      int64 `json:"total_pos"`
+	TotalPosForms int64 `json:"total_posforms"`
 }

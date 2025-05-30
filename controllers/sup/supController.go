@@ -7,7 +7,6 @@ import (
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 // Paginate
@@ -28,44 +27,56 @@ func GetPaginatedSups(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Sup
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-
-	db.Table("users").
-		Joins("JOIN asms ON users.asm_uuid=asms.uuid").
-		Joins("JOIN sups ON users.sup_uuid=sups.uuid").
-		Where("sups.title = ?", "Supervisor").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	db.
+		Where("users.role = ?", "Supervisor").
+		Where("fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
-	err = db.Table("users").
-		Joins("JOIN sups ON users.sup_uuid=sups.uuid").
-		Where("sups.title = ?", "Supervisor").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	err = db.
+		Where("users.role = ?", "Supervisor").
+		Where("fullname ILIKE ?", "%"+search+"%").
 		Select(`
-			sups.uuid AS uuid,
-			sups.title AS title,
-			users.fullname AS fullname,
+			users.*,
 			(
-				SELECT u2.fullname
+				SELECT COUNT(DISTINCT u2.dr_uuid)
 				FROM users u2
-				WHERE u2.asm_uuid = sups.asm_uuid
-				LIMIT 1
-			) AS asm_fullname
+				WHERE u2.role = 'ASM' AND u2.province_uuid = users.province_uuid
+				AND u2.area_uuid = users.area_uuid
+			) AS total_dr,
+			(
+				SELECT COUNT(DISTINCT u2.cyclo_uuid)
+				FROM users u2
+				WHERE u2.role = 'ASM' AND u2.province_uuid = users.province_uuid
+				AND u2.area_uuid = users.area_uuid
+			) AS total_cyclo,
+			 (
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE users.province_uuid = p.province_uuid
+				AND users.area_uuid = p.area_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+				AND users.area_uuid = ps.area_uuid
+			) AS total_posforms
 		`).
 		Offset(offset).
 		Limit(limit).
-		Order("asms.updated_at DESC").
+		Order("users.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		Preload("Asm").
-		Preload("Drs").
-		Preload("Cyclos").
-		// Preload("Users").
-		Preload("Pos").
-		Preload("PosForms").
+		Preload("Area").
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -115,34 +126,59 @@ func GetPaginatedSupProvince(c *fiber.Ctx) error {
 
 	// Parse search query
 	search := c.Query("search", "")
-	fmt.Println("Search query:", search)
 
-	var dataList []models.Sup
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Sup{}).
-		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
-		Where("provinces.uuid = ?", province_uuid).
-		Where("provinces.name ILIKE ?", "%"+search+"%").
+	db.
+		Where("users.role = ?", "Supervisor").
+		Where("province_uuid = ?", province_uuid).
+		Where("fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON sups.province_uuid=provinces.uuid").
-		Where("provinces.uuid = ?", province_uuid).
-		Where("provinces.name ILIKE ?", "%"+search+"%").
+		Where("users.role = ?", "Supervisor").
+		Where("province_uuid = ?", province_uuid).
+		Where("fullname ILIKE ?", "%"+search+"%").
+		Select(`
+			users.*,  
+			(
+				SELECT COUNT(DISTINCT u2.dr_uuid)
+				FROM users u2
+				WHERE u2.role = 'ASM' AND u2.province_uuid = users.province_uuid
+				AND u2.area_uuid = users.area_uuid
+			) AS total_dr,
+			(
+				SELECT COUNT(DISTINCT u2.cyclo_uuid)
+				FROM users u2
+				WHERE u2.role = 'ASM' AND u2.province_uuid = users.province_uuid
+				AND u2.area_uuid = users.area_uuid
+			) AS total_cyclo,
+			 (
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE users.province_uuid = p.province_uuid
+				AND users.area_uuid = p.area_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+				AND users.area_uuid = ps.area_uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("sups.updated_at DESC").
+		Order("users.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		// Preload("Asm").
-		Preload("Users").
-		// Preload("Drs").
-		// Preload("Cyclos").
-		Preload("Pos").
-		Preload("PosForms").
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -194,32 +230,59 @@ func GetPaginatedSupArea(c *fiber.Ctx) error {
 	search := c.Query("search", "")
 	fmt.Println("Search query:", search)
 
-	var dataList []models.Sup
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Sup{}).
-		Joins("JOIN users ON sups.user_uuid=users.uuid").
-		Where("sups.area_uuid = ?", area_uuid).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	db.
+		Where("users.role = ?", "Supervisor").
+		Where("area_uuid = ?", area_uuid).
+		Where("fullname ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON sups.user_uuid=users.uuid").
-		Where("sups.area_uuid = ?", area_uuid).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where("users.role = ?", "Supervisor").
+		Where("area_uuid = ?", area_uuid).
+		Where("fullname ILIKE ?", "%"+search+"%").
+		Select(`
+			users.*,  
+			(
+				SELECT COUNT(DISTINCT u2.dr_uuid)
+				FROM users u2
+				WHERE u2.role = 'ASM' AND u2.province_uuid = users.province_uuid
+				AND u2.area_uuid = users.area_uuid
+			) AS total_dr,
+			(
+				SELECT COUNT(DISTINCT u2.cyclo_uuid)
+				FROM users u2
+				WHERE u2.role = 'ASM' AND u2.province_uuid = users.province_uuid
+				AND u2.area_uuid = users.area_uuid
+			) AS total_cyclo,
+			 (
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p
+				INNER JOIN users u2 ON p.user_uuid = u2.uuid
+				WHERE u2.province_uuid = p.province_uuid
+				AND u2.area_uuid = p.area_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+				AND users.area_uuid = ps.area_uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("sups.updated_at DESC").
+		Order("users.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
-		// Preload("Asm").
-		Preload("Users").
-		// Preload("Drs").
-		// Preload("Cyclos").
-		Preload("Pos").
-		Preload("PosForms").
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -248,188 +311,4 @@ func GetPaginatedSupArea(c *fiber.Ctx) error {
 		"data":       dataList,
 		"pagination": pagination,
 	})
-}
-
-// Get All Sups
-func GetAllSups(c *fiber.Ctx) error {
-	db := database.DB
-	var data []models.Sup
-	db.
-		Preload("User").
-		Find(&data)
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "All sups",
-		"data":    data,
-	})
-}
-
-// Total of DR by Sup ID
-func GetDrByID(c *fiber.Ctx) error {
-	sup_uuid := c.Params("sup_uuid")
-	db := database.DB
-
-	var dr []models.Dr
-	var count int64
-	db.Where("sup_uuid = ?", sup_uuid).Find(&dr).Count(&count)
-
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "Count DR by Sup id found",
-		"data":    count,
-	})
-}
-
-// Total of Cyclo by Cyclo ID
-func GetCycloByID(c *fiber.Ctx) error {
-	sup_uuid := c.Params("sup_uuid")
-	db := database.DB
-
-	var cyclo []models.Cyclo
-	var count int64
-	db.Where("sup_uuid = ?", sup_uuid).Find(&cyclo).Count(&count)
-
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "Count Cyclo by Sup id found",
-		"data":    count,
-	})
-}
-
-// Total of POS by Sup ID
-func GetPosByID(c *fiber.Ctx) error {
-	sup_uuid := c.Params("sup_uuid")
-	db := database.DB
-
-	var pos []models.Pos
-	var count int64
-	db.Where("sup_uuid = ?", sup_uuid).Find(&pos).Count(&count)
-
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "Count POS by Sup id found",
-		"data":    count,
-	})
-}
-
-// Get one data
-func GetSup(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-	db := database.DB
-	var sup models.Sup
-	db.Where("uuid = ?", uuid).First(&sup)
-	if sup.ProvinceUUID == "" {
-		return c.Status(404).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "No sup name found",
-				"data":    nil,
-			},
-		)
-	}
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "sup found",
-			"data":    sup,
-		},
-	)
-}
-
-// Create data
-func CreateSup(c *fiber.Ctx) error {
-	p := &models.Sup{}
-
-	if err := c.BodyParser(&p); err != nil {
-		return err
-	}
-	p.UUID = uuid.New().String()
-	database.DB.Create(p)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "Sup created success",
-			"data":    p,
-		},
-	)
-}
-
-// Update data
-func UpdateSup(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-	db := database.DB
-
-	type UpdateData struct {
-		UUID string `json:"uuid"`
-
-		CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null"`
-		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-		// AsmUUID      string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
-		// UserUUID     string `json:"user_uuid"`
-		Signature string `json:"signature"`
-	}
-
-	var updateData UpdateData
-
-	if err := c.BodyParser(&updateData); err != nil {
-		return c.Status(500).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "Review your iunput",
-				"data":    nil,
-			},
-		)
-	}
-
-	sup := new(models.Sup)
-
-	db.Where("uuid = ?", uuid).First(&sup)
-	sup.CountryUUID = updateData.CountryUUID
-	sup.ProvinceUUID = updateData.ProvinceUUID
-	sup.AreaUUID = updateData.AreaUUID
-	// sup.AsmUUID = updateData.AsmUUID
-	// sup.UserUUID = updateData.UserUUID
-	sup.Signature = updateData.Signature
-
-	db.Save(&sup)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "sup updated success",
-			"data":    sup,
-		},
-	)
-
-}
-
-// Delete data
-func DeleteSup(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-
-	db := database.DB
-
-	var sup models.Sup
-	db.Where("uuid = ?", uuid).First(&sup)
-	if sup.UUID == "00000000-0000-0000-0000-000000000000" {
-		return c.Status(404).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "No sup found",
-				"data":    nil,
-			},
-		)
-	}
-
-	db.Delete(&sup)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "sup deleted success",
-			"data":    nil,
-		},
-	)
 }

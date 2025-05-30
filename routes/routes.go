@@ -122,17 +122,6 @@ func Setup(app *fiber.App) {
 	com.Put("/update/:uuid", commune.UpdateCommune)
 	com.Delete("/delete/:uuid", commune.DeleteCommune)
 
-	// ASM controller
-	as := api.Group("/asms")
-	as.Get("/all", asm.GetAllAsms)
-	as.Get("/all/paginate", asm.GetPaginatedASM)
-	as.Get("/all/paginate/province/:province_uuid", asm.GetPaginatedASMByProvince)
-	// as.Get("/all/:id", asm.GetAsmByID)
-	as.Post("/create", asm.CreateAsm)
-	as.Get("/get/:uuid", asm.GetAsm)
-	as.Put("/update/:uuid", asm.UpdateAsm)
-	as.Delete("/delete/:uuid", asm.DeleteAsm)
-
 	// Manager controller
 	ma := api.Group("/managers")
 	ma.Get("/all", manager.GetAllManagers)
@@ -142,6 +131,32 @@ func Setup(app *fiber.App) {
 	ma.Post("/create", manager.CreateManager)
 	ma.Put("/update/:uuid", manager.UpdateManager)
 	ma.Delete("/delete/:uuid", manager.DeleteManager)
+
+	// ASM controller
+	as := api.Group("/asms")
+	as.Get("/all/paginate", asm.GetPaginatedASM)
+	as.Get("/all/paginate/province/:province_uuid", asm.GetPaginatedASMByProvince)
+
+	// Sup controller
+	su := api.Group("/sups")
+	su.Get("/all/paginate", sup.GetPaginatedSups)
+	su.Get("/all/paginate/province/:province_uuid", sup.GetPaginatedSupProvince)
+	su.Get("/all/paginate/area/:area_uuid", sup.GetPaginatedSupArea)
+
+	// DR Controller
+	d := api.Group("/drs") 
+	d.Get("/all/paginate", dr.GetPaginatedDr)
+	d.Get("/all/paginate/province/:province_uuid", dr.GetPaginatedDrByProvince)
+	d.Get("/all/paginate/area/:area_uuid", dr.GetPaginatedDrByArea)
+	d.Get("/all/paginate/subarea/:subarea_uuid", dr.GetPaginatedDrBySubArea) 
+
+	//Cyclo controller
+	cy := api.Group("/cyclos")
+	cy.Get("/all/paginate", cyclo.GetPaginatedCyclo)
+	cy.Get("/all/paginate/province/:province_uuid", cyclo.GetPaginatedCycloProvinceByID)
+	cy.Get("/all/paginate/area/:area_uuid", cyclo.GetPaginatedCycloByAreaUUID)
+	cy.Get("/all/paginate/subarea/:subarea_uuid", cyclo.GetPaginatedSubAreaByID)
+	cy.Get("/all/paginate/commune/:user_uuid", cyclo.GetPaginatedCycloCommune) 
 
 	// Posforms controller
 	posf := api.Group("/posforms")
@@ -167,17 +182,6 @@ func Setup(app *fiber.App) {
 	posfi.Put("/update/:uuid", PosFormItem.UpdatePosformItem)
 	posfi.Delete("/delete/:uuid", PosFormItem.DeletePosformItem)
 
-	// Sup controller
-	su := api.Group("/sups")
-	su.Get("/all", sup.GetAllSups)
-	su.Get("/all/paginate", sup.GetPaginatedSups)
-	su.Get("/all/paginate/province/:province_uuid", sup.GetPaginatedSupProvince)
-	su.Get("/all/paginate/area/:area_uuid", sup.GetPaginatedSupArea)
-	su.Post("/create", sup.CreateSup)
-	su.Get("/get/:uuid", sup.GetSup)
-	su.Put("/update/:uuid", sup.UpdateSup)
-	su.Delete("/delete/:uuid", sup.DeleteSup)
-
 	// Pos controller
 	po := api.Group("/pos")
 	po.Get("/all", pos.GetAllPoss)
@@ -195,31 +199,6 @@ func Setup(app *fiber.App) {
 	po.Get("/get/:uuid", pos.GetPos)
 	po.Put("/update/:uuid", pos.UpdatePos)
 	po.Delete("/delete/:uuid", pos.DeletePos)
-
-	// DR Controller
-	d := api.Group("/drs")
-	d.Get("/all", dr.GetAllDr)
-	d.Get("/all/paginate", dr.GetPaginatedDr)
-	d.Get("/all/paginate/province/:province_uuid", dr.GetPaginatedDrByProvince)
-	d.Get("/all/paginate/area/:area_uuid", dr.GetPaginatedDrByArea)
-	d.Get("/all/paginate/subarea/:subarea_uuid", dr.GetPaginatedDrBySubArea)
-	d.Get("/get/:uuid", dr.GetOneDr)
-	d.Post("/create", dr.CreateDr)
-	d.Put("/update/:uuid", dr.UpdateDr)
-	d.Delete("/delete/:uuid", dr.DeleteDr)
-
-	//Cyclo controller
-	cy := api.Group("/cyclos")
-	cy.Get("/all", cyclo.GetAllCyclo)
-	cy.Get("/all/paginate", cyclo.GetPaginatedCyclo)
-	cy.Get("/all/paginate/province/:province_uuid", cyclo.GetPaginatedCycloProvinceByID)
-	cy.Get("/all/paginate/area/:area_uuid", cyclo.GetPaginatedCycloByAreaUUID)
-	cy.Get("/all/paginate/subarea/:subarea_uuid", cyclo.GetPaginatedSubAreaByID)
-	cy.Get("/all/paginate/commune/:user_uuid", cyclo.GetPaginatedCycloCommune)
-	cy.Get("/get/:uuid", cyclo.GetOneCyclo)
-	cy.Post("/create", cyclo.CreateCyclo)
-	cy.Put("/update/:uuid", cyclo.UpdateCyclo)
-	cy.Delete("/delete/:uuid", cyclo.DeleteCyclo)
 
 	//routeplan controller
 	rp := api.Group("/routeplans")

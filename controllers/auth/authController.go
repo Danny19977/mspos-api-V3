@@ -11,6 +11,7 @@ import (
 	"github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	// "gorm.io/gorm"
 )
 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
@@ -48,6 +49,12 @@ func Register(c *fiber.Ctx) error {
 		AreaUUID:     nu.AreaUUID,
 		SubAreaUUID:  nu.SubAreaUUID,
 		CommuneUUID:  nu.CommuneUUID,
+		Support:      nu.Support,
+		Manager:      nu.Manager,
+		Asm:          nu.Asm,
+		Sup:          nu.Sup,
+		Dr:           nu.Dr,
+		Cyclo:        nu.Cyclo,
 	}
 
 	u.SetPassword(nu.Password)
@@ -150,14 +157,22 @@ func AuthUser(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
+		// Preload("Asm", func(db *gorm.DB) *gorm.DB {
+		// 	return db.Select("fullname AS asm_fullname, uuid AS asm_uuid").Where("users.asm_uuid = ?", UserUUID)
+		// }).
+		// Preload("Sup", func(db *gorm.DB) *gorm.DB {
+		// 	return db.Select("fullname AS sup_fullname, uuid AS sup_uuid").Where("users.sup_uuid = ?", UserUUID)
+		// }).
+		// Preload("Dr", func(db *gorm.DB) *gorm.DB {
+		// 	return db.Select("fullname AS dr_fullname, uuid AS dr_uuid").Where("users.dr_uuid = ?", UserUUID)
+		// }).
+		// Preload("Cyclo", func(db *gorm.DB) *gorm.DB {
+		// 	return db.Select("fullname AS cyclo_fullname, uuid AS cyclo_uuid").Where("users.cyclo_uuid = ?", UserUUID)
+		// }).
 		First(&u)
 
 	r := &models.UserResponse{
-		ID:           u.ID,
+		// ID:           u.ID,
 		UUID:         u.UUID,
 		Fullname:     u.Fullname,
 		Email:        u.Email,
@@ -176,12 +191,20 @@ func AuthUser(c *fiber.Ctx) error {
 		SubArea:      u.SubArea,
 		CommuneUUID:  u.CommuneUUID,
 		Commune:      u.Commune,
+		Support:      u.Support,
+		SupportUUID:  u.SupportUUID,
+		Manager:      u.Manager,
+		ManagerUUID:  u.ManagerUUID,
+		Asm:          u.Asm,
+		AsmUUID:      u.AsmUUID,
+		Sup:          u.Sup,
+		SupUUID:      u.SupUUID,
+		Dr:           u.Dr,
+		DrUUID:       u.DrUUID,
+		Cyclo:        u.Cyclo,
+		CycloUUID:    u.CycloUUID,
 		CreatedAt:    u.CreatedAt,
 		UpdatedAt:    u.UpdatedAt,
-		Asm:          u.Asm,
-		Sup:          u.Sup,
-		Dr:           u.Dr,
-		Cyclo:        u.Cyclo,
 	}
 
 	// json, err := json.MarshalIndent(r, "", "  ")
@@ -304,7 +327,7 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	db := database.DB
 
-	db.First(&user, user.ID)
+	db.Where("uuid = ?", UserUUID).First(&user)
 	user.Password = p
 
 	db.Save(&user)
