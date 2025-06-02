@@ -589,7 +589,8 @@ func CreateRouteplan(c *fiber.Ctx) error {
 	}
 
 	p.UUID = utils.GenerateUUID()
-	database.DB.Create(p)
+	// Omit the primary key field (ID) during creation
+	database.DB.Omit("ID").Create(p)
 
 	return c.JSON(
 		fiber.Map{

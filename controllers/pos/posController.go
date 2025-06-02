@@ -11,7 +11,7 @@ import (
 
 // Paginate
 func GetPaginatedPos(c *fiber.Ctx) error {
-	db := database.DB 
+	db := database.DB
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -83,7 +83,7 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	AsmUUID := c.Params("asm_uuid") 
+	ProvinceUUID := c.Params("province_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -104,13 +104,13 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("pos.asm_uuid = ?", AsmUUID).
+		Where("pos.province_uuid = ?", ProvinceUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("pos.asm_uuid = ?", AsmUUID).
+		Where("pos.province_uuid = ?", ProvinceUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -157,7 +157,7 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	SupUUID := c.Params("sup_uuid") 
+	AreaUUID := c.Params("area_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -178,13 +178,13 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("pos.sup_uuid = ?", SupUUID).
+		Where("pos.area_uuid = ?", AreaUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("pos.sup_uuid = ?", SupUUID).
+		Where("pos.area_uuid = ?", AreaUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -231,7 +231,7 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	DrUUID := c.Params("dr_uuid") 
+	SubAreaUUID := c.Params("sub_area_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -252,13 +252,13 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("pos.dr_uuid = ?", DrUUID).
+		Where("pos.sub_area_uuid = ?", SubAreaUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("pos.dr_uuid = ?", DrUUID).
+		Where("pos.sub_area_uuid = ?", SubAreaUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -305,7 +305,7 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	CycloUUID := c.Params("cyclo_uuid") 
+	CycloUUID := c.Params("cyclo_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -518,7 +518,6 @@ func UpdatePos(c *fiber.Ctx) error {
 	db := database.DB
 
 	type UpdateData struct {
-
 		Name      string `gorm:"not null" json:"name"` // Celui qui vend
 		Shop      string `json:"shop"`                 // Nom du shop
 		Postype   string `json:"postype"`              // Type de POS

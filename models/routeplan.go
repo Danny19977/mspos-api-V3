@@ -17,7 +17,7 @@ type RoutePlan struct {
 	User     User   `gorm:"foreignKey:UserUUID;references:UUID"`
 
 	CountryUUID string  `json:"country_uuid" gorm:"type:varchar(255);not null"`
-	Country     Country `gorm:"foreignKey:CountryUUID;references:UUID"`
+	Country     Country `gorm:"foreignKey:CountryUUID;references:UUID"` 
 
 	ProvinceUUID string   `json:"province_uuid" gorm:"type:varchar(255);not null"`
 	Province     Province `gorm:"foreignKey:ProvinceUUID;references:UUID"`
