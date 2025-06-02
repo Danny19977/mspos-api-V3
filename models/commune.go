@@ -1,11 +1,18 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Commune struct {
-	gorm.Model
-	UUID string `gorm:"not null;unique" json:"uuid"`
+	UUID string `gorm:"type:text;not null;unique;primaryKey" json:"uuid"`
 
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	
 	Name string `gorm:"not null" json:"name"`
 
 	CountryUUID  string   `json:"country_uuid" gorm:"type:varchar(255);not null"`
@@ -19,11 +26,13 @@ type Commune struct {
 
 	Signature string `json:"signature"`
 
-	Cyclos []Cyclo `gorm:"foreignKey:CommuneUUID;references:UUID"`
+	// RouthePlans []RoutePlan `gorm:"foreignKey:CommuneUUID;references:UUID"`
+	// Pos         []Pos       `gorm:"foreignKey:CommuneUUID;references:UUID"`
+	// PosForms    []PosForm   `gorm:"foreignKey:CommuneUUID;references:UUID"`
 
-	RouthePlans []RoutePlan `gorm:"foreignKey:CommuneUUID;references:UUID"`
-	Pos         []Pos       `gorm:"foreignKey:CommuneUUID;references:UUID"`
-	PosForms    []PosForm   `gorm:"foreignKey:CommuneUUID;references:UUID"`
+	// Users []User `gorm:"foreignKey:CommuneUUID;references:UUID"`
 
-	Users []User `gorm:"foreignKey:CommuneUUID;references:UUID"`
+	TotalUsers    int64 `json:"total_users"`
+	TotalPos      int64 `json:"total_pos"`
+	TotalPosForms int64 `json:"total_posforms"`
 }

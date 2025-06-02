@@ -11,18 +11,7 @@ import (
 
 // Paginate
 func GetPaginatedPos(c *fiber.Ctx) error {
-	db := database.DB
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
-	// Provide default values if start_date or end_date are empty
-	if start_date == "" {
-		start_date = "1970-01-01T00:00:00Z" // Default start date
-	}
-	if end_date == "" {
-		end_date = "2100-01-01T00:00:00Z" // Default end date
-	}
+	db := database.DB 
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -43,13 +32,11 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -59,10 +46,6 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
 		Preload("User").
 		Preload("PosForms").
 		Preload("PosEquipments").
@@ -100,18 +83,7 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	ProvinceUUID := c.Params("province_uuid")
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
-	// Provide default values if start_date or end_date are empty
-	if start_date == "" {
-		start_date = "1970-01-01T00:00:00Z" // Default start date
-	}
-	if end_date == "" {
-		end_date = "2100-01-01T00:00:00Z" // Default end date
-	}
+	AsmUUID := c.Params("asm_uuid") 
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -132,15 +104,13 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("province_uuid = ?", ProvinceUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos.asm_uuid = ?", AsmUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("province_uuid = ?", ProvinceUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos.asm_uuid = ?", AsmUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -150,10 +120,6 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
 		Preload("User").
 		Preload("PosForms").
 		Preload("PosEquipments").
@@ -191,10 +157,7 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	AreaUUID := c.Params("area_uuid")
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
+	SupUUID := c.Params("sup_uuid") 
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -215,15 +178,13 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("area_uuid = ?", AreaUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos.sup_uuid = ?", SupUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("area_uuid = ?", AreaUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos.sup_uuid = ?", SupUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -233,10 +194,6 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
 		Preload("User").
 		Preload("PosEquipments").
 		Preload("PosForms").
@@ -274,10 +231,7 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	SubAreaUUID := c.Params("subarea_uuid")
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
+	DrUUID := c.Params("dr_uuid") 
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -298,15 +252,13 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("sub_area_uuid = ?", SubAreaUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos.dr_uuid = ?", DrUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("sub_area_uuid = ?", SubAreaUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
+		Where("pos.dr_uuid = ?", DrUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -316,10 +268,6 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
 		Preload("User").
 		Preload("PosEquipments").
 		Preload("PosForms").
@@ -357,18 +305,7 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	CycloUUID := c.Params("cyclo_uuid")
-
-	start_date := c.Query("start_date")
-	end_date := c.Query("end_date")
-
-	// Provide default values if start_date or end_date are empty
-	if start_date == "" {
-		start_date = "1970-01-01T00:00:00Z" // Default start date
-	}
-	if end_date == "" {
-		end_date = "2100-01-01T00:00:00Z" // Default end date
-	}
+	CycloUUID := c.Params("cyclo_uuid") 
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -390,14 +327,12 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
 		Where("pos.cyclo_uuid = ?", CycloUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
 		Where("pos.cyclo_uuid = ?", CycloUUID).
-		Where("pos.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -408,10 +343,6 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
-		Preload("Asm").
-		Preload("Sup").
-		Preload("Dr").
-		Preload("Cyclo").
 		Preload("PosForms").
 		Preload("PosEquipments").
 		Find(&dataList).Error
@@ -476,10 +407,10 @@ func GetAllPosByManager(c *fiber.Ctx) error {
 func GetAllPosByASM(c *fiber.Ctx) error {
 	db := database.DB
 
-	provinceUUID := c.Params("province_uuid")
+	AsmUUID := c.Params("asm_uuid")
 
 	var data []models.Pos
-	db.Where("province_uuid = ?", provinceUUID).
+	db.Where("asm_uuid = ?", AsmUUID).
 		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
@@ -492,10 +423,10 @@ func GetAllPosByASM(c *fiber.Ctx) error {
 func GetAllPosBySup(c *fiber.Ctx) error {
 	db := database.DB
 
-	areaUUID := c.Params("area_uuid")
+	SupUUID := c.Params("sup_uuid")
 
 	var data []models.Pos
-	db.Where("area_uuid = ?", areaUUID).
+	db.Where("sup_uuid = ?", SupUUID).
 		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
@@ -508,10 +439,10 @@ func GetAllPosBySup(c *fiber.Ctx) error {
 func GetAllPosByDR(c *fiber.Ctx) error {
 	db := database.DB
 
-	subAreaUUID := c.Params("sub_area_uuid")
+	DrUUID := c.Params("dr_uuid")
 
 	var data []models.Pos
-	db.Where("sub_area_uuid = ?", subAreaUUID).
+	db.Where("dr_uuid = ?", DrUUID).
 		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
@@ -569,6 +500,7 @@ func CreatePos(c *fiber.Ctx) error {
 	}
 
 	p.UUID = uuid.New().String()
+	p.Sync = true
 	database.DB.Create(p)
 
 	return c.JSON(
@@ -586,7 +518,6 @@ func UpdatePos(c *fiber.Ctx) error {
 	db := database.DB
 
 	type UpdateData struct {
-		UUID string `json:"uuid"`
 
 		Name      string `gorm:"not null" json:"name"` // Celui qui vend
 		Shop      string `json:"shop"`                 // Nom du shop
@@ -598,12 +529,25 @@ func UpdatePos(c *fiber.Ctx) error {
 		Telephone string `json:"telephone"`
 		Image     string `json:"image"`
 
-		CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null"`
-		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+		CountryUUID  string `json:"country_uuid"`
+		ProvinceUUID string `json:"province_uuid"`
+		AreaUUID     string `json:"area_uuid"`
+		SubAreaUUID  string `json:"subarea_uuid"`
 
-		UserUUID string `json:"user_uuid" gorm:"type:varchar(255);not null"`
+		ManagerUUID string `json:"manager_uuid"`
+		Manager     string `json:"manager" gorm:"default:''"`
+		SupportUUID string `json:"support_uuid"`
+		Support     string `json:"support" gorm:"default:''"`
+		AsmUUID     string `json:"asm_uuid"`
+		Asm         string `json:"asm" gorm:"default:''"`
+		SupUUID     string `json:"sup_uuid"`
+		Sup         string `json:"sup" gorm:"default:''"`
+		DrUUID      string `json:"dr_uuid"`
+		Dr          string `json:"dr" gorm:"default:''"`
+		CycloUUID   string `json:"cyclo_uuid"`
+		Cyclo       string `json:"cyclo" gorm:"default:''"`
+
+		UserUUID string `json:"user_uuid"`
 
 		Status    bool   `json:"status"`
 		Signature string `json:"signature"`
@@ -636,9 +580,18 @@ func UpdatePos(c *fiber.Ctx) error {
 	pos.ProvinceUUID = updateData.ProvinceUUID
 	pos.AreaUUID = updateData.AreaUUID
 	pos.SubAreaUUID = updateData.SubAreaUUID
+	pos.AsmUUID = updateData.AsmUUID
+	pos.Asm = updateData.Asm
+	pos.SupUUID = updateData.SupUUID
+	pos.Sup = updateData.Sup
+	pos.DrUUID = updateData.DrUUID
+	pos.Dr = updateData.Dr
+	pos.CycloUUID = updateData.CycloUUID
+	pos.Cyclo = updateData.Cyclo
 	pos.UserUUID = updateData.UserUUID
 	pos.Status = updateData.Status
 	pos.Signature = updateData.Signature
+	pos.Sync = true
 
 	db.Save(&pos)
 

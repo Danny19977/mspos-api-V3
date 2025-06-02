@@ -1,10 +1,17 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Brand struct {
-	gorm.Model
-	UUID string `gorm:"not null;unique" json:"uuid"`
+	UUID string `gorm:"type:text;not null;unique;primaryKey" json:"uuid"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	Name         string   `gorm:"not null" json:"name"`
 	CountryUUID  string   `json:"country_uuid" gorm:"type:varchar(255);not null"`

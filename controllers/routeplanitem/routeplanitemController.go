@@ -5,8 +5,8 @@ import (
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
+	"github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 // Paginate
@@ -43,7 +43,6 @@ func GetPaginatedRoutePlanItem(c *fiber.Ctx) error {
 		Order("updated_at DESC").
 		Preload("RoutePlan").
 		Preload("Pos").
-		Preload("Status").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -74,18 +73,37 @@ func GetPaginatedRoutePlanItem(c *fiber.Ctx) error {
 	})
 }
 
-// Get One by route uuid
-func GetOneByRouteUUID(c *fiber.Ctx) error {
-	routeUUID := c.Params("route_uuid")
+// Get All data
+func GetAllRoutePlanItem(c *fiber.Ctx) error {
+	db := database.DB
+
+	routePlanUUID := c.Params("route_plan_uuid")
+
+	var dataList []models.RoutePlanItem
+	db.
+		Where("route_plan_uuid = ?", routePlanUUID).
+		Preload("RoutePlan").
+		Preload("Pos").
+		Find(&dataList)
+
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "All RoutePlanItems",
+		"data":    dataList,
+	})
+}
+
+// Get One data
+func GetOneByRouteItermUUID(c *fiber.Ctx) error {
+	UUID := c.Params("uuid")
 	db := database.DB
 
 	var routePlanItem models.RoutePlanItem
 
 	// Fetch the RoutePlanItem by route UUID
-	err := db.Where("route_plan_uuid = ?", routeUUID).
+	err := db.Where("uuid = ?", UUID).
 		Preload("RoutePlan").
 		Preload("Pos").
-		Preload("Status").
 		First(&routePlanItem).Error
 
 	if err != nil {
@@ -103,19 +121,6 @@ func GetOneByRouteUUID(c *fiber.Ctx) error {
 	})
 }
 
-// Get All data
-func GetAllRoutePlanItem(c *fiber.Ctx) error {
-	db := database.DB
-
-	var data []models.RoutePlanItem
-	db.Find(&data)
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "All RoutePlanItems",
-		"data":    data,
-	})
-}
-
 // Create data
 func CreateRoutePlanItem(c *fiber.Ctx) error {
 	p := &models.RoutePlanItem{}
@@ -124,7 +129,7 @@ func CreateRoutePlanItem(c *fiber.Ctx) error {
 		return err
 	}
 
-	p.UUID = uuid.New().String()
+	p.UUID = utils.GenerateUUID()
 	database.DB.Create(p)
 
 	return c.JSON(
@@ -142,9 +147,9 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 	db := database.DB
 
 	type UpdateData struct {
-		UUID        string `json:"uuid"`
-		PosUUID     string `json:"pos_uuid" gorm:"type:varchar(255);not null"`
-		RoutePlanID string `json:"routeplan_uuid" gorm:"type:varchar(255);not null"`
+		RoutePlanUUID string `json:"routeplan_uuid"`
+		PosUUID       string `json:"pos_uuid"`
+		Status        bool   `json:"status"`
 	}
 
 	var updateData UpdateData
@@ -165,12 +170,50 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 
 	db.Save(&RoutePlanItem)
 	RoutePlanItem.PosUUID = updateData.PosUUID
-	RoutePlanItem.RoutePlanUUID = updateData.RoutePlanID
+	RoutePlanItem.RoutePlanUUID = updateData.RoutePlanUUID
+	RoutePlanItem.Status = updateData.Status
 
 	return c.JSON(
 		fiber.Map{
 			"status":  "success",
 			"message": "stock updated success",
+			"data":    RoutePlanItem,
+		},
+	)
+}
+
+// Update data Status
+func UpdateRoutePlanItemPosStatus(c *fiber.Ctx) error {
+	PosUUID := c.Params("pos_uuid")
+	db := database.DB
+
+	type UpdateData struct {
+		Status bool `json:"status"`
+	}
+
+	var updateData UpdateData
+
+	if err := c.BodyParser(&updateData); err != nil {
+		return c.Status(500).JSON(
+			fiber.Map{
+				"status":  "error",
+				"message": "Review your iunput",
+				"data":    nil,
+			},
+		)
+	}
+
+	RoutePlanItem := new(models.RoutePlanItem)
+
+	db.Where("pos_uuid = ?", PosUUID).First(&RoutePlanItem)
+
+	db.Save(&RoutePlanItem)
+	RoutePlanItem.Status = updateData.Status
+
+	return c.JSON(
+		fiber.Map{
+			"status":  "success",
+			"message": "RoutePlanItem updated success",
 			"data":    RoutePlanItem,
 		},
 	)

@@ -38,6 +38,32 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 	// Fetch paginated data
 	err = db.
 		Where("name ILIKE ?", "%"+search+"%").
+		Select(` 
+			areas.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = areas.country_uuid
+				AND u2.province_uuid = areas.province_uuid
+				AND u2.area_uuid = areas.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = areas.country_uuid 
+				AND p.province_uuid = areas.province_uuid
+				AND p.area_uuid = areas.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = areas.country_uuid
+				AND ps.province_uuid = areas.province_uuid
+				AND ps.area_uuid = areas.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -45,12 +71,9 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
-		Preload("Pos").
-		Preload("Users").
-		Preload("PosForms").
+		// Preload("Pos").
+		// Preload("Users").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -114,6 +137,32 @@ func GetAreaByASM(c *fiber.Ctx) error {
 	err = db.
 		Where("province_uuid = ?", ProvinceUUID).
 		Where("name ILIKE ?", "%"+search+"%").
+		Select(` 
+			areas.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = areas.country_uuid
+				AND u2.province_uuid = areas.province_uuid
+				AND u2.area_uuid = areas.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = areas.country_uuid 
+				AND p.province_uuid = areas.province_uuid
+				AND p.area_uuid = areas.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = areas.country_uuid
+				AND ps.province_uuid = areas.province_uuid
+				AND ps.area_uuid = areas.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -121,12 +170,9 @@ func GetAreaByASM(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
-		Preload("Pos").
-		Preload("Users").
-		Preload("PosForms").
+		// Preload("Pos").
+		// Preload("Users").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -190,6 +236,32 @@ func GetAreaBySups(c *fiber.Ctx) error {
 	err = db.
 		Where("uuid = ?", AreaUUID).
 		Where("name ILIKE ?", "%"+search+"%").
+		Select(` 
+			areas.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = areas.country_uuid
+				AND u2.province_uuid = areas.province_uuid
+				AND u2.area_uuid = areas.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = areas.country_uuid 
+				AND p.province_uuid = areas.province_uuid
+				AND p.area_uuid = areas.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = areas.country_uuid
+				AND ps.province_uuid = areas.province_uuid
+				AND ps.area_uuid = areas.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -197,12 +269,9 @@ func GetAreaBySups(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
-		Preload("Pos").
-		Preload("Users").
-		Preload("PosForms").
+		// Preload("Pos").
+		// Preload("Users").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {

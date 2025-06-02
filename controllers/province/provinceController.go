@@ -40,6 +40,28 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 	// Fetch paginated data
 	err = db.
 		Where("name ILIKE ?", "%"+search+"%").
+		Select(` 
+			provinces.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = provinces.country_uuid
+				AND u2.province_uuid = provinces.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = provinces.country_uuid 
+				AND p.province_uuid = provinces.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM pos_forms ps  
+				WHERE ps.country_uuid = provinces.country_uuid
+				AND ps.province_uuid = provinces.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -47,14 +69,10 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 		Preload("Areas").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Asms").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
 		Preload("Brands").
-		Preload("Pos").
-		Preload("Users").
-		Preload("PosForms").
+		// Preload("Pos").
+		// Preload("Users").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -66,9 +84,7 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 	}
 
 	// Calculate total pages
-	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit)) 
 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
@@ -120,6 +136,29 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 	err = db.
 		Where("uuid = ?", ProvinceUUID).
 		Where("name ILIKE ?", "%"+search+"%").
+		Select(` 
+			provinces.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = provinces.country_uuid
+				AND u2.province_uuid = provinces.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = provinces.country_uuid 
+				AND p.province_uuid = provinces.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = provinces.country_uuid
+				AND ps.province_uuid = provinces.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -127,14 +166,10 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 		Preload("Areas").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Asms").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
 		Preload("Brands").
-		Preload("Pos").
-		Preload("Users").
-		Preload("PosForms").
+		// Preload("Pos").
+		// Preload("Users").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {

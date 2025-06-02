@@ -5,8 +5,8 @@ import (
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
+	"github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
-	// "github.com/google/uuid"
 )
 
 // Paginate
@@ -33,14 +33,36 @@ func GetPaginatedRouteplan(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.RoutePlan{}).
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where(`  
+		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where(`  
+		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
+		Select(`
+			route_plans.*, 
+			COALESCE((
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid 
+				AND r.status = true
+			), 0) AS total_route_plan_item_active,
+			COALESCE((
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid
+			), 0) AS total_route_plan_item
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -65,7 +87,7 @@ func GetPaginatedRouteplan(c *fiber.Ctx) error {
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
-	pagination := map[string]interface{}{
+	pagination := map[string]any{
 		"total_records": totalRecords,
 		"total_pages":   totalPages,
 		"current_page":  page,
@@ -107,16 +129,38 @@ func GetPaginatedRouthplaByProvinceUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.RoutePlan{}).
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
 		Where("route_plans.province_uuid = ?", provinceUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where(`  
+		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
 		Where("route_plans.province_uuid = ?", provinceUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where(`  
+		 EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
+		Select(`
+			route_plans.*, 
+			(
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid 
+				AND r.status = true
+			) AS total_route_plan_item_active,
+			 (
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid
+			) AS total_route_plan_item
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -183,16 +227,38 @@ func GetPaginatedRouthplaByareaUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.RoutePlan{}).
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
 		Where("route_plans.area_uuid = ?", areaUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where(`  
+		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
 		Where("route_plans.area_uuid = ?", areaUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where(`  
+		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
+		Select(`
+			route_plans.*, 
+			(
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid 
+				AND r.status = true
+			) AS total_route_plan_item_active,
+			 (
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid
+			) AS total_route_plan_item
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -259,16 +325,38 @@ func GetPaginatedRouthplaBySubareaUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.RoutePlan{}).
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
 		Where("route_plans.sub_area_uuid = ?", subareaUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where(`  
+		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
 		Where("route_plans.sub_area_uuid = ?", subareaUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where(`  
+		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
+		Select(`
+			route_plans.*, 
+			(
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid 
+				AND r.status = true
+			) AS total_route_plan_item_active,
+			 (
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid
+			) AS total_route_plan_item
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -312,7 +400,7 @@ func GetPaginatedRouthplaBySubareaUUID(c *fiber.Ctx) error {
 // GetPaginatedRouteplaBycommuneUUID
 func GetPaginatedRouteplaBycommuneUUID(c *fiber.Ctx) error {
 
-	communeUUID := c.Params("commune_uuid")
+	UserUUID := c.Params("user_uuid")
 
 	// Initialize database connection
 	db := database.DB
@@ -335,16 +423,38 @@ func GetPaginatedRouteplaBycommuneUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.RoutePlan{}).
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
-		Where("route_plans.commune_uuid = ?", communeUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where("route_plans.user_uuid = ?", UserUUID).
+		Where(`  
+		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Joins("JOIN users ON users.uuid = route_plans.user_uuid").
-		Where("route_plans.commune_uuid = ?", communeUUID).
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where("route_plans.user_uuid = ?", UserUUID).
+		Where(`  
+		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
+		`, "%"+search+"%").
+		Select(`
+			route_plans.*, 
+			(
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid 
+				AND r.status = true
+			) AS total_route_plan_item_active,
+			 (
+				SELECT
+				COUNT(DISTINCT r.uuid)
+				FROM
+				route_plan_items r 
+				WHERE
+				r.route_plan_uuid = route_plans.uuid
+			) AS total_route_plan_item
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -414,14 +524,45 @@ func GetAllRouteplanBySearch(c *fiber.Ctx) error {
 	})
 }
 
+// Get one data by user id
+func GetRouteplanByUserUUID(c *fiber.Ctx) error {
+	userUUID := c.Params("user_uuid")
+	db := database.DB
+
+	var routeplan models.RoutePlan
+	db.Where("user_uuid = ?", userUUID).
+	Order("created_at DESC").
+	Preload("RoutePlanItems").
+	First(&routeplan)
+
+	if routeplan.UUID == "00000000-0000-0000-0000-000000000000" {
+		return c.Status(404).JSON(
+			fiber.Map{
+				"status":  "error",
+				"message": "No Routeplan name found",
+				"data":    nil,
+			},
+		)
+	}
+	return c.JSON(
+		fiber.Map{
+			"status":  "success",
+			"message": "All Routeplan",
+			"data":    routeplan,
+		},
+	)
+}
+
 // Get one data
 func GetRouteplan(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 	db := database.DB
 
 	var Routeplan models.RoutePlan
-	db.Where("uuid = ?", uuid).First(&Routeplan)
-	if Routeplan.UUID == "0" {
+	db.Where("uuid = ?", uuid). 
+	Preload("RoutePlanItems").
+	First(&Routeplan)
+	if Routeplan.UUID == "0000000-0000-0000-0000-000000000000" {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
@@ -447,7 +588,7 @@ func CreateRouteplan(c *fiber.Ctx) error {
 		return err
 	}
 
-	// p.UUID = uuid.New().String()
+	p.UUID = utils.GenerateUUID()
 	database.DB.Create(p)
 
 	return c.JSON(
@@ -468,12 +609,12 @@ func UpdateRouteplan(c *fiber.Ctx) error {
 		UUID string `json:"uuid"`
 
 		UserUUID     string `json:"user_uuid"`
-		ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-		SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
-		CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
-		TotalPOS     int    `json:"total_pos"`
-		Signature    string `json:"signature"`
+		ProvinceUUID string `json:"province_uuid"`
+		AreaUUID     string `json:"area_uuid"`
+		SubAreaUUID  string `json:"subarea_uuid"`
+		CommuneUUID  string `json:"commune_uuid"`
+
+		Signature string `json:"signature"`
 	}
 
 	var updateData UpdateData
@@ -495,7 +636,6 @@ func UpdateRouteplan(c *fiber.Ctx) error {
 	RoutePlan.AreaUUID = updateData.AreaUUID
 	RoutePlan.SubAreaUUID = updateData.SubAreaUUID
 	RoutePlan.CommuneUUID = updateData.CommuneUUID
-	// RoutePlan.TotalPOS = updateData.TotalPOS
 	RoutePlan.Signature = updateData.Signature
 
 	db.Save(&RoutePlan)

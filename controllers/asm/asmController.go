@@ -1,13 +1,11 @@
 package asm
 
-import (
-	"fmt"
+import ( 
 	"strconv"
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 // Paginate
@@ -28,29 +26,56 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Asm
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Asm{}).
-		Joins("JOIN users ON asms.user_uuid=users.uuid").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+	db.
+		Where("users.role = ?", "ASM").
+		Where("fullname ILIKE ? ", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN users ON asms.user_uuid=users.uuid").
-		Where("users.fullname ILIKE ?", "%"+search+"%").
+		Where("users.role = ?", "ASM"). 
+		Where("fullname ILIKE ? ", "%"+search+"%").
+		Select(` 
+			users.*, 
+			(
+				SELECT COUNT(DISTINCT u2.sup_uuid)
+				FROM users u2
+				WHERE u2.role = 'Supervisor' AND u2.province_uuid = users.province_uuid
+			) AS total_sup,
+			(
+				SELECT COUNT(DISTINCT u2.dr_uuid)
+				FROM users u2
+				WHERE u2.role = 'DR' AND u2.province_uuid = users.province_uuid
+			) AS total_dr,
+			(
+				SELECT COUNT(DISTINCT u2.cyclo_uuid)
+				FROM users u2
+				WHERE u2.role = 'Cyclo' AND u2.province_uuid = users.province_uuid
+			) AS total_cyclo, 
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE users.province_uuid = p.province_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("asms.updated_at DESC").
+		Order("users.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		// Preload("User").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
-		Preload("Pos").
-		Preload("PosForms").
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -64,10 +89,8 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
-
 	// Prepare pagination metadata
-	pagination := map[string]interface{}{
+	pagination := map[string]any{
 		"total_records": totalRecords,
 		"total_pages":   totalPages,
 		"current_page":  page,
@@ -87,7 +110,7 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 	db := database.DB
 
-	province_uuid := c.Params("province_uuid")
+	UserUUID := c.Params("user_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -103,31 +126,58 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 	// Parse search query
 	search := c.Query("search", "")
 
-	var dataList []models.Asm
+	var dataList []models.User
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Model(&models.Asm{}).
-		Joins("JOIN provinces ON asms.province_uuid=provinces.uuid").
-		Where("provinces.uuid = ?", province_uuid).
-		Where("provinces.name ILIKE ?", "%"+search+"%").
+	db.
+		Where("users.role = ?", "ASM").
+		Where("users.asm_uuid = ?", UserUUID).
+		Where("fullname ILIKE ? ", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Joins("JOIN provinces ON asms.province_uuid=provinces.uuid").
-		Where("provinces.uuid = ?", province_uuid).
-		Where("provinces.name ILIKE ?", "%"+search+"%").
+		Where("users.role = ?", "ASM").
+		Where("users.asm_uuid = ?", UserUUID).
+		Where("fullname ILIKE ? ", "%"+search+"%").
+		Select(` 
+			users.*, 
+			(
+				SELECT COUNT(DISTINCT u2.sup_uuid)
+				FROM users u2
+				WHERE u2.role = 'Supervisor' AND u2.province_uuid = users.province_uuid
+			) AS total_sup,
+			(
+				SELECT COUNT(DISTINCT u2.dr_uuid)
+				FROM users u2
+				WHERE u2.role = 'DR' AND u2.province_uuid = users.province_uuid
+			) AS total_dr,
+			(
+				SELECT COUNT(DISTINCT u2.cyclo_uuid)
+				FROM users u2
+				WHERE u2.role = 'Cyclo' AND u2.province_uuid = users.province_uuid
+			) AS total_cyclo, 
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE users.province_uuid = p.province_uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps 
+				WHERE
+				users.province_uuid = ps.province_uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
-		Order("asms.updated_at DESC").
+		Order("users.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		// Preload("User").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
-		Preload("Pos").
-		Preload("PosForms").
+		// Preload("Pos").
+		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -138,10 +188,9 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 		})
 	}
 
+
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
@@ -158,152 +207,4 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 		"data":       dataList,
 		"pagination": pagination,
 	})
-}
-
-// Get All data
-func GetAllAsms(c *fiber.Ctx) error {
-	db := database.DB
-	var data []models.Asm
-	db.
-		// Preload("User").
-		Find(&data)
-		
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "All Asms",
-		"data":    data,
-	})
-}
-
-// query data
-func GetPosByID(c *fiber.Ctx) error {
-	asm_uuid := c.Params("asm_uuid")
-	db := database.DB
-	var pos []models.Pos
-
-	var count int64
-	db.Where("asm_uuid = ?", asm_uuid).Find(&pos).Count(&count)
-
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "Count POS by ASM id found",
-		"data":    count,
-	})
-}
-
-// Get one data
-func GetAsm(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-	db := database.DB
-	var asm models.Asm
-	db.Where("uuid = ?", uuid).First(&asm)
-	if asm.ID == 0 {
-		return c.Status(404).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "No asm name found",
-				"data":    nil,
-			},
-		)
-	}
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "asm found",
-			"data":    asm,
-		},
-	)
-}
-
-// Create data
-func CreateAsm(c *fiber.Ctx) error {
-	p := &models.Asm{}
-
-	if err := c.BodyParser(&p); err != nil {
-		return err
-	}
-
-	p.UUID = uuid.New().String()
-	database.DB.Create(p)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "asm created success",
-			"data":    p,
-		},
-	)
-}
-
-// Update data
-func UpdateAsm(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-	db := database.DB
-
-	type UpdateData struct {
-		CountryUUID string `json:"country_uuid" gorm:"type:varchar(255);not null"`
-		// ProvinceUUID string   `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		Signature string `json:"signature"`
-		UserUUID  string `json:"user_uuid"`
-	}
-
-	var updateData UpdateData
-
-	if err := c.BodyParser(&updateData); err != nil {
-		return c.Status(500).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "Review your iunput",
-				"data":    nil,
-			},
-		)
-	}
-
-	asm := new(models.Asm)
-
-	db.Where("uuid = ?", uuid).First(&asm)
-	asm.CountryUUID = updateData.CountryUUID
-	// asm.ProvinceUUID = updateData.ProvinceUUID
-	asm.Signature = updateData.Signature
-	asm.UserUUID = updateData.UserUUID
-
-	db.Save(&asm)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "asm updated success",
-			"data":    asm,
-		},
-	)
-
-}
-
-// Delete data
-func DeleteAsm(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
-
-	db := database.DB
-
-	var asm models.Asm
-	db.Where("uuid = ?", uuid).First(&asm)
-	if asm.UUID == "00000000-0000-0000-0000-000000000000" {
-		return c.Status(404).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "No asm name found",
-				"data":    nil,
-			},
-		)
-	}
- 
-	db.Delete(&asm)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "asm deleted success",
-			"data":    nil,
-		},
-	)
 }

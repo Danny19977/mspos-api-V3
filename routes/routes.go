@@ -17,6 +17,7 @@ import (
 	PosFormItem "github.com/danny19977/mspos-api-v3/controllers/posformitem"
 	"github.com/danny19977/mspos-api-v3/controllers/province"
 	"github.com/danny19977/mspos-api-v3/controllers/routeplan.go"
+
 	RoutePlanItem "github.com/danny19977/mspos-api-v3/controllers/routeplanitem"
 	Subarea "github.com/danny19977/mspos-api-v3/controllers/subarea"
 	"github.com/danny19977/mspos-api-v3/controllers/sup"
@@ -121,17 +122,6 @@ func Setup(app *fiber.App) {
 	com.Put("/update/:uuid", commune.UpdateCommune)
 	com.Delete("/delete/:uuid", commune.DeleteCommune)
 
-	// ASM controller
-	as := api.Group("/asms")
-	as.Get("/all", asm.GetAllAsms)
-	as.Get("/all/paginate", asm.GetPaginatedASM)
-	as.Get("/all/paginate/province/:province_uuid", asm.GetPaginatedASMByProvince)
-	// as.Get("/all/:id", asm.GetAsmByID)
-	as.Post("/create", asm.CreateAsm)
-	as.Get("/get/:uuid", asm.GetAsm)
-	as.Put("/update/:uuid", asm.UpdateAsm)
-	as.Delete("/delete/:uuid", asm.DeleteAsm)
-
 	// Manager controller
 	ma := api.Group("/managers")
 	ma.Get("/all", manager.GetAllManagers)
@@ -142,83 +132,49 @@ func Setup(app *fiber.App) {
 	ma.Put("/update/:uuid", manager.UpdateManager)
 	ma.Delete("/delete/:uuid", manager.DeleteManager)
 
-	// Posforms controller
-	posf := api.Group("/posforms")
-	posf.Get("/all", posform.GetAllPosforms)
-	posf.Get("/all/paginate", posform.GetPaginatedPosForm)
-	posf.Get("/all/paginate/province/:province_uuid", posform.GetPaginatedPosFormProvine)
-	posf.Get("/all/paginate/area/:area_uuid", posform.GetPaginatedPosFormArea)
-	posf.Get("/all/paginate/subarea/:dr_uuid", posform.GetPaginatedPosFormSubArea)
-	posf.Get("/all/paginate/:cyclo_uuid", posform.GetPaginatedPosFormCommune)
-	posf.Get("/all/paginate/:pos_uuid", posform.GetPaginatedPosFormByPOS)
-	posf.Post("/create", posform.CreatePosform)
-	posf.Get("/get/:uuid", posform.GetPosform)
-	posf.Put("/update/:uuid", posform.UpdatePosform)
-	posf.Delete("/delete/:uuid", posform.DeletePosform)
-
-	//POSformItem controller
-	posfi := api.Group("/posform-items")
-	posfi.Get("/all/", PosFormItem.GetAllPosFormItems)
-	posfi.Get("/all/:posform_uuid", PosFormItem.GetAllPosFormItemsByUUID)
-	posfi.Get("/all/paginate", PosFormItem.GetPaginatedPosformItem)
-	// posfi.Get("/get/:uuid", PosFormItem.Get)
-	posfi.Post("/create", PosFormItem.CreatePosformItem)
-	posfi.Put("/update/:uuid", PosFormItem.UpdatePosformItem)
-	posfi.Delete("/delete/:uuid", PosFormItem.DeletePosformItem)
+	// ASM controller
+	as := api.Group("/asms")
+	as.Get("/all/paginate", asm.GetPaginatedASM)
+	as.Get("/all/paginate/province/:user_uuid", asm.GetPaginatedASMByProvince)
 
 	// Sup controller
 	su := api.Group("/sups")
-	su.Get("/all", sup.GetAllSups)
 	su.Get("/all/paginate", sup.GetPaginatedSups)
-	su.Get("/all/paginate/province/:province_uuid", sup.GetPaginatedSupProvince)
-	su.Get("/all/paginate/area/:area_uuid", sup.GetPaginatedSupArea)
-	su.Post("/create", sup.CreateSup)
-	su.Get("/get/:uuid", sup.GetSup)
-	su.Put("/update/:uuid", sup.UpdateSup)
-	su.Delete("/delete/:uuid", sup.DeleteSup)
+	su.Get("/all/paginate/province/:user_uuid", sup.GetPaginatedSupProvince)
+	su.Get("/all/paginate/area/:user_uuid", sup.GetPaginatedSupArea)
+
+	// DR Controller
+	d := api.Group("/drs")
+	d.Get("/all/paginate", dr.GetPaginatedDr)
+	d.Get("/all/paginate/province/:user_uuid", dr.GetPaginatedDrByProvince)
+	d.Get("/all/paginate/area/:user_uuid", dr.GetPaginatedDrByArea)
+	d.Get("/all/paginate/subarea/:user_uuid", dr.GetPaginatedDrBySubArea)
+
+	// Cyclo controller
+	cy := api.Group("/cyclos")
+	cy.Get("/all/paginate", cyclo.GetPaginatedCyclo)
+	cy.Get("/all/paginate/province/:user_uuid", cyclo.GetPaginatedCycloProvinceByID)
+	cy.Get("/all/paginate/area/:user_uuid", cyclo.GetPaginatedCycloByAreaUUID)
+	cy.Get("/all/paginate/subarea/:user_uuid", cyclo.GetPaginatedSubAreaByID)
+	cy.Get("/all/paginate/commune/:user_uuid", cyclo.GetPaginatedCycloCommune)
 
 	// Pos controller
 	po := api.Group("/pos")
 	po.Get("/all", pos.GetAllPoss)
 	po.Get("/all/paginate", pos.GetPaginatedPos)
-	po.Get("/all/paginate/province/:province_uuid", pos.GetPaginatedPosByProvinceUUID)
-	po.Get("/all/paginate/area/:area_uuid", pos.GetPaginatedPosByAreaUUID)
-	po.Get("/all/paginate/subarea/:subarea_uuid", pos.GetPaginatedPosBySubAreaUUID)
-	po.Get("/all/paginate/commune/:commune_uuid", pos.GetPaginatedPosByCommuneUUID)
+	po.Get("/all/paginate/province/:asm_uuid", pos.GetPaginatedPosByProvinceUUID)
+	po.Get("/all/paginate/area/:sup_uuid", pos.GetPaginatedPosByAreaUUID)
+	po.Get("/all/paginate/subarea/:dr_uuid", pos.GetPaginatedPosBySubAreaUUID)
+	po.Get("/all/paginate/commune/:cyclo_uuid", pos.GetPaginatedPosByCommuneUUID)
 	po.Get("/all/countries/:country_uuid", pos.GetAllPosByManager)
-	po.Get("/all/provinces/:province_uuid", pos.GetAllPosByASM)
-	po.Get("/all/areas/:area_uuid", pos.GetAllPosBySup)
-	po.Get("/all/subareas/:sub_area_uuid", pos.GetAllPosByDR)
+	po.Get("/all/provinces/:asm_uuid", pos.GetAllPosByASM)
+	po.Get("/all/areas/:sup_uuid", pos.GetAllPosBySup)
+	po.Get("/all/subareas/:dr_uuid", pos.GetAllPosByDR)
 	po.Get("/all/cyclo/:cyclo_uuid", pos.GetAllPosByCyclo)
 	po.Post("/create", pos.CreatePos)
 	po.Get("/get/:uuid", pos.GetPos)
 	po.Put("/update/:uuid", pos.UpdatePos)
 	po.Delete("/delete/:uuid", pos.DeletePos)
-
-	// DR Controller
-	d := api.Group("/drs")
-	d.Get("/all", dr.GetAllDr)
-	d.Get("/all/paginate", dr.GetPaginatedDr)
-	d.Get("/all/paginate/province/:province_uuid", dr.GetPaginatedDrByProvince)
-	d.Get("/all/paginate/area/:area_uuid", dr.GetPaginatedDrByArea)
-	d.Get("/all/paginate/subarea/:subarea_uuid", dr.GetPaginatedDrBySubArea)
-	d.Get("/get/:uuid", dr.GetOneDr)
-	d.Post("/create", dr.CreateDr)
-	d.Put("/update/:uuid", dr.UpdateDr)
-	d.Delete("/delete/:uuid", dr.DeleteDr)
-
-	//Cyclo controller
-	cy := api.Group("/cyclos")
-	cy.Get("/all", cyclo.GetAllCyclo)
-	cy.Get("/all/paginate", cyclo.GetPaginatedCyclo)
-	cy.Get("/all/paginate/province/:province_uuid", cyclo.GetPaginatedCycloProvinceByID)
-	cy.Get("/all/paginate/area/:area_uuid", cyclo.GetPaginatedCycloByAreaUUID)
-	cy.Get("/all/paginate/subarea/:subarea_uuid", cyclo.GetPaginatedSubAreaByID)
-	cy.Get("/all/paginate/commune/:user_uuid", cyclo.GetPaginatedCycloCommune)
-	cy.Get("/get/:uuid", cyclo.GetOneCyclo)
-	cy.Post("/create", cyclo.CreateCyclo)
-	cy.Put("/update/:uuid", cyclo.UpdateCyclo)
-	cy.Delete("/delete/:uuid", cyclo.DeleteCyclo)
 
 	//routeplan controller
 	rp := api.Group("/routeplans")
@@ -227,36 +183,60 @@ func Setup(app *fiber.App) {
 	rp.Get("/all/paginate/province/:province_uuid", routeplan.GetPaginatedRouthplaByProvinceUUID)
 	rp.Get("/all/paginate/area/:area_uuid", routeplan.GetPaginatedRouthplaByareaUUID)
 	rp.Get("/all/paginate/subarea/:subarea_uuid", routeplan.GetPaginatedRouthplaBySubareaUUID)
-	rp.Get("/all/paginate/:commune_uuid", routeplan.GetPaginatedRouteplaBycommuneUUID)
-	rp.Get("/all/:id", routeplan.GetRouteplan)
+	rp.Get("/all/paginate/:user_uuid", routeplan.GetPaginatedRouteplaBycommuneUUID)
+	rp.Get("/all/:uuid", routeplan.GetRouteplan)
+	rp.Get("/get-by-user/:user_uuid", routeplan.GetRouteplanByUserUUID)
 	rp.Get("/get/:uuid", routeplan.GetRouteplan)
 	rp.Post("/create", routeplan.CreateRouteplan)
 	rp.Put("/update/:uuid", routeplan.UpdateRouteplan)
 	rp.Delete("/delete/:uuid", routeplan.DeleteRouteplan)
 
-	//routeplanitem controller
+	// routeplanitem controller
 	rpi := api.Group("/routeplan-items")
-	rpi.Get("/all", RoutePlanItem.GetPaginatedRoutePlanItem)
 	rpi.Get("/all/paginate", RoutePlanItem.GetPaginatedRoutePlanItem)
-	rpi.Get("/all/:id", RoutePlanItem.GetAllRoutePlanItem)
-	rpi.Get("/get/:route_uuid", RoutePlanItem.GetOneByRouteUUID)
-	rpi.Get("/get/:uuid", RoutePlanItem.GetAllRoutePlanItem)
+	rpi.Get("/all/:route_plan_uuid", RoutePlanItem.GetAllRoutePlanItem)
+	rpi.Get("/get/:uuid", RoutePlanItem.GetOneByRouteItermUUID)
 	rpi.Post("/create", RoutePlanItem.CreateRoutePlanItem)
+	rpi.Put("/update/status/:pos_uuid", RoutePlanItem.UpdateRoutePlanItemPosStatus)
 	rpi.Put("/update/:uuid", RoutePlanItem.UpdateRoutePlanItem)
 	rpi.Delete("/delete/:uuid", RoutePlanItem.DeleteRoutePlanItem)
 
 	// Brand controller
 	br := api.Group("/brands")
 	br.Get("/all", brand.GetAllBrands)
-	br.Get("/all/provinces/:province_uuid", brand.GetAllBrandsByProvince)
 	br.Get("/all/paginate", brand.GetPaginatedBrands)
 	br.Get("/all/paginate/province/:province_uuid", brand.GetPaginatedBrandsByProvinceUUID)
+	br.Get("/all/provinces/:province_uuid", brand.GetAllBrandsByProvince)
 	br.Get("/get/:uuid", brand.GetOneBrand)
 	br.Post("/create", brand.CreateBrand)
 	br.Put("/update/:uuid", brand.UpdateBrand)
 	br.Delete("/delete/:uuid", brand.DeleteBrand)
 
-	//POSEQUIPEMENT controller
+	// Posforms controller
+	posf := api.Group("/posforms")
+	posf.Get("/all/paginate", posform.GetPaginatedPosForm)
+	posf.Get("/all/paginate/province/:user_uuid", posform.GetPaginatedPosFormProvine)
+	posf.Get("/all/paginate/area/:user_uuid", posform.GetPaginatedPosFormArea)
+	posf.Get("/all/paginate/subarea/:user_uuid", posform.GetPaginatedPosFormSubArea)
+	posf.Get("/all/paginate/commune/:user_uuid", posform.GetPaginatedPosFormCommune)
+	posf.Get("/all/paginate/:pos_uuid", posform.GetPaginatedPosFormByPOS)
+	posf.Get("/all", posform.GetAllPosforms)
+	posf.Post("/create", posform.CreatePosform)
+	posf.Get("/get/:uuid", posform.GetPosForm)
+	posf.Put("/update/:uuid", posform.UpdatePosform)
+	posf.Delete("/delete/:uuid", posform.DeletePosform)
+
+	// POSformItem controller
+	posfi := api.Group("/posform-items")
+	posfi.Get("/all/", PosFormItem.GetAllPosFormItems)
+	posfi.Get("/all/paginate", PosFormItem.GetPaginatedPosformItem)
+	posfi.Get("/all/:pos_form_uuid", PosFormItem.GetAllPosFormItemsByUUID)
+	// posfi.Get("/get/:uuid", PosFormItem.Get)
+	posfi.Post("/create", PosFormItem.CreatePosformItem)
+	posfi.Put("/update/:uuid", PosFormItem.UpdatePosformItem)
+	posfi.Delete("/delete/:uuid", PosFormItem.DeletePosformItem)
+
+	// POSEQUIPEMENT controller
 	pe := api.Group("/posequipements")
 	pe.Get("/all", posequiment.GetPaginatedPosEquipment)
 	pe.Get("/all/paginate", posequiment.GetPaginatedPosEquipment)

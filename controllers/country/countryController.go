@@ -6,7 +6,7 @@ import (
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
+	"github.com/google/uuid" 
 )
 
 // Paginate
@@ -38,6 +38,26 @@ func GetPaginatedCountry(c *fiber.Ctx) error {
 	// Fetch paginated data
 	err = db.
 		Where("name ILIKE ?", "%"+search+"%").
+		Select(` 
+			countries.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2
+				WHERE u2.country_uuid = countries.uuid
+			) AS total_users,  
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p 
+				WHERE p.country_uuid = countries.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps
+				WHERE ps.country_uuid = countries.uuid
+			) AS total_posforms
+		`).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -45,14 +65,9 @@ func GetPaginatedCountry(c *fiber.Ctx) error {
 		Preload("Areas").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Asms").
-		Preload("Sups").
-		Preload("Drs").
-		Preload("Cyclos").
-		Preload("Brands").
-		Preload("Pos").
-		Preload("Users").
-		Preload("PosForms").
+		Preload("Brands"). 
+		// Preload("Users").
+		// Preload("PosForms").
 		Find(&countries).Error
 
 	if err != nil {

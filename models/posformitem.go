@@ -1,13 +1,17 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type PosFormItems struct {
-	gorm.Model
+	UUID string `gorm:"type:text;not null;unique;primaryKey" json:"uuid"`
 
-	UUID string `gorm:"not null;unique" json:"uuid"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	PosFormUUID string `json:"posform_uuid" gorm:"type:varchar(255);not null"` // Foreign key (belongs to), tag `index` will create index for this column
 	BrandUUID   string `json:"brand_uuid" gorm:"type:varchar(255);not null"`   // Foreign key (belongs to), tag `index` will create index for this column

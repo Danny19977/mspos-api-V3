@@ -1,12 +1,17 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type SubArea struct {
-	gorm.Model
-	UUID string `gorm:"not null;unique" json:"uuid"`
+UUID string `gorm:"type:text;not null;unique;primaryKey" json:"uuid"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	Name string `gorm:"not null" json:"name"`
 
@@ -21,13 +26,14 @@ type SubArea struct {
 
 	Communes []Commune `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 
-	Pos      []Pos     `gorm:"foreignKey:SubAreaUUID;references:UUID"`
-	Posforms []PosForm `gorm:"foreignKey:SubAreaUUID;references:UUID"`
+	// Pos      []Pos     `gorm:"foreignKey:SubAreaUUID;references:UUID"`
+	// Posforms []PosForm `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 
-	Drs    []Dr    `gorm:"foreignKey:SubAreaUUID;references:UUID"`
-	Cyclos []Cyclo `gorm:"foreignKey:ProvinceUUID;references:UUID"`
+	// RoutePlan []RoutePlan `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 
-	RoutePlan []RoutePlan `gorm:"foreignKey:SubAreaUUID;references:UUID"`
+	// Users []User `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 
-	Users []User `gorm:"foreignKey:SubAreaUUID;references:UUID"`
+	TotalUsers    int64 `json:"total_users"`
+	TotalPos      int64 `json:"total_pos"`
+	TotalPosForms int64 `json:"total_posforms"`
 }

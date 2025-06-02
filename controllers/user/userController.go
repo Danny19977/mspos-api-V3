@@ -46,11 +46,6 @@ func GetPaginatedUsers(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Cyclo").
-		Preload("Dr").
-		Preload("Sup").
-		Preload("Asm").
-		Preload("Managers").
 		Find(&users).Error
 
 	if err != nil {
@@ -81,7 +76,6 @@ func GetPaginatedUsers(c *fiber.Ctx) error {
 	})
 }
 
-
 func GetPaginatedNoSerach(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -111,11 +105,6 @@ func GetPaginatedNoSerach(c *fiber.Ctx) error {
 		Preload("Area").
 		Preload("SubArea").
 		Preload("Commune").
-		Preload("Cyclo").
-		Preload("Dr").
-		Preload("Sup").
-		Preload("Asm").
-		Preload("Managers").
 		Find(&users).Error
 
 	if err != nil {
@@ -236,6 +225,18 @@ func CreateUser(c *fiber.Ctx) error {
 		AreaUUID:     p.AreaUUID,
 		SubAreaUUID:  p.SubAreaUUID,
 		CommuneUUID:  p.CommuneUUID,
+		Support:      p.Support,
+		SupportUUID:  p.SupportUUID,
+		ManagerUUID:  p.ManagerUUID,
+		Manager:      p.Manager,
+		AsmUUID:      p.AsmUUID,
+		Asm:          p.Asm,
+		SupUUID:      p.SupUUID,
+		Sup:          p.Sup,
+		DrUUID:       p.DrUUID,
+		Dr:           p.Dr,
+		CycloUUID:    p.CycloUUID,
+		Cyclo:        p.Cyclo,
 	}
 
 	user.SetPassword(p.Password)
@@ -283,13 +284,24 @@ func UpdateUser(c *fiber.Ctx) error {
 		Permission      string `json:"permission"`
 		Image           string `json:"image"`
 		Status          bool   `json:"status"`
-		CountryUUID     string `json:"country_uuid" gorm:"type:varchar(255);not null"`
-		ProvinceUUID    string `json:"province_uuid" gorm:"type:varchar(255);not null"`
-		AreaUUID        string `json:"area_uuid" gorm:"type:varchar(255);not null"`
-		SubAreaUUID     string `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
-		CommuneUUID     string `json:"commune_uuid" gorm:"type:varchar(255);not null"`
-		// IsManager  bool   `json:"is_manager"`
-		Signature string `json:"signature"`
+		CountryUUID     string `json:"country_uuid"`
+		ProvinceUUID    string `json:"province_uuid"`
+		AreaUUID        string `json:"area_uuid"`
+		SubAreaUUID     string `json:"subarea_uuid"`
+		CommuneUUID     string `json:"commune_uuid"`
+		ManagerUUID     string `json:"manager_uuid"`
+		Manager         string `json:"manager" gorm:"default:''"`
+		SupportUUID     string `json:"support_uuid"`
+		Support         string `json:"support" gorm:"default:''"`
+		AsmUUID         string `json:"asm_uuid"`
+		Asm             string `json:"asm" gorm:"default:''"`
+		SupUUID         string `json:"sup_uuid"`
+		Sup             string `json:"sup" gorm:"default:''"`
+		DrUUID          string `json:"dr_uuid"`
+		Dr              string `json:"dr" gorm:"default:''"`
+		CycloUUID       string `json:"cyclo_uuid"`
+		Cyclo           string `json:"cyclo" gorm:"default:''"`
+		Signature       string `json:"signature"`
 	}
 	var updateData UpdateDataInput
 
@@ -319,6 +331,18 @@ func UpdateUser(c *fiber.Ctx) error {
 	user.AreaUUID = updateData.AreaUUID
 	user.SubAreaUUID = updateData.SubAreaUUID
 	user.CommuneUUID = updateData.CommuneUUID
+	user.SupportUUID = updateData.SupportUUID
+	user.Support = updateData.Support
+	user.ManagerUUID = updateData.ManagerUUID
+	user.Manager = updateData.Manager
+	user.AsmUUID = updateData.AsmUUID
+	user.Asm = updateData.Asm
+	user.SupUUID = updateData.SupUUID
+	user.Sup = updateData.Sup
+	user.DrUUID = updateData.DrUUID
+	user.Dr = updateData.Dr
+	user.CycloUUID = updateData.CycloUUID
+	user.Cyclo = updateData.Cyclo
 	user.Signature = updateData.Signature
 
 	db.Save(&user)

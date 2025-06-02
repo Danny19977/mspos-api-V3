@@ -6,13 +6,14 @@ import (
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
+	"github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 // Paginate
 func GetPaginatedPosformItem(c *fiber.Ctx) error {
 	db := database.DB
-	PosFormUUID := c.Params("posform_id")
+	PosFormUUID := c.Params("posform_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -26,10 +27,9 @@ func GetPaginatedPosformItem(c *fiber.Ctx) error {
 
 	var dataList []models.PosFormItems
 	var length int64
-	db.Model(dataList).Where("posform_id = ?", PosFormUUID).Count(&length)
-	db.Where("posform_id = ?", PosFormUUID).
-		Joins("JOIN posforms ON posform_items.posform_id=posforms.id").
-		Joins("JOIN brands ON posform_items.brand_id=brands.id").
+	db.Model(dataList).Where("posform_uuid = ?", PosFormUUID).Count(&length)
+
+	db.Where("posform_uuid = ?", PosFormUUID).
 		Offset(offset).
 		Limit(limit).
 		Order("posform_items.created_at DESC").
@@ -86,6 +86,8 @@ func GetAllPosFormItemsByUUID(c *fiber.Ctx) error {
 	var data []models.PosFormItems
 	db.
 		Where("pos_form_uuid = ?", PosFormUUID).
+		Preload("PosForm").
+		Preload("Brand").
 		Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
@@ -102,7 +104,7 @@ func CreatePosformItem(c *fiber.Ctx) error {
 		return err
 	}
 
-	// p.UUID = uuid.New().String()
+	p.UUID = utils.GenerateUUID()
 	database.DB.Create(p)
 
 	return c.JSON(
@@ -123,11 +125,11 @@ func UpdatePosformItem(c *fiber.Ctx) error {
 		UUID string `json:"uuid"`
 
 		Sold        int    `gorm:"default:0" json:"sold"`
-		NumberFarde int    `gorm:"not null" json:"number_farde"`                 // NUMBER Farde
-		Counter     int    `gorm:"not null" json:"counter"`                      // Allows to calculate the Sum of the ND Dashboard
-		PosFormUUID string `json:"posform_id" gorm:"type:varchar(255);not null"` // Foreign key (belongs to), tag `index` will create index for this column
-		BrandUUID   string `json:"brand_id" gorm:"type:varchar(255);not null"`   // Foreign key (belongs to), tag `index` will create index for this column
-		PosUUID     string `json:"pos_uuid" gorm:"type:varchar(255);not null"`   // Foreign key (belongs to), tag `index` will create index for this column
+		NumberFarde int    `gorm:"not null" json:"number_farde"`                   // NUMBER Farde
+		Counter     int    `gorm:"not null" json:"counter"`                        // Allows to calculate the Sum of the ND Dashboard
+		PosFormUUID string `json:"posform_uuid" gorm:"type:varchar(255);not null"` // Foreign key (belongs to), tag `index` will create index for this column
+		BrandUUID   string `json:"brand_id" gorm:"type:varchar(255);not null"`     // Foreign key (belongs to), tag `index` will create index for this column
+		PosUUID     string `json:"pos_uuid" gorm:"type:varchar(255);not null"`     // Foreign key (belongs to), tag `index` will create index for this column
 		// Foreign key (belongs to), tag `index` will create index for this column
 	}
 

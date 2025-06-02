@@ -43,7 +43,7 @@ func GetPaginatedBrands(c *fiber.Ctx) error {
 		Order("updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		Preload("PosFormItems").
+		// Preload("PosFormItems").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -111,7 +111,7 @@ func GetPaginatedBrandsByProvinceUUID(c *fiber.Ctx) error {
 		Order("updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		Preload("PosFormItems").
+		// Preload("PosFormItems").
 		Find(&dataList).Error
 
 	if err != nil {
