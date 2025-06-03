@@ -173,6 +173,7 @@ func NdTableViewArea(c *fiber.Ctx) error {
 	   
 		SELECT 
 		provinces.name AS name,
+		areas.name AS area,
 
 		brands.name AS brand,
 
@@ -295,6 +296,8 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 	   
 		SELECT 
 		provinces.name AS name,
+		areas.name AS area,
+		sub_areas.name AS sub_area,
 
 		brands.name AS brand,
 
@@ -419,6 +422,9 @@ func NdTableViewCommune(c *fiber.Ctx) error {
 	   
 		SELECT 
 		provinces.name AS name,
+		areas.name AS area,
+		sub_areas.name AS sub_area,
+		communes.name AS commune,
 
 		brands.name AS brand,
 
