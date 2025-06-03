@@ -407,10 +407,10 @@ func GetAllPosByManager(c *fiber.Ctx) error {
 func GetAllPosByASM(c *fiber.Ctx) error {
 	db := database.DB
 
-	AsmUUID := c.Params("asm_uuid")
+	ProvinceUUID := c.Params("province_uuid")
 
 	var data []models.Pos
-	db.Where("asm_uuid = ?", AsmUUID).
+	db.Where("province_uuid = ?", ProvinceUUID).
 		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
@@ -423,10 +423,10 @@ func GetAllPosByASM(c *fiber.Ctx) error {
 func GetAllPosBySup(c *fiber.Ctx) error {
 	db := database.DB
 
-	SupUUID := c.Params("sup_uuid")
+	AreaUUID := c.Params("area_uuid")
 
 	var data []models.Pos
-	db.Where("sup_uuid = ?", SupUUID).
+	db.Where("area_uuid = ?", AreaUUID).
 		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
@@ -439,10 +439,10 @@ func GetAllPosBySup(c *fiber.Ctx) error {
 func GetAllPosByDR(c *fiber.Ctx) error {
 	db := database.DB
 
-	DrUUID := c.Params("dr_uuid")
+	SubAreaUUID := c.Params("sub_area_uuid")
 
 	var data []models.Pos
-	db.Where("dr_uuid = ?", DrUUID).
+	db.Where("sub_area_uuid = ?", SubAreaUUID).
 		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
