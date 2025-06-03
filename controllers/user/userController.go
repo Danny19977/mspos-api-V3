@@ -239,6 +239,8 @@ func CreateUser(c *fiber.Ctx) error {
 		Cyclo:        p.Cyclo,
 	}
 
+	user.UUID = utils.GenerateUUID()
+
 	user.SetPassword(p.Password)
 
 	if err := utils.ValidateStruct(*user); err != nil {
@@ -246,12 +248,31 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.JSON(err)
 	}
 
-	user.UUID = utils.GenerateUUID()
+	// Check if user with the same email already exists
+	var existingUser models.User
+	if err := database.DB.Where("email = ?", user.Email).First(&existingUser).Error; err == nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status":  "error",
+			"message": "A user with this email already exists",
+			"data":    nil,
+		})
+	}
+
+	// Ensure UUID is unique before creating the user
+	for {
+		var uuidUser models.User
+		if err := database.DB.Where("uuid = ?", user.UUID).First(&uuidUser).Error; err != nil {
+			// Not found, so UUID is unique
+			break
+		}
+		// Duplicate found, regenerate UUID
+		user.UUID = utils.GenerateUUID()
+	}
 
 	if err := database.DB.Create(user).Error; err != nil {
 		c.Status(500)
 		sm := strings.Split(err.Error(), ":")
-		m := strings.TrimSpace(sm[1])
+		m := strings.TrimSpace(sm[len(sm)-1])
 
 		return c.JSON(fiber.Map{
 			"message": m,

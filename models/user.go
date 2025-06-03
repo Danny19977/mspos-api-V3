@@ -56,7 +56,7 @@ type User struct {
 	TotalDr       int64 `json:"total_dr"`
 	TotalCyclo    int64 `json:"total_cyclo"`
 	TotalPos      int64 `json:"total_pos"`
-	TotalPosForms int64 `json:"total_posforms"`
+	TotalPosForms int64 `json:"total_pos_forms"`
 
 	RoutePlan []RoutePlan `gorm:"foreignKey:UserUUID;references:UUID"`
 	Pos       []Pos       `gorm:"foreignKey:UserUUID;references:UUID"`
