@@ -525,10 +525,10 @@ func GetPosForm(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 	db := database.DB
 	var posform models.PosForm
-	db.Where("uuid = ?", uuid).
-	Preload("Pos").
-	First(&posform)
-	if posform.UUID == "" {
+	result := db.Where("uuid = ?", uuid).
+		Preload("Pos").
+		First(&posform)
+	if result.Error != nil {
 		return c.Status(404).JSON(
 			fiber.Map{
 				"status":  "error",
