@@ -70,7 +70,21 @@ func GetAllPosFormItems(c *fiber.Ctx) error {
 	db := database.DB
 
 	var data []models.PosFormItems
-	db.Find(&data)
+	result := db.Find(&data)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": result.Error.Error(),
+			"data":    nil,
+		})
+	}
+	if result.RowsAffected == 0 {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No PosFormItems found",
+			"data":    nil,
+		})
+	}
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All PosFormItems",
@@ -106,6 +120,8 @@ func CreatePosformItem(c *fiber.Ctx) error {
 
 	p.UUID = utils.GenerateUUID()
 	database.DB.Create(p)
+
+	
 
 	return c.JSON(
 		fiber.Map{

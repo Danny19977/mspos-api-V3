@@ -7,6 +7,7 @@ import (
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm/clause" // Added import for OnConflict
 )
 
 // Paginate ALL data
@@ -21,7 +22,7 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 		start_date = "1970-01-01T00:00:00Z" // Default start date
 	}
 	if end_date == "" {
-		end_date = "2100-01-01T00:00:00Z" // Default end date 
+		end_date = "2100-01-01T00:00:00Z" // Default end date
 	}
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -104,7 +105,7 @@ func GetPaginatedPosFormProvine(c *fiber.Ctx) error {
 		end_date = "2100-01-01T00:00:00Z" // Default end date
 	}
 
-	UserUUID := c.Params("user_uuid")
+	AsmUUID := c.Params("asm_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -123,13 +124,13 @@ func GetPaginatedPosFormProvine(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Where("pos_forms.asm_uuid = ?", UserUUID).
+		Where("pos_forms.asm_uuid = ?", AsmUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("comment ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("pos_forms.asm_uuid = ?", UserUUID).
+		Where("pos_forms.asm_uuid = ?", AsmUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("comment ILIKE ?", "%"+search+"%").
 		Offset(offset).
@@ -188,7 +189,7 @@ func GetPaginatedPosFormArea(c *fiber.Ctx) error {
 		end_date = "2100-01-01T00:00:00Z" // Default end date
 	}
 
-	UserUUID := c.Params("user_uuid")
+	SupUUID := c.Params("sup_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -207,13 +208,13 @@ func GetPaginatedPosFormArea(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Where("pos_forms.sup_uuid = ?", UserUUID).
+		Where("pos_forms.sup_uuid = ?", SupUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("comment ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("pos_forms.sup_uuid = ?", UserUUID).
+		Where("pos_forms.sup_uuid = ?", SupUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("comment ILIKE ?", "%"+search+"%").
 		Offset(offset).
@@ -272,7 +273,7 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 		end_date = "2100-01-01T00:00:00Z" // Default end date
 	}
 
-	UserUUID := c.Params("user_uuid")
+	DrUUID := c.Params("dr_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -291,13 +292,13 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Where("pos_forms.dr_uuid = ?", UserUUID).
+		Where("pos_forms.dr_uuid = ?", DrUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("comment ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("pos_forms.dr_uuid = ?", UserUUID).
+		Where("pos_forms.dr_uuid = ?", DrUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("comment ILIKE ?", "%"+search+"%").
 		Offset(offset).
@@ -309,6 +310,7 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 		Preload("SubArea").
 		Preload("Commune").
 		Preload("User").
+		Preload("Pos").
 		Preload("PosFormItems").
 		Find(&dataList).Error
 
@@ -551,20 +553,53 @@ func CreatePosform(c *fiber.Ctx) error {
 	p := &models.PosForm{}
 
 	if err := c.BodyParser(&p); err != nil {
-		return err
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Invalid request body",
+			"error":   err.Error(),
+		})
 	}
 
+	// This line generates a new UUID. If 'uuid' is the primary key,
+	// a conflict should be extremely rare unless utils.GenerateUUID() has issues
+	// or the primary key 'pos_forms_pkey' is on a different field (e.g., a client-sent 'id').
 	p.UUID = utils.GenerateUUID()
 	p.Sync = true
-	database.DB.Create(p)
 
-	return c.JSON(
-		fiber.Map{
+	// Use OnConflict to ignore if the primary key constraint 'pos_forms_pkey' is violated.
+	// If a record with the conflicting primary key already exists, GORM will do nothing.
+	result := database.DB.Clauses(clause.OnConflict{
+		OnConstraint: "pos_forms_pkey", // Target the specific primary key constraint name
+		DoNothing:    true,             // If conflict, do nothing
+	}).Create(&p)
+
+	if result.Error != nil {
+		// This handles errors other than the PK conflict that OnConflict{DoNothing:true} is intended to suppress.
+		// e.g., database connection issues, other constraint violations.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to process posform",
+			"error":   result.Error.Error(),
+		})
+	}
+
+	if result.RowsAffected > 0 {
+		// Record was successfully created
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 			"status":  "success",
-			"message": "posForm created success",
-			"data":    p,
-		},
-	)
+			"message": "PosForm created successfully",
+			"data":    p, // 'p' will have fields populated by GORM on successful creation (e.g., ID, CreatedAt)
+		})
+	} else {
+		// No rows affected, meaning the record likely already existed, and the insert was skipped
+		// due to the OnConflict{DoNothing: true} clause.
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"status":  "success", // Or "info"
+			"message": "PosForm already exists or creation was skipped due to primary key conflict.",
+			"data":    nil, // Or 'p' (the input data), but 'nil' is clearer that no new data was persisted.
+			// If you need to return the existing data, you'd have to query for it separately.
+		})
+	}
 }
 
 // Update data
@@ -594,12 +629,12 @@ func UpdatePosform(c *fiber.Ctx) error {
 		Dr        string `json:"dr"`
 		CycloUUID string `json:"cyclo_uuid"`
 		Cyclo     string `json:"cyclo"`
-		UserUUID  string `json:"user_uuid"` 
+		UserUUID  string `json:"user_uuid"`
 	}
 
-	var updateData UpdateData 
+	var updateData UpdateData
 
-	if err := c.BodyParser(&updateData); err != nil {  
+	if err := c.BodyParser(&updateData); err != nil {
 		return c.Status(500).JSON(
 			fiber.Map{
 				"status":  "error",
@@ -608,10 +643,10 @@ func UpdatePosform(c *fiber.Ctx) error {
 			},
 		)
 	}
-	
-	posform := new(models.PosForm) 
 
-	db.Where("uuid = ?", uuid).First(&posform) 
+	posform := new(models.PosForm)
+
+	db.Where("uuid = ?", uuid).First(&posform)
 
 	posform.Price = updateData.Price
 	posform.Comment = updateData.Comment

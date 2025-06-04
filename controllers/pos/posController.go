@@ -305,7 +305,7 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	db := database.DB
 
-	CycloUUID := c.Params("cyclo_uuid")
+	UserUUID := c.Params("user_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -326,13 +326,13 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Pos{}).
-		Where("pos.cyclo_uuid = ?", CycloUUID).
+		Where("pos.user_uuid = ?", UserUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("pos.cyclo_uuid = ?", CycloUUID).
+		Where("pos.user_uuid = ?", UserUUID).
 		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Offset(offset).
 		Limit(limit).
@@ -455,10 +455,10 @@ func GetAllPosByDR(c *fiber.Ctx) error {
 func GetAllPosByCyclo(c *fiber.Ctx) error {
 	db := database.DB
 
-	cycloUUID := c.Params("cyclo_uuid")
+	UserUUID := c.Params("user_uuid")
 
 	var data []models.Pos
-	db.Where("cyclo_uuid = ?", cycloUUID).
+	db.Where("user_uuid = ?", UserUUID).
 		Where("status = ?", true).Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
