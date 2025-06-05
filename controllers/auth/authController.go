@@ -304,7 +304,7 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	user := new(models.User)
 
-	database.DB.Where("id = ?", UserUUID).First(&user)
+	database.DB.Where("uuid = ?", UserUUID).First(&user)
 
 	if err := user.ComparePassword(updateData.OldPassword); err != nil {
 		c.Status(400)
