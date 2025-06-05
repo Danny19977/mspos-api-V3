@@ -302,7 +302,7 @@ func GetPaginatedRouthplaByareaUUID(c *fiber.Ctx) error {
 // GetPaginatedRouthplaBysubareaUUID
 func GetPaginatedRouthplaBySubareaUUID(c *fiber.Ctx) error {
 
-	subareaUUID := c.Params("subarea_uuid")
+	subareaUUID := c.Params("sub_area_uuid")
 
 	// Initialize database connection
 	db := database.DB

@@ -50,7 +50,7 @@ type PosForm struct {
 
  
 
-	Sync bool `json:"sync" gorm:"default:false"`
+	// Sync bool `json:"sync" gorm:"default:false"`
 
 	PosFormItems []PosFormItems `gorm:"foreignKey:PosFormUUID;references:UUID"`
 }

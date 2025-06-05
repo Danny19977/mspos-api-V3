@@ -30,7 +30,7 @@ type User struct {
 	CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null;default:''"`
 	ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null;default:''"`
 	AreaUUID     string `json:"area_uuid" gorm:"type:varchar(255);not null;default:''"`
-	SubAreaUUID  string `json:"subarea_uuid" gorm:"type:varchar(255);not null;default:''"`
+	SubAreaUUID  string `json:"sub_area_uuid" gorm:"type:varchar(255);not null;default:''"`
 	CommuneUUID  string `json:"commune_uuid" gorm:"type:varchar(255);not null;default:''"`
 
 	Country  Country  `gorm:"foreignKey:CountryUUID;references:UUID"`
@@ -78,7 +78,7 @@ type UserResponse struct {
 	Province     Province
 	AreaUUID     string `json:"area_uuid"`
 	Area         Area
-	SubAreaUUID  string `json:"subarea_uuid"`
+	SubAreaUUID  string `json:"sub_area_uuid"`
 	SubArea      SubArea
 	CommuneUUID  string `json:"commune_uuid"`
 	Commune      Commune
