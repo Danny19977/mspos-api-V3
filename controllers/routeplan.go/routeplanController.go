@@ -531,9 +531,9 @@ func GetRouteplanByUserUUID(c *fiber.Ctx) error {
 
 	var routeplan models.RoutePlan
 	db.Where("user_uuid = ?", userUUID).
-	Order("created_at DESC").
-	Preload("RoutePlanItems").
-	First(&routeplan)
+		Order("created_at DESC").
+		Preload("RoutePlanItems").
+		First(&routeplan)
 
 	if routeplan.UUID == "00000000-0000-0000-0000-000000000000" {
 		return c.Status(404).JSON(
@@ -559,9 +559,9 @@ func GetRouteplan(c *fiber.Ctx) error {
 	db := database.DB
 
 	var Routeplan models.RoutePlan
-	db.Where("uuid = ?", uuid). 
-	Preload("RoutePlanItems").
-	First(&Routeplan)
+	db.Where("uuid = ?", uuid).
+		Preload("RoutePlanItems").
+		First(&Routeplan)
 	if Routeplan.UUID == "0000000-0000-0000-0000-000000000000" {
 		return c.Status(404).JSON(
 			fiber.Map{
@@ -612,7 +612,7 @@ func UpdateRouteplan(c *fiber.Ctx) error {
 		UserUUID     string `json:"user_uuid"`
 		ProvinceUUID string `json:"province_uuid"`
 		AreaUUID     string `json:"area_uuid"`
-		SubAreaUUID  string `json:"subarea_uuid"`
+		SubAreaUUID  string `json:"sub_area_uuid"`
 		CommuneUUID  string `json:"commune_uuid"`
 
 		Signature string `json:"signature"`

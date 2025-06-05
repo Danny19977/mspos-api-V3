@@ -12,7 +12,7 @@ type Commune struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-	
+
 	Name string `gorm:"not null" json:"name"`
 
 	CountryUUID  string   `json:"country_uuid" gorm:"type:varchar(255);not null"`
@@ -21,7 +21,7 @@ type Commune struct {
 	Province     Province `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 	AreaUUID     string   `json:"area_uuid" gorm:"type:varchar(255);not null"`
 	Area         Area     `gorm:"foreignKey:AreaUUID;references:UUID"`
-	SubAreaUUID  string   `json:"subarea_uuid" gorm:"type:varchar(255);not null"`
+	SubAreaUUID  string   `json:"sub_area_uuid" gorm:"type:varchar(255);not null"`
 	SubArea      SubArea  `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 
 	Signature string `json:"signature"`

@@ -254,7 +254,7 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 	country_uuid := c.Query("country_uuid")
 	province_uuid := c.Query("province_uuid")
 	area_uuid := c.Query("area_uuid")
-	subarea_uuid := c.Query("sub_area_uuid")
+	sub_area_uuid := c.Query("sub_area_uuid")
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
 
@@ -329,7 +329,7 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 		ORDER BY pourcent DESC;
 	`
 
-	rows, err := db.Raw(sqlQuery, country_uuid, province_uuid, area_uuid, subarea_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date).Rows()
+	rows, err := db.Raw(sqlQuery, country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date).Rows()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",

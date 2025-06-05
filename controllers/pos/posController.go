@@ -531,7 +531,7 @@ func UpdatePos(c *fiber.Ctx) error {
 		CountryUUID  string `json:"country_uuid"`
 		ProvinceUUID string `json:"province_uuid"`
 		AreaUUID     string `json:"area_uuid"`
-		SubAreaUUID  string `json:"subarea_uuid"`
+		SubAreaUUID  string `json:"sub_area_uuid"`
 
 		ManagerUUID string `json:"manager_uuid"`
 		Manager     string `json:"manager" gorm:"default:''"`

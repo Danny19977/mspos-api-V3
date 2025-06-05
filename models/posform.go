@@ -21,6 +21,7 @@ type PosForm struct {
 	Signature string  `json:"signature"`
 
 	PosUUID string `json:"pos_uuid" gorm:"type:varchar(255);not null;default:''"`
+	Pos Pos `gorm:"foreignKey:PosUUID;references:UUID"`
 
 	CountryUUID  string `json:"country_uuid" gorm:"type:varchar(255);not null;default:''"`
 	ProvinceUUID string `json:"province_uuid" gorm:"type:varchar(255);not null;default:''"`
@@ -39,8 +40,6 @@ type PosForm struct {
 	Dr        string `json:"dr" gorm:"default:''"`
 	CycloUUID string `json:"cyclo_uuid" gorm:"type:varchar(255);not null"`
 	Cyclo     string `json:"cyclo" gorm:"default:''"`
-
-	Pos Pos `gorm:"foreignKey:PosUUID;references:UUID"`
 
 	Country  Country  `gorm:"foreignKey:CountryUUID;references:UUID"`
 	Province Province `gorm:"foreignKey:ProvinceUUID;references:UUID"`
