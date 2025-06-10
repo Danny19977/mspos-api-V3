@@ -44,7 +44,7 @@ func TotalVisitsByProvince(c *fiber.Ctx) error {
 					WHEN users.title = 'ASM'  THEN 10 
 					WHEN users.title = 'Supervisor'  THEN 20 
 					WHEN users.title = 'DR'   THEN 40 
-					WHEN users.title = 'Cyclos' THEN 40
+					WHEN users.title = 'Cyclo' THEN 40
 					ELSE 1 
 			END
 		) AS target
