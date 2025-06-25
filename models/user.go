@@ -39,17 +39,17 @@ type User struct {
 	SubArea  SubArea  `gorm:"foreignKey:SubAreaUUID;references:UUID"`
 	Commune  Commune  `gorm:"foreignKey:CommuneUUID;references:UUID"`
 
-	ManagerUUID string `json:"manager_uuid" gorm:"type:varchar(255);not null"`
+	ManagerUUID string `json:"manager_uuid" gorm:"type:varchar(255)"`
 	Manager     string `json:"manager" gorm:"default:''"`
-	SupportUUID string `json:"support_uuid" gorm:"type:varchar(255);not null"`
+	SupportUUID string `json:"support_uuid" gorm:"type:varchar(255)"`
 	Support     string `json:"support" gorm:"default:''"`
-	AsmUUID     string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
+	AsmUUID     string `json:"asm_uuid" gorm:"type:varchar(255)"`
 	Asm         string `json:"asm" gorm:"default:''"`
-	SupUUID     string `json:"sup_uuid" gorm:"type:varchar(255);not null"`
+	SupUUID     string `json:"sup_uuid" gorm:"type:varchar(255)"`
 	Sup         string `json:"sup" gorm:"default:''"`
-	DrUUID      string `json:"dr_uuid" gorm:"type:varchar(255);not null"`
+	DrUUID      string `json:"dr_uuid" gorm:"type:varchar(255)"`
 	Dr          string `json:"dr" gorm:"default:''"`
-	CycloUUID   string `json:"cyclo_uuid" gorm:"type:varchar(255);not null"`
+	CycloUUID   string `json:"cyclo_uuid" gorm:"type:varchar(255)"`
 	Cyclo       string `json:"cyclo" gorm:"default:''"`
 
 	TotalSup      int64 `json:"total_sup"`

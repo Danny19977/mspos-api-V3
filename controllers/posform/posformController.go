@@ -377,13 +377,13 @@ func GetPaginatedPosFormCommune(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	db.Model(&models.PosForm{}).
-		Where("pos_forms.cyclo_uuid = ?", UserUUID).
+		Where("pos_forms.user_uuid = ?", UserUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("comment ILIKE ?", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("pos_forms.cyclo_uuid = ?", UserUUID).
+		Where("pos_forms.user_uuid = ?", UserUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("comment ILIKE ?", "%"+search+"%").
 		Offset(offset).

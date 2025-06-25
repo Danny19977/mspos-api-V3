@@ -74,11 +74,11 @@ func GetPaginatedRoutePlanItem(c *fiber.Ctx) error {
 }
 
 // Get All data
-func GetAllRoutePlanItem(c *fiber.Ctx) error {
+func GetAllRoutePlanItem(c *fiber.Ctx) error { 
 	db := database.DB
 
 	routePlanUUID := c.Params("route_plan_uuid")
-
+  
 	var dataList []models.RoutePlanItem
 	db.
 		Where("route_plan_uuid = ?", routePlanUUID).
