@@ -8,6 +8,7 @@ import (
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 // Paginate
@@ -404,4 +405,259 @@ func DeleteUser(c *fiber.Ctx) error {
 			"data":    nil,
 		},
 	)
+}
+
+// GetUserByParams - Récupère un utilisateur selon différents paramètres
+func GetUserByParams(c *fiber.Ctx) error {
+	db := database.DB
+
+	// Parse filter parameters
+	posUUID := c.Query("pos")
+	posformUUID := c.Query("posform")
+	role := c.Query("role")
+	status := c.Query("status")
+	countryUUID := c.Query("country")
+	provinceUUID := c.Query("province")
+	areaUUID := c.Query("area")
+	subAreaUUID := c.Query("subarea")
+	communeUUID := c.Query("commune")
+	managerUUID := c.Query("manager")
+	asmUUID := c.Query("asm")
+	supUUID := c.Query("sup")
+	drUUID := c.Query("dr")
+	cycloUUID := c.Query("cyclo")
+	search := c.Query("search", "")
+
+	var user models.User
+
+	// Build the query
+	query := db.Model(&models.User{})
+
+	// Apply filters based on POS
+	if posUUID != "" {
+		query = query.Joins("JOIN pos ON pos.user_uuid = users.uuid").
+			Where("pos.uuid = ?", posUUID)
+	}
+
+	// Apply filters based on POSFORM
+	if posformUUID != "" {
+		query = query.Joins("JOIN posforms ON posforms.user_uuid = users.uuid").
+			Where("posforms.uuid = ?", posformUUID)
+	}
+
+	// Apply other filters
+	if role != "" {
+		query = query.Where("users.role = ?", role)
+	}
+
+	if status != "" {
+		statusBool := status == "true"
+		query = query.Where("users.status = ?", statusBool)
+	}
+
+	if countryUUID != "" {
+		query = query.Where("users.country_uuid = ?", countryUUID)
+	}
+
+	if provinceUUID != "" {
+		query = query.Where("users.province_uuid = ?", provinceUUID)
+	}
+
+	if areaUUID != "" {
+		query = query.Where("users.area_uuid = ?", areaUUID)
+	}
+
+	if subAreaUUID != "" {
+		query = query.Where("users.sub_area_uuid = ?", subAreaUUID)
+	}
+
+	if communeUUID != "" {
+		query = query.Where("users.commune_uuid = ?", communeUUID)
+	}
+
+	if managerUUID != "" {
+		query = query.Where("users.manager_uuid = ?", managerUUID)
+	}
+
+	if asmUUID != "" {
+		query = query.Where("users.asm_uuid = ?", asmUUID)
+	}
+
+	if supUUID != "" {
+		query = query.Where("users.sup_uuid = ?", supUUID)
+	}
+
+	if drUUID != "" {
+		query = query.Where("users.dr_uuid = ?", drUUID)
+	}
+
+	if cycloUUID != "" {
+		query = query.Where("users.cyclo_uuid = ?", cycloUUID)
+	}
+
+	// Apply search filter
+	if search != "" {
+		query = query.Where("users.fullname ILIKE ? OR users.title ILIKE ? OR users.email ILIKE ?",
+			"%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	// Execute the query to get the first matching user
+	err := query.
+		Order("users.updated_at DESC").
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		First(&user).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(404).JSON(fiber.Map{
+				"status":  "error",
+				"message": "No user found matching the criteria",
+				"data":    nil,
+			})
+		}
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch User",
+			"error":   err.Error(),
+		})
+	}
+
+	// Prepare filters applied
+	filtersApplied := map[string]interface{}{
+		"pos":      posUUID,
+		"posform":  posformUUID,
+		"role":     role,
+		"status":   status,
+		"country":  countryUUID,
+		"province": provinceUUID,
+		"area":     areaUUID,
+		"subarea":  subAreaUUID,
+		"commune":  communeUUID,
+		"manager":  managerUUID,
+		"asm":      asmUUID,
+		"sup":      supUUID,
+		"dr":       drUUID,
+		"cyclo":    cycloUUID,
+		"search":   search,
+	}
+
+	// Return response
+	return c.JSON(fiber.Map{
+		"status":          "success",
+		"message":         "User retrieved successfully",
+		"data":            user,
+		"filters_applied": filtersApplied,
+	})
+}
+
+// GetUserWithRelations - Récupère un utilisateur avec ses POS et POSFORM associés
+func GetUserWithRelations(c *fiber.Ctx) error {
+	db := database.DB
+
+	// Parse filter parameters
+	userUUID := c.Query("user")
+	role := c.Query("role")
+	status := c.Query("status")
+	includePos := c.Query("include_pos", "true") == "true"
+	includePosform := c.Query("include_posform", "true") == "true"
+	search := c.Query("search", "")
+
+	var user models.User
+
+	// Build the query
+	query := db.Model(&models.User{})
+
+	// Apply filters
+	if userUUID != "" {
+		query = query.Where("users.uuid = ?", userUUID)
+	}
+
+	if role != "" {
+		query = query.Where("users.role = ?", role)
+	}
+
+	if status != "" {
+		statusBool := status == "true"
+		query = query.Where("users.status = ?", statusBool)
+	}
+
+	if search != "" {
+		query = query.Where("users.fullname ILIKE ? OR users.title ILIKE ? OR users.email ILIKE ?",
+			"%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	// Build preload query
+	userQuery := query.
+		Order("users.updated_at DESC").
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune")
+
+	// Conditionally include POS and POSFORM relations
+	if includePos {
+		userQuery = userQuery.Preload("Pos", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Country").
+				Preload("Province").
+				Preload("Area").
+				Preload("SubArea").
+				Preload("Commune").
+				Order("pos.updated_at DESC")
+		})
+	}
+
+	if includePosform {
+		userQuery = userQuery.Preload("PosForms", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("Country").
+				Preload("Province").
+				Preload("Area").
+				Preload("SubArea").
+				Preload("Commune").
+				Preload("Pos").
+				Order("posforms.updated_at DESC")
+		})
+	}
+
+	// Execute the query to get the first matching user
+	err := userQuery.First(&user).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(404).JSON(fiber.Map{
+				"status":  "error",
+				"message": "No user found matching the criteria",
+				"data":    nil,
+			})
+		}
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch User with relations",
+			"error":   err.Error(),
+		})
+	}
+
+	// Prepare response metadata
+	metadata := map[string]interface{}{
+		"include_pos":     includePos,
+		"include_posform": includePosform,
+		"filters": map[string]interface{}{
+			"user":   userUUID,
+			"role":   role,
+			"status": status,
+			"search": search,
+		},
+	}
+
+	// Return response
+	return c.JSON(fiber.Map{
+		"status":   "success",
+		"message":  "User with relations retrieved successfully",
+		"data":     user,
+		"metadata": metadata,
+	})
 }

@@ -1,10 +1,13 @@
 package pos
 
 import (
+	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
+	"github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -504,7 +507,16 @@ func GetPos(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 	db := database.DB
 	var pos models.Pos
-	db.Where("uuid = ?", uuid).First(&pos)
+	db.Where("uuid = ?", uuid).
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Preload("User").
+		Preload("PosForms").
+		Preload("PosEquipments").
+		First(&pos)
 	if pos.Name == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
@@ -743,10 +755,10 @@ func applyAdvancedFilters(query *gorm.DB, c *fiber.Ctx) *gorm.DB {
 
 	// 👤 Filtres utilisateur
 	if userFullname != "" {
-		query = query.Where("users.fullname = ?", userFullname)
+		query = query.Where("signature = ?", userFullname)
 	}
 	if userSearch != "" {
-		query = query.Where("users.fullname ILIKE ?", "%"+userSearch+"%")
+		query = query.Where("signature ILIKE ?", "%"+userSearch+"%")
 	}
 
 	// 👔 Filtres hiérarchie commerciale avec recherche intégrée
@@ -797,4 +809,355 @@ func applyAdvancedFilters(query *gorm.DB, c *fiber.Ctx) *gorm.DB {
 	}
 
 	return query
+}
+
+// applyAdvancedFiltersForExcel applies advanced filters including date range for Excel reports
+func applyAdvancedFiltersForExcel(query *gorm.DB, c *fiber.Ctx) *gorm.DB {
+	// Apply all standard filters first
+	query = applyAdvancedFilters(query, c)
+
+	// Additional filters specific to Excel reports
+	startDate := c.Query("startDate", "")
+	endDate := c.Query("endDate", "")
+
+	// 📅 Filtres par plage de dates personnalisée (uniquement pour Excel)
+	if startDate != "" && endDate != "" {
+		// Validation et parsing des dates
+		startTime, err := time.Parse("2006-01-02", startDate)
+		if err == nil {
+			endTime, err := time.Parse("2006-01-02", endDate)
+			if err == nil {
+				// Ajouter 23:59:59 à la date de fin pour inclure toute la journée
+				endTime = endTime.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+				query = query.Where("pos.created_at >= ? AND pos.created_at <= ?", startTime, endTime)
+			}
+		}
+	} else if startDate != "" {
+		// Filtre à partir d'une date de début seulement
+		startTime, err := time.Parse("2006-01-02", startDate)
+		if err == nil {
+			query = query.Where("pos.created_at >= ?", startTime)
+		}
+	} else if endDate != "" {
+		// Filtre jusqu'à une date de fin seulement
+		endTime, err := time.Parse("2006-01-02", endDate)
+		if err == nil {
+			// Ajouter 23:59:59 à la date de fin pour inclure toute la journée
+			endTime = endTime.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+			query = query.Where("pos.created_at <= ?", endTime)
+		}
+	}
+
+	return query
+}
+
+// GeneratePosExcelReport generates an Excel report for POS data
+func GeneratePosExcelReport(c *fiber.Ctx) error {
+	db := database.DB
+
+	// Parse query parameters for filtering (same as pagination)
+	var dataList []models.Pos
+	var totalRecords int64
+
+	// Build query with joins for better filtering
+	query := db.Model(&models.Pos{}).
+		Joins("LEFT JOIN countries ON pos.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON pos.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON pos.area_uuid = areas.uuid").
+		Joins("LEFT JOIN sub_areas ON pos.sub_area_uuid = sub_areas.uuid").
+		Joins("LEFT JOIN communes ON pos.commune_uuid = communes.uuid").
+		Joins("LEFT JOIN users ON pos.user_uuid = users.uuid")
+
+	// Apply advanced filters (including date range filters for Excel)
+	query = applyAdvancedFiltersForExcel(query, c)
+
+	// Count total records
+	query.Count(&totalRecords)
+
+	// Get all filtered data for the report (no pagination for Excel)
+	// Limit to 10000 records to prevent memory issues
+	limit := 10000
+	if totalRecords > int64(limit) {
+		return c.Status(400).JSON(fiber.Map{
+			"status":  "error",
+			"message": fmt.Sprintf("Trop de données pour le rapport Excel. Maximum %d enregistrements autorisés, %d trouvés. Veuillez utiliser des filtres plus spécifiques.", limit, totalRecords),
+			"data":    nil,
+		})
+	}
+
+	err := query.
+		Select("pos.*").
+		Order("pos.updated_at DESC").
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Preload("User").
+		Preload("PosForms").
+		Preload("PosEquipments").
+		Find(&dataList).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Échec de la récupération des données POS pour le rapport Excel",
+			"error":   err.Error(),
+		})
+	}
+
+	// Create Excel file
+	config := utils.ExcelReportConfig{
+		Title:       "Rapport des Points de Vente (POS)",
+		CompanyName: "MSPOS System",
+		ReportDate:  time.Now(),
+		Author:      "Système de Rapport Automatique",
+	}
+
+	f := utils.CreateExcelFile(config)
+	sheetName := "Rapport POS"
+
+	// Rename default sheet
+	f.SetSheetName("Sheet1", sheetName)
+
+	// Setup styles
+	styles, err := utils.SetupExcelStyles(f)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Erreur lors de la configuration des styles Excel",
+			"error":   err.Error(),
+		})
+	}
+
+	// Add report header
+	err = utils.AddReportHeader(f, sheetName, config, styles)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Erreur lors de l'ajout de l'en-tête du rapport",
+			"error":   err.Error(),
+		})
+	}
+
+	// Add summary statistics
+	summaryData := map[string]interface{}{
+		"Total des POS":      totalRecords,
+		"POS Actifs":         countActivePos(dataList),
+		"POS Inactifs":       countInactivePos(dataList),
+		"Total Provinces":    countUniqueProvinces(dataList),
+		"Total Aires":        countUniqueAreas(dataList),
+		"Total Sous-Aires":   countUniqueSubAreas(dataList),
+		"Date de génération": time.Now().Format("02/01/2006 15:04:05"),
+	}
+
+	err = utils.AddSummaryTable(f, sheetName, summaryData, 6, styles)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Erreur lors de l'ajout du résumé",
+			"error":   err.Error(),
+		})
+	}
+
+	// Define headers for the main data table
+	headers := []string{
+		"UUID", "Nom POS", "Shop", "Type POS", "Gérant", "Avenue", "Quartier",
+		"Référence", "Téléphone", "Pays", "Province", "Aire", "Sous-Aire",
+		"Commune", "Utilisateur", "ASM", "Superviseur", "DR", "Cyclo",
+		"Statut", "Date Création", "Date Modification",
+	}
+
+	// Start data table after summary (row 15)
+	dataStartRow := 15
+
+	// Add main data table title
+	f.SetCellValue(sheetName, fmt.Sprintf("A%d", dataStartRow), "DONNÉES DÉTAILLÉES DES POS")
+	f.SetCellStyle(sheetName, fmt.Sprintf("A%d", dataStartRow), fmt.Sprintf("V%d", dataStartRow), styles["title"])
+	f.MergeCell(sheetName, fmt.Sprintf("A%d", dataStartRow), fmt.Sprintf("V%d", dataStartRow))
+	dataStartRow += 2
+
+	// Add headers
+	for i, header := range headers {
+		col := string(rune('A' + i))
+		if i >= 26 {
+			// Handle columns beyond Z (AA, AB, etc.)
+			col = string(rune('A'+(i/26-1))) + string(rune('A'+(i%26)))
+		}
+		cell := fmt.Sprintf("%s%d", col, dataStartRow)
+		f.SetCellValue(sheetName, cell, header)
+		f.SetCellStyle(sheetName, cell, cell, styles["header"])
+	}
+
+	// Add data rows
+	for i, pos := range dataList {
+		row := dataStartRow + 1 + i
+
+		// Convert status to readable format
+		statusText := "Inactif"
+		if pos.Status {
+			statusText = "Actif"
+		}
+
+		// Get related data safely
+		countryName := ""
+		if pos.Country.Name != "" {
+			countryName = pos.Country.Name
+		}
+
+		provinceName := ""
+		if pos.Province.Name != "" {
+			provinceName = pos.Province.Name
+		}
+
+		areaName := ""
+		if pos.Area.Name != "" {
+			areaName = pos.Area.Name
+		}
+
+		subAreaName := ""
+		if pos.SubArea.Name != "" {
+			subAreaName = pos.SubArea.Name
+		}
+
+		communeName := ""
+		if pos.Commune.Name != "" {
+			communeName = pos.Commune.Name
+		}
+
+		userName := ""
+		if pos.User.Fullname != "" {
+			userName = pos.User.Fullname
+		}
+
+		// Data array
+		rowData := []interface{}{
+			pos.UUID,
+			pos.Name,
+			pos.Shop,
+			pos.Postype,
+			pos.Gerant,
+			pos.Avenue,
+			pos.Quartier,
+			pos.Reference,
+			pos.Telephone,
+			countryName,
+			provinceName,
+			areaName,
+			subAreaName,
+			communeName,
+			userName,
+			pos.Asm,
+			pos.Sup,
+			pos.Dr,
+			pos.Cyclo,
+			statusText,
+			pos.CreatedAt.Format("02/01/2006 15:04:05"),
+			pos.UpdatedAt.Format("02/01/2006 15:04:05"),
+		}
+
+		// Set data in cells
+		for j, data := range rowData {
+			col := string(rune('A' + j))
+			if j >= 26 {
+				col = string(rune('A'+(j/26-1))) + string(rune('A'+(j%26)))
+			}
+			cell := fmt.Sprintf("%s%d", col, row)
+			f.SetCellValue(sheetName, cell, data)
+
+			// Apply appropriate style based on data type
+			style := styles["data"]
+			if j == 19 { // Status column
+				if pos.Status {
+					style = styles["success"]
+				} else {
+					style = styles["warning"]
+				}
+			} else if j == 20 || j == 21 { // Date columns
+				style = styles["date"]
+			}
+			f.SetCellStyle(sheetName, cell, cell, style)
+		}
+	}
+
+	// Auto-fit columns
+	columns := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V"}
+	err = utils.AutoFitColumns(f, sheetName, columns, 15.0)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Erreur lors de l'ajustement des colonnes",
+			"error":   err.Error(),
+		})
+	}
+
+	// Generate filename with timestamp
+	filename := fmt.Sprintf("rapport_pos_%s.xlsx", time.Now().Format("2006-01-02_15-04-05"))
+
+	// Set response headers for file download
+	c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	c.Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+
+	// Write file to response
+	buffer, err := f.WriteToBuffer()
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Erreur lors de la génération du fichier Excel",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Send(buffer.Bytes())
+}
+
+// Helper functions for summary statistics
+func countActivePos(posList []models.Pos) int {
+	count := 0
+	for _, pos := range posList {
+		if pos.Status {
+			count++
+		}
+	}
+	return count
+}
+
+func countInactivePos(posList []models.Pos) int {
+	count := 0
+	for _, pos := range posList {
+		if !pos.Status {
+			count++
+		}
+	}
+	return count
+}
+
+func countUniqueProvinces(posList []models.Pos) int {
+	provinces := make(map[string]bool)
+	for _, pos := range posList {
+		if pos.Province.Name != "" {
+			provinces[pos.Province.Name] = true
+		}
+	}
+	return len(provinces)
+}
+
+func countUniqueAreas(posList []models.Pos) int {
+	areas := make(map[string]bool)
+	for _, pos := range posList {
+		if pos.Area.Name != "" {
+			areas[pos.Area.Name] = true
+		}
+	}
+	return len(areas)
+}
+
+func countUniqueSubAreas(posList []models.Pos) int {
+	subAreas := make(map[string]bool)
+	for _, pos := range posList {
+		if pos.SubArea.Name != "" {
+			subAreas[pos.SubArea.Name] = true
+		}
+	}
+	return len(subAreas)
 }
