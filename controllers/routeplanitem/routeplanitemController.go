@@ -207,8 +207,9 @@ func UpdateRoutePlanItemPosStatus(c *fiber.Ctx) error {
 
 	db.Where("pos_uuid = ?", PosUUID).First(&RoutePlanItem)
 
+	RoutePlanItem.Status = updateData.Status // updateData.Status
+
 	db.Save(&RoutePlanItem)
-	RoutePlanItem.Status = true // updateData.Status
 
 	return c.JSON(
 		fiber.Map{
