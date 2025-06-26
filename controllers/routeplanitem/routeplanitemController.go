@@ -74,11 +74,11 @@ func GetPaginatedRoutePlanItem(c *fiber.Ctx) error {
 }
 
 // Get All data
-func GetAllRoutePlanItem(c *fiber.Ctx) error { 
+func GetAllRoutePlanItem(c *fiber.Ctx) error {
 	db := database.DB
 
 	routePlanUUID := c.Params("route_plan_uuid")
-  
+
 	var dataList []models.RoutePlanItem
 	db.
 		Where("route_plan_uuid = ?", routePlanUUID).
@@ -147,9 +147,7 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 	db := database.DB
 
 	type UpdateData struct {
-		RoutePlanUUID string `json:"routeplan_uuid"`
-		PosUUID       string `json:"pos_uuid"`
-		Status        bool   `json:"status"`
+		Status bool `json:"status"`
 	}
 
 	var updateData UpdateData
@@ -169,8 +167,6 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 	db.Where("uuid = ?", uuid).First(&RoutePlanItem)
 
 	db.Save(&RoutePlanItem)
-	RoutePlanItem.PosUUID = updateData.PosUUID
-	RoutePlanItem.RoutePlanUUID = updateData.RoutePlanUUID
 	RoutePlanItem.Status = updateData.Status
 
 	return c.JSON(
@@ -180,45 +176,6 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 			"data":    RoutePlanItem,
 		},
 	)
-}
-
-// Update data Status
-func UpdateRoutePlanItemPosStatus(c *fiber.Ctx) error {
-	PosUUID := c.Params("pos_uuid")
-	db := database.DB
-
-	type UpdateData struct {
-		Status bool `json:"status"`
-	}
-
-	var updateData UpdateData
-
-	if err := c.BodyParser(&updateData); err != nil {
-		return c.Status(500).JSON(
-			fiber.Map{
-				"status":  "error",
-				"message": "Review your iunput",
-				"data":    nil,
-			},
-		)
-	}
-
-	RoutePlanItem := new(models.RoutePlanItem)
-
-	db.Where("pos_uuid = ?", PosUUID).First(&RoutePlanItem)
-
-	RoutePlanItem.Status = updateData.Status // updateData.Status
-
-	db.Save(&RoutePlanItem)
-
-	return c.JSON(
-		fiber.Map{
-			"status":  "success",
-			"message": "RoutePlanItem updated success",
-			"data":    RoutePlanItem,
-		},
-	)
-
 }
 
 // Delete data

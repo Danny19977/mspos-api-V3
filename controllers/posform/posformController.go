@@ -618,7 +618,7 @@ func UpdatePosform(c *fiber.Ctx) error {
 	db := database.DB
 
 	type UpdateData struct {
-		Price   int    `gorm:"default:0" json:"price"`
+		Price   int    `json:"price"`
 		Comment string `json:"comment"`
 		PosUUID string `json:"pos_uuid"`
 

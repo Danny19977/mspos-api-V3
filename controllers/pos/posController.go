@@ -7,6 +7,7 @@ import (
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // Paginate
@@ -24,23 +25,30 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 	}
 	offset := (page - 1) * limit
 
-	// Parse search query
-	search := c.Query("search", "")
-
 	var dataList []models.Pos
 	var totalRecords int64
 
-	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+	// Build query with joins for better filtering
+	query := db.Model(&models.Pos{}).
+		Joins("LEFT JOIN countries ON pos.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON pos.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON pos.area_uuid = areas.uuid").
+		Joins("LEFT JOIN sub_areas ON pos.sub_area_uuid = sub_areas.uuid").
+		Joins("LEFT JOIN communes ON pos.commune_uuid = communes.uuid").
+		Joins("LEFT JOIN users ON pos.user_uuid = users.uuid")
+
+	// Apply advanced filters
+	query = applyAdvancedFilters(query, c)
+
+	// Count total records
+	query.Count(&totalRecords)
 
 	// Fetch paginated data
-	err = db.
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	err = query.
+		Select("pos.*").
 		Offset(offset).
 		Limit(limit).
-		Order("updated_at DESC").
+		Order("pos.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
@@ -54,7 +62,7 @@ func GetPaginatedPos(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch provinces",
+			"message": "Failed to fetch POS",
 			"error":   err.Error(),
 		})
 	}
@@ -96,25 +104,31 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 	}
 	offset := (page - 1) * limit
 
-	// Parse search query
-	search := c.Query("search", "")
-
 	var dataList []models.Pos
 	var totalRecords int64
 
-	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("pos.province_uuid = ?", ProvinceUUID).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+	// Build query with joins for better filtering
+	query := db.Model(&models.Pos{}).
+		Joins("LEFT JOIN countries ON pos.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON pos.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON pos.area_uuid = areas.uuid").
+		Joins("LEFT JOIN sub_areas ON pos.sub_area_uuid = sub_areas.uuid").
+		Joins("LEFT JOIN communes ON pos.commune_uuid = communes.uuid").
+		Joins("LEFT JOIN users ON pos.user_uuid = users.uuid").
+		Where("pos.province_uuid = ?", ProvinceUUID)
+
+	// Apply advanced filters
+	query = applyAdvancedFilters(query, c)
+
+	// Count total records
+	query.Count(&totalRecords)
 
 	// Fetch paginated data
-	err = db.
-		Where("pos.province_uuid = ?", ProvinceUUID).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	err = query.
+		Select("pos.*").
 		Offset(offset).
 		Limit(limit).
-		Order("updated_at DESC").
+		Order("pos.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
@@ -128,7 +142,7 @@ func GetPaginatedPosByProvinceUUID(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch provinces",
+			"message": "Failed to fetch POS by province",
 			"error":   err.Error(),
 		})
 	}
@@ -170,25 +184,31 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 	}
 	offset := (page - 1) * limit
 
-	// Parse search query
-	search := c.Query("search", "")
-
 	var dataList []models.Pos
 	var totalRecords int64
 
-	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("pos.area_uuid = ?", AreaUUID).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+	// Build query with joins for better filtering
+	query := db.Model(&models.Pos{}).
+		Joins("LEFT JOIN countries ON pos.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON pos.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON pos.area_uuid = areas.uuid").
+		Joins("LEFT JOIN sub_areas ON pos.sub_area_uuid = sub_areas.uuid").
+		Joins("LEFT JOIN communes ON pos.commune_uuid = communes.uuid").
+		Joins("LEFT JOIN users ON pos.user_uuid = users.uuid").
+		Where("pos.area_uuid = ?", AreaUUID)
+
+	// Apply advanced filters
+	query = applyAdvancedFilters(query, c)
+
+	// Count total records
+	query.Count(&totalRecords)
 
 	// Fetch paginated data
-	err = db.
-		Where("pos.area_uuid = ?", AreaUUID).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	err = query.
+		Select("pos.*").
 		Offset(offset).
 		Limit(limit).
-		Order("updated_at DESC").
+		Order("pos.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
@@ -202,7 +222,7 @@ func GetPaginatedPosByAreaUUID(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch Area",
+			"message": "Failed to fetch POS by area",
 			"error":   err.Error(),
 		})
 	}
@@ -244,25 +264,31 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 	}
 	offset := (page - 1) * limit
 
-	// Parse search query
-	search := c.Query("search", "")
-
 	var dataList []models.Pos
 	var totalRecords int64
 
-	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("pos.sub_area_uuid = ?", SubAreaUUID).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+	// Build query with joins for better filtering
+	query := db.Model(&models.Pos{}).
+		Joins("LEFT JOIN countries ON pos.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON pos.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON pos.area_uuid = areas.uuid").
+		Joins("LEFT JOIN sub_areas ON pos.sub_area_uuid = sub_areas.uuid").
+		Joins("LEFT JOIN communes ON pos.commune_uuid = communes.uuid").
+		Joins("LEFT JOIN users ON pos.user_uuid = users.uuid").
+		Where("pos.sub_area_uuid = ?", SubAreaUUID)
+
+	// Apply advanced filters
+	query = applyAdvancedFilters(query, c)
+
+	// Count total records
+	query.Count(&totalRecords)
 
 	// Fetch paginated data
-	err = db.
-		Where("pos.sub_area_uuid = ?", SubAreaUUID).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	err = query.
+		Select("pos.*").
 		Offset(offset).
 		Limit(limit).
-		Order("updated_at DESC").
+		Order("pos.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
@@ -276,7 +302,7 @@ func GetPaginatedPosBySubAreaUUID(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch provinces",
+			"message": "Failed to fetch POS by sub area",
 			"error":   err.Error(),
 		})
 	}
@@ -318,25 +344,31 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	}
 	offset := (page - 1) * limit
 
-	// Parse search query
-	search := c.Query("search", "")
-
 	var dataList []models.Pos
 	var totalRecords int64
 
-	// Count total records matching the search query
-	db.Model(&models.Pos{}).
-		Where("pos.user_uuid = ?", UserUUID).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+	// Build query with joins for better filtering
+	query := db.Model(&models.Pos{}).
+		Joins("LEFT JOIN countries ON pos.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON pos.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON pos.area_uuid = areas.uuid").
+		Joins("LEFT JOIN sub_areas ON pos.sub_area_uuid = sub_areas.uuid").
+		Joins("LEFT JOIN communes ON pos.commune_uuid = communes.uuid").
+		Joins("LEFT JOIN users ON pos.user_uuid = users.uuid").
+		Where("pos.user_uuid = ?", UserUUID)
+
+	// Apply advanced filters
+	query = applyAdvancedFilters(query, c)
+
+	// Count total records
+	query.Count(&totalRecords)
 
 	// Fetch paginated data
-	err = db.
-		Where("pos.user_uuid = ?", UserUUID).
-		Where("name ILIKE ? OR shop ILIKE ? OR postype ILIKE ? OR gerant ILIKE ? OR quartier ILIKE ? OR reference ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+	err = query.
+		Select("pos.*").
 		Offset(offset).
 		Limit(limit).
-		Order("updated_at DESC").
+		Order("pos.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").
@@ -350,7 +382,7 @@ func GetPaginatedPosByCommuneUUID(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch provinces",
+			"message": "Failed to fetch POS by user",
 			"error":   err.Error(),
 		})
 	}
@@ -630,4 +662,139 @@ func DeletePos(c *fiber.Ctx) error {
 			"data":    nil,
 		},
 	)
+}
+
+// Helper function to apply advanced filters for all paginated functions
+func applyAdvancedFilters(query *gorm.DB, c *fiber.Ctx) *gorm.DB {
+	// Filtres de recherche générale
+	search := c.Query("search", "")
+
+	// Filtres géographiques
+	country := c.Query("country", "")
+	province := c.Query("province", "")
+	area := c.Query("area", "")
+	subarea := c.Query("subarea", "")
+	commune := c.Query("commune", "")
+
+	// Filtres POS spécifiques
+	posType := c.Query("posType", "")
+	status := c.Query("status", "")
+	gerant := c.Query("gerant", "")
+	quartier := c.Query("quartier", "")
+
+	// Filtres utilisateur
+	userFullname := c.Query("userFullname", "")
+	userSearch := c.Query("userSearch", "")
+
+	// Filtres hiérarchie commerciale avec recherche intégrée
+	asm := c.Query("asm", "")
+	asmSearch := c.Query("asmSearch", "")
+	supervisor := c.Query("supervisor", "")
+	supervisorSearch := c.Query("supervisorSearch", "")
+	dr := c.Query("dr", "")
+	drSearch := c.Query("drSearch", "")
+	cyclo := c.Query("cyclo", "")
+	cycloSearch := c.Query("cycloSearch", "")
+
+	// Filtres temporels
+	quickDate := c.Query("quickDate", "")
+
+	// 🔍 Recherche générale dans tous les champs pertinents
+	if search != "" {
+		query = query.Where("pos.name ILIKE ? OR pos.shop ILIKE ? OR pos.postype ILIKE ? OR pos.gerant ILIKE ? OR pos.quartier ILIKE ? OR pos.reference ILIKE ?",
+			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	// 🌍 Filtres géographiques
+	if country != "" {
+		query = query.Where("countries.name = ?", country)
+	}
+	if province != "" {
+		query = query.Where("provinces.name = ?", province)
+	}
+	if area != "" {
+		query = query.Where("areas.name = ?", area)
+	}
+	if subarea != "" {
+		query = query.Where("sub_areas.name = ?", subarea)
+	}
+	if commune != "" {
+		query = query.Where("communes.name = ?", commune)
+	}
+
+	// 🏪 Filtres POS spécifiques
+	if posType != "" {
+		query = query.Where("pos.postype = ?", posType)
+	}
+	if gerant != "" {
+		query = query.Where("pos.gerant ILIKE ?", "%"+gerant+"%")
+	}
+	if quartier != "" {
+		query = query.Where("pos.quartier ILIKE ?", "%"+quartier+"%")
+	}
+
+	// 📊 Filtre statut du POS
+	switch status {
+	case "active":
+		query = query.Where("pos.status = ?", true)
+	case "inactive":
+		query = query.Where("pos.status = ?", false)
+	}
+
+	// 👤 Filtres utilisateur
+	if userFullname != "" {
+		query = query.Where("users.fullname = ?", userFullname)
+	}
+	if userSearch != "" {
+		query = query.Where("users.fullname ILIKE ?", "%"+userSearch+"%")
+	}
+
+	// 👔 Filtres hiérarchie commerciale avec recherche intégrée
+	// ASM - support recherche intégrée
+	if asm != "" {
+		query = query.Where("pos.asm = ?", asm)
+	}
+	if asmSearch != "" {
+		query = query.Where("pos.asm ILIKE ?", "%"+asmSearch+"%")
+	}
+
+	// Supervisor - support recherche intégrée
+	if supervisor != "" {
+		query = query.Where("pos.sup = ?", supervisor)
+	}
+	if supervisorSearch != "" {
+		query = query.Where("pos.sup ILIKE ?", "%"+supervisorSearch+"%")
+	}
+
+	// DR - support recherche intégrée
+	if dr != "" {
+		query = query.Where("pos.dr = ?", dr)
+	}
+	if drSearch != "" {
+		query = query.Where("pos.dr ILIKE ?", "%"+drSearch+"%")
+	}
+
+	// Cyclo - support recherche intégrée
+	if cyclo != "" {
+		query = query.Where("pos.cyclo = ?", cyclo)
+	}
+	if cycloSearch != "" {
+		query = query.Where("pos.cyclo ILIKE ?", "%"+cycloSearch+"%")
+	}
+
+	// 📅 Filtres rapides par date
+	if quickDate != "" {
+		switch quickDate {
+		case "today":
+			query = query.Where("DATE(pos.created_at) = CURRENT_DATE")
+		case "yesterday":
+			query = query.Where("DATE(pos.created_at) = CURRENT_DATE - INTERVAL '1 day'")
+		case "last7days":
+			query = query.Where("pos.created_at >= CURRENT_DATE - INTERVAL '7 days'")
+		case "last30days":
+			query = query.Where("pos.created_at >= CURRENT_DATE - INTERVAL '30 days'")
+		}
+	}
+
+	return query
 }

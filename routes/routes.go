@@ -196,8 +196,7 @@ func Setup(app *fiber.App) {
 	rpi.Get("/all/paginate", RoutePlanItem.GetPaginatedRoutePlanItem)
 	rpi.Get("/all/:route_plan_uuid", RoutePlanItem.GetAllRoutePlanItem)
 	rpi.Get("/get/:uuid", RoutePlanItem.GetOneByRouteItermUUID)
-	rpi.Post("/create", RoutePlanItem.CreateRoutePlanItem)
-	rpi.Put("/update/status/:pos_uuid", RoutePlanItem.UpdateRoutePlanItemPosStatus)
+	rpi.Post("/create", RoutePlanItem.CreateRoutePlanItem) 
 	rpi.Put("/update/:uuid", RoutePlanItem.UpdateRoutePlanItem)
 	rpi.Delete("/delete/:uuid", RoutePlanItem.DeleteRoutePlanItem)
 
