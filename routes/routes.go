@@ -223,6 +223,7 @@ func Setup(app *fiber.App) {
 	posf.Get("/all/paginate/commune/:user_uuid", posform.GetPaginatedPosFormCommune)
 	posf.Get("/all/paginate/:pos_uuid", posform.GetPaginatedPosFormByPOS)
 	posf.Get("/all", posform.GetAllPosforms)
+	posf.Get("/export/excel", posform.GeneratePosFormExcelReport)
 	posf.Post("/create", posform.CreatePosform)
 	posf.Get("/get/:uuid", posform.GetPosForm)
 	posf.Put("/update/:uuid", posform.UpdatePosform)
