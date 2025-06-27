@@ -8,7 +8,6 @@ import (
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 )
 
 // Paginate
@@ -407,257 +406,365 @@ func DeleteUser(c *fiber.Ctx) error {
 	)
 }
 
-// GetUserByParams - Récupère un utilisateur selon différents paramètres
-func GetUserByParams(c *fiber.Ctx) error {
+// Get users by CountryUUID
+func GetUsersByCountryUUID(c *fiber.Ctx) error {
+	countryUUID := c.Params("country_uuid")
 	db := database.DB
-
-	// Parse filter parameters
-	posUUID := c.Query("pos")
-	posformUUID := c.Query("posform")
-	role := c.Query("role")
-	status := c.Query("status")
-	countryUUID := c.Query("country")
-	provinceUUID := c.Query("province")
-	areaUUID := c.Query("area")
-	subAreaUUID := c.Query("subarea")
-	communeUUID := c.Query("commune")
-	managerUUID := c.Query("manager")
-	asmUUID := c.Query("asm")
-	supUUID := c.Query("sup")
-	drUUID := c.Query("dr")
-	cycloUUID := c.Query("cyclo")
-	search := c.Query("search", "")
-
-	var user models.User
-
-	// Build the query
-	query := db.Model(&models.User{})
-
-	// Apply filters based on POS
-	if posUUID != "" {
-		query = query.Joins("JOIN pos ON pos.user_uuid = users.uuid").
-			Where("pos.uuid = ?", posUUID)
-	}
-
-	// Apply filters based on POSFORM
-	if posformUUID != "" {
-		query = query.Joins("JOIN posforms ON posforms.user_uuid = users.uuid").
-			Where("posforms.uuid = ?", posformUUID)
-	}
-
-	// Apply other filters
-	if role != "" {
-		query = query.Where("users.role = ?", role)
-	}
-
-	if status != "" {
-		statusBool := status == "true"
-		query = query.Where("users.status = ?", statusBool)
-	}
-
-	if countryUUID != "" {
-		query = query.Where("users.country_uuid = ?", countryUUID)
-	}
-
-	if provinceUUID != "" {
-		query = query.Where("users.province_uuid = ?", provinceUUID)
-	}
-
-	if areaUUID != "" {
-		query = query.Where("users.area_uuid = ?", areaUUID)
-	}
-
-	if subAreaUUID != "" {
-		query = query.Where("users.sub_area_uuid = ?", subAreaUUID)
-	}
-
-	if communeUUID != "" {
-		query = query.Where("users.commune_uuid = ?", communeUUID)
-	}
-
-	if managerUUID != "" {
-		query = query.Where("users.manager_uuid = ?", managerUUID)
-	}
-
-	if asmUUID != "" {
-		query = query.Where("users.asm_uuid = ?", asmUUID)
-	}
-
-	if supUUID != "" {
-		query = query.Where("users.sup_uuid = ?", supUUID)
-	}
-
-	if drUUID != "" {
-		query = query.Where("users.dr_uuid = ?", drUUID)
-	}
-
-	if cycloUUID != "" {
-		query = query.Where("users.cyclo_uuid = ?", cycloUUID)
-	}
-
-	// Apply search filter
-	if search != "" {
-		query = query.Where("users.fullname ILIKE ? OR users.title ILIKE ? OR users.email ILIKE ?",
-			"%"+search+"%", "%"+search+"%", "%"+search+"%")
-	}
-
-	// Execute the query to get the first matching user
-	err := query.
-		Order("users.updated_at DESC").
-		Preload("Country").
-		Preload("Province").
-		Preload("Area").
-		Preload("SubArea").
-		Preload("Commune").
-		First(&user).Error
-
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return c.Status(404).JSON(fiber.Map{
-				"status":  "error",
-				"message": "No user found matching the criteria",
-				"data":    nil,
-			})
-		}
-		return c.Status(500).JSON(fiber.Map{
-			"status":  "error",
-			"message": "Failed to fetch User",
-			"error":   err.Error(),
-		})
-	}
-
-	// Prepare filters applied
-	filtersApplied := map[string]interface{}{
-		"pos":      posUUID,
-		"posform":  posformUUID,
-		"role":     role,
-		"status":   status,
-		"country":  countryUUID,
-		"province": provinceUUID,
-		"area":     areaUUID,
-		"subarea":  subAreaUUID,
-		"commune":  communeUUID,
-		"manager":  managerUUID,
-		"asm":      asmUUID,
-		"sup":      supUUID,
-		"dr":       drUUID,
-		"cyclo":    cycloUUID,
-		"search":   search,
-	}
-
-	// Return response
+	var users []models.User
+	db.Where("country_uuid = ?", countryUUID).Find(&users)
 	return c.JSON(fiber.Map{
-		"status":          "success",
-		"message":         "User retrieved successfully",
-		"data":            user,
-		"filters_applied": filtersApplied,
+		"status":  "success",
+		"message": "Users by country_uuid found",
+		"data":    users,
 	})
 }
 
-// GetUserWithRelations - Récupère un utilisateur avec ses POS et POSFORM associés
-func GetUserWithRelations(c *fiber.Ctx) error {
+// Get single user by CountryUUID
+func GetUserByCountryUUID(c *fiber.Ctx) error {
+	countryUUID := c.Params("country_uuid")
 	db := database.DB
-
-	// Parse filter parameters
-	userUUID := c.Query("user")
-	role := c.Query("role")
-	status := c.Query("status")
-	includePos := c.Query("include_pos", "true") == "true"
-	includePosform := c.Query("include_posform", "true") == "true"
-	search := c.Query("search", "")
-
 	var user models.User
-
-	// Build the query
-	query := db.Model(&models.User{})
-
-	// Apply filters
-	if userUUID != "" {
-		query = query.Where("users.uuid = ?", userUUID)
-	}
-
-	if role != "" {
-		query = query.Where("users.role = ?", role)
-	}
-
-	if status != "" {
-		statusBool := status == "true"
-		query = query.Where("users.status = ?", statusBool)
-	}
-
-	if search != "" {
-		query = query.Where("users.fullname ILIKE ? OR users.title ILIKE ? OR users.email ILIKE ?",
-			"%"+search+"%", "%"+search+"%", "%"+search+"%")
-	}
-
-	// Build preload query
-	userQuery := query.
-		Order("users.updated_at DESC").
-		Preload("Country").
-		Preload("Province").
-		Preload("Area").
-		Preload("SubArea").
-		Preload("Commune")
-
-	// Conditionally include POS and POSFORM relations
-	if includePos {
-		userQuery = userQuery.Preload("Pos", func(db *gorm.DB) *gorm.DB {
-			return db.Preload("Country").
-				Preload("Province").
-				Preload("Area").
-				Preload("SubArea").
-				Preload("Commune").
-				Order("pos.updated_at DESC")
-		})
-	}
-
-	if includePosform {
-		userQuery = userQuery.Preload("PosForms", func(db *gorm.DB) *gorm.DB {
-			return db.Preload("Country").
-				Preload("Province").
-				Preload("Area").
-				Preload("SubArea").
-				Preload("Commune").
-				Preload("Pos").
-				Order("posforms.updated_at DESC")
-		})
-	}
-
-	// Execute the query to get the first matching user
-	err := userQuery.First(&user).Error
-
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return c.Status(404).JSON(fiber.Map{
-				"status":  "error",
-				"message": "No user found matching the criteria",
-				"data":    nil,
-			})
-		}
-		return c.Status(500).JSON(fiber.Map{
+	db.Where("country_uuid = ?", countryUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch User with relations",
-			"error":   err.Error(),
+			"message": "No user found for this country_uuid",
+			"data":    nil,
 		})
 	}
-
-	// Prepare response metadata
-	metadata := map[string]interface{}{
-		"include_pos":     includePos,
-		"include_posform": includePosform,
-		"filters": map[string]interface{}{
-			"user":   userUUID,
-			"role":   role,
-			"status": status,
-			"search": search,
-		},
-	}
-
-	// Return response
 	return c.JSON(fiber.Map{
-		"status":   "success",
-		"message":  "User with relations retrieved successfully",
-		"data":     user,
-		"metadata": metadata,
+		"status":  "success",
+		"message": "User by country_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by ProvinceUUID
+func GetUsersByProvinceUUID(c *fiber.Ctx) error {
+	provinceUUID := c.Params("province_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("province_uuid = ?", provinceUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by province_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by ProvinceUUID
+func GetUserByProvinceUUID(c *fiber.Ctx) error {
+	provinceUUID := c.Params("province_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("province_uuid = ?", provinceUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this province_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by province_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by AreaUUID
+func GetUsersByAreaUUID(c *fiber.Ctx) error {
+	areaUUID := c.Params("area_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("area_uuid = ?", areaUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by area_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by AreaUUID
+func GetUserByAreaUUID(c *fiber.Ctx) error {
+	areaUUID := c.Params("area_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("area_uuid = ?", areaUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this area_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by area_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by SubAreaUUID
+func GetUsersBySubAreaUUID(c *fiber.Ctx) error {
+	subAreaUUID := c.Params("sub_area_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("sub_area_uuid = ?", subAreaUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by sub_area_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by SubAreaUUID
+func GetUserBySubAreaUUID(c *fiber.Ctx) error {
+	subAreaUUID := c.Params("sub_area_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("sub_area_uuid = ?", subAreaUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this sub_area_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by sub_area_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by CommuneUUID
+func GetUsersByCommuneUUID(c *fiber.Ctx) error {
+	communeUUID := c.Params("commune_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("commune_uuid = ?", communeUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by commune_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by CommuneUUID
+func GetUserByCommuneUUID(c *fiber.Ctx) error {
+	communeUUID := c.Params("commune_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("commune_uuid = ?", communeUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this commune_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by commune_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by SupportUUID
+func GetUsersBySupportUUID(c *fiber.Ctx) error {
+	supportUUID := c.Params("support_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("support_uuid = ?", supportUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by support_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by SupportUUID
+func GetUserBySupportUUID(c *fiber.Ctx) error {
+	supportUUID := c.Params("support_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("support_uuid = ?", supportUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this support_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by support_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by ManagerUUID
+func GetUsersByManagerUUID(c *fiber.Ctx) error {
+	managerUUID := c.Params("manager_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("manager_uuid = ?", managerUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by manager_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by ManagerUUID
+func GetUserByManagerUUID(c *fiber.Ctx) error {
+	managerUUID := c.Params("manager_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("manager_uuid = ?", managerUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this manager_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by manager_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by AsmUUID
+func GetUsersByAsmUUID(c *fiber.Ctx) error {
+	asmUUID := c.Params("asm_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("asm_uuid = ?", asmUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by asm_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by AsmUUID
+func GetUserByAsmUUID(c *fiber.Ctx) error {
+	asmUUID := c.Params("asm_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("asm_uuid = ?", asmUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this asm_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by asm_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by SupUUID
+func GetUsersBySupUUID(c *fiber.Ctx) error {
+	supUUID := c.Params("sup_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("sup_uuid = ?", supUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by sup_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by SupUUID
+func GetUserBySupUUID(c *fiber.Ctx) error {
+	supUUID := c.Params("sup_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("sup_uuid = ?", supUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this sup_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by sup_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by DrUUID
+func GetUsersByDrUUID(c *fiber.Ctx) error {
+	drUUID := c.Params("dr_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("dr_uuid = ?", drUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by dr_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by DrUUID
+func GetUserByDrUUID(c *fiber.Ctx) error {
+	drUUID := c.Params("dr_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("dr_uuid = ?", drUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this dr_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by dr_uuid found",
+		"data":    user,
+	})
+}
+
+// Get users by CycloUUID
+func GetUsersByCycloUUID(c *fiber.Ctx) error {
+	cycloUUID := c.Params("cyclo_uuid")
+	db := database.DB
+	var users []models.User
+	db.Where("cyclo_uuid = ?", cycloUUID).Find(&users)
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Users by cyclo_uuid found",
+		"data":    users,
+	})
+}
+
+// Get single user by CycloUUID
+func GetUserByCycloUUID(c *fiber.Ctx) error {
+	cycloUUID := c.Params("cyclo_uuid")
+	db := database.DB
+	var user models.User
+	db.Where("cyclo_uuid = ?", cycloUUID).First(&user)
+	if user.Fullname == "" {
+		return c.Status(404).JSON(fiber.Map{
+			"status":  "error",
+			"message": "No user found for this cyclo_uuid",
+			"data":    nil,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "User by cyclo_uuid found",
+		"data":    user,
 	})
 }

@@ -1,7 +1,6 @@
 package posequiment
 
-import (
-	"fmt"
+import ( 
 	"strconv"
 
 	"github.com/danny19977/mspos-api-v3/database"
@@ -11,80 +10,10 @@ import (
 )
 
 // Paginate
-func GetPaginatedPosEquipment(c *fiber.Ctx) error {
-	db := database.DB
-
-	// Parse query parameters for pagination
-	page, err := strconv.Atoi(c.Query("page", "1"))
-	if err != nil || page <= 0 {
-		page = 1
-	}
-	limit, err := strconv.Atoi(c.Query("limit", "15"))
-	if err != nil || limit <= 0 {
-		limit = 15
-	}
-	offset := (page - 1) * limit
-
-	// Parse search query
-	search := c.Query("search", "")
-
-	var dataList []models.PosEquipment
-	var totalRecords int64
-
-	// Count total records matching the search query
-	db.Model(&models.PosEquipment{}).
-		Joins("JOIN pos ON pos.id = pos_equipment.pos_id").
-		Where("pos.name ILIKE ? OR pos_equipment.name ILIKE ?", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
-
-	// Fetch paginated data
-	err = db.
-		Joins("JOIN pos ON pos.id = pos_equipment.pos_id").
-		Where("pos.name ILIKE ? OR pos_equipment.name ILIKE ?", "%"+search+"%", "%"+search+"%").
-		Offset(offset).
-		Limit(limit).
-		Order("pos_equipment.updated_at DESC").
-		Preload("Pos").
-		Preload("Parasol").
-		Preload("Stand").
-		Preload("Kiosk").
-		Find(&dataList).Error
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"status":  "error",
-			"message": "Failed to fetch provinces",
-			"error":   err.Error(),
-		})
-	}
-
-	// Calculate total pages
-	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
-
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
-
-	// Prepare pagination metadata
-	pagination := map[string]interface{}{
-		"total_records": totalRecords,
-		"total_pages":   totalPages,
-		"current_page":  page,
-		"page_size":     limit,
-	}
-
-	// Return response
-	return c.JSON(fiber.Map{
-		"status":     "success",
-		"message":    "Provinces retrieved successfully",
-		"data":       dataList,
-		"pagination": pagination,
-	})
-}
-
-// Paginate
 func GetPaginatedPosEquipmentByPos(c *fiber.Ctx) error {
 	db := database.DB
 
-	PosUUID := c.Params("pos_id")
+	PosUUID := c.Params("pos_uuid")
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -105,23 +34,20 @@ func GetPaginatedPosEquipmentByPos(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.PosEquipment{}).
-		Joins("JOIN pos ON pos.id = pos_equipment.pos_id").
-		Where("pos.name ILIKE ? OR pos_equipment.name ILIKE ?", "%"+search+"%", "%"+search+"%").
-		Where("pos.id = ?", PosUUID).
+		Joins("JOIN pos ON pos.uuid = pos_equipments.pos_uuid").
+		Where("pos_equipments.parasol ILIKE ? OR pos_equipments.stand ILIKE ? OR pos_equipments.kiosk ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("pos.uuid = ?", PosUUID).
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Joins("JOIN pos ON pos.id = pos_equipment.pos_id").
-		Where("pos.name ILIKE ? OR pos_equipment.name ILIKE ?", "%"+search+"%", "%"+search+"%").
-		Where("pos.id = ?", PosUUID).
+		Joins("JOIN pos ON pos.uuid = pos_equipments.pos_uuid").
+		Where("pos_equipments.parasol ILIKE ? OR pos_equipments.stand ILIKE ? OR pos_equipments.kiosk ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("pos.uuid = ?", PosUUID).
 		Offset(offset).
 		Limit(limit).
-		Order("pos_equipment.updated_at DESC").
+		Order("pos_equipments.updated_at DESC").
 		Preload("Pos").
-		Preload("Parasol").
-		Preload("Stand").
-		Preload("Kiosk").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -135,8 +61,6 @@ func GetPaginatedPosEquipmentByPos(c *fiber.Ctx) error {
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
-	fmt.Printf("Total Records: %d,Total Page: %d, Total Pages: %d\n", totalRecords, page, totalPages)
-
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
 		"total_records": totalRecords,
@@ -148,28 +72,9 @@ func GetPaginatedPosEquipmentByPos(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "Provinces retrieved successfully",
+		"message":    "Equipement retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
-	})
-}
-
-// Get all data by search
-func GetAllPosEquipmentSearch(c *fiber.Ctx) error {
-	db := database.DB
-	search := c.Query("search", "")
-
-	var data []models.PosEquipment
-	if search != "" {
-		db.Where("name ILIKE ? OR shop ILIKE ?", "%"+search+"%", "%"+search+"%").Find(&data)
-	} else {
-		db.Find(&data)
-	}
-
-	return c.JSON(fiber.Map{
-		"status":  "success",
-		"message": "All Pos",
-		"data":    data,
 	})
 }
 
@@ -180,21 +85,21 @@ func GetAllPosEquipments(c *fiber.Ctx) error {
 	db.Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "All Pos",
+		"message": "All Equipements found",
 		"data":    data,
 	})
 }
 
 // query data
 func GetPosEquipmentByID(c *fiber.Ctx) error {
-	id := c.Params("id")
+	uuid := c.Params("uuid")
 	db := database.DB
 	var poss []models.PosEquipment
-	db.Where("pos_id = ?", id).Find(&poss)
+	db.Where("pos_uuid = ?", uuid).Find(&poss)
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "poss by id found",
+		"message": "equipement by uuid found",
 		"data":    poss,
 	})
 }
@@ -249,16 +154,15 @@ func UpdatePosEquipment(c *fiber.Ctx) error {
 	db := database.DB
 
 	type UpdateData struct {
-		UUID          string `json:"uuid"`
-		PosUUID       string   `json:"pos_uuid" gorm:"type:varchar(255);not null"`
-		Parasol       string `json:"parasol"`                        //Equrtor, Compatition, Parasol
-		ParasolStatus string `gorm:"not null" json:"parasol_status"` // Status d'equipements  Casser, Vieux, Bien
+		PosUUID       string `json:"pos_uuid"`
+		Parasol       string `json:"parasol"`        //Equrtor, Compatition, Parasol
+		ParasolStatus string `json:"parasol_status"` // Status d'equipements  Casser, Vieux, Bien
 
-		Stand       string `json:"stand"`                        //Equrtor, Compatition, Parasol
-		StandStatus bool   `gorm:"not null" json:"stand_status"` // Status d'equipements  Casser, Vieux, Bien
+		Stand       string `json:"stand"`        //Equrtor, Compatition, Parasol
+		StandStatus string `json:"stand_status"` // Status d'equipements  Casser, Vieux, Bien
 
-		Kiosk       string `json:"kiosk"`                        //Equrtor, Compatition, Parasol
-		KioskStatus bool   `gorm:"not null" json:"kiosk_Status"` // Status d'equipements  Casser, Vieux, Bien
+		Kiosk       string `json:"kiosk"`        //Equrtor, Compatition, Parasol
+		KioskStatus string `json:"kiosk_status"` // Status d'equipements  Casser, Vieux, Bien
 
 		Signature string `json:"signature"`
 	}
