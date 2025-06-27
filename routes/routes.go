@@ -174,6 +174,7 @@ func Setup(app *fiber.App) {
 	po.Get("/all/subareas/:sub_area_uuid", pos.GetAllPosByDR)
 	po.Get("/all/cyclo/:user_uuid", pos.GetAllPosByCyclo)
 	po.Get("/export/excel", pos.GeneratePosExcelReport)
+	po.Get("/map-pos/:uuid", pos.MapPos)
 	po.Post("/create", pos.CreatePos)
 	po.Get("/get/:uuid", pos.GetPos)
 	po.Put("/update/:uuid", pos.UpdatePos)
