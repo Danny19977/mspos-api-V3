@@ -121,8 +121,6 @@ func CreatePosformItem(c *fiber.Ctx) error {
 	p.UUID = utils.GenerateUUID()
 	database.DB.Create(p)
 
-	
-
 	return c.JSON(
 		fiber.Map{
 			"status":  "success",
@@ -140,12 +138,12 @@ func UpdatePosformItem(c *fiber.Ctx) error {
 	type UpdateData struct {
 		UUID string `json:"uuid"`
 
-		Sold        int    `gorm:"default:0" json:"sold"`
-		NumberFarde int    `gorm:"not null" json:"number_farde"`                   // NUMBER Farde
-		Counter     int    `gorm:"not null" json:"counter"`                        // Allows to calculate the Sum of the ND Dashboard
-		PosFormUUID string `json:"posform_uuid" gorm:"type:varchar(255);not null"` // Foreign key (belongs to), tag `index` will create index for this column
-		BrandUUID   string `json:"brand_id" gorm:"type:varchar(255);not null"`     // Foreign key (belongs to), tag `index` will create index for this column
-		PosUUID     string `json:"pos_uuid" gorm:"type:varchar(255);not null"`     // Foreign key (belongs to), tag `index` will create index for this column
+		Sold        float64 `gorm:"default:0" json:"sold"`
+		NumberFarde float64 `gorm:"not null" json:"number_farde"`                   // NUMBER Farde
+		Counter     int     `gorm:"not null" json:"counter"`                        // Allows to calculate the Sum of the ND Dashboard
+		PosFormUUID string  `json:"posform_uuid" gorm:"type:varchar(255);not null"` // Foreign key (belongs to), tag `index` will create index for this column
+		BrandUUID   string  `json:"brand_id" gorm:"type:varchar(255);not null"`     // Foreign key (belongs to), tag `index` will create index for this column
+		PosUUID     string  `json:"pos_uuid" gorm:"type:varchar(255);not null"`     // Foreign key (belongs to), tag `index` will create index for this column
 		// Foreign key (belongs to), tag `index` will create index for this column
 	}
 

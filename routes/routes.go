@@ -202,7 +202,7 @@ func Setup(app *fiber.App) {
 	po.Put("/update/:uuid", pos.UpdatePos)
 	po.Delete("/delete/:uuid", pos.DeletePos)
 
-	//routeplan controller
+	// routeplan controller
 	rp := api.Group("/routeplans")
 	rp.Get("/all", routeplan.GetRouteplan)
 	rp.Get("/all/paginate", routeplan.GetPaginatedRouteplan)
@@ -245,6 +245,7 @@ func Setup(app *fiber.App) {
 	posf.Get("/all/paginate/subarea/:dr_uuid", posform.GetPaginatedPosFormSubArea)
 	posf.Get("/all/paginate/commune/:user_uuid", posform.GetPaginatedPosFormCommune)
 	posf.Get("/all/paginate/:pos_uuid", posform.GetPaginatedPosFormByPOS)
+	posf.Get("/all/paginate/user/:user_uuid", posform.GetPaginatedPosFormByUserUUID)
 	posf.Get("/all", posform.GetAllPosforms)
 	posf.Get("/export/excel", posform.GeneratePosFormExcelReport)
 	posf.Post("/create", posform.CreatePosform)

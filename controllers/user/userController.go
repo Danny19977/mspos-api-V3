@@ -166,7 +166,15 @@ func GetUser(c *fiber.Ctx) error {
 	uuid := c.Params("uuid")
 	db := database.DB
 	var user models.User
-	db.Where("uuid = ?", uuid).First(&user)
+	db.Where("uuid = ?", uuid).
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Preload("Pos").
+		Preload("PosForms").
+		First(&user)
 	if user.Fullname == "" {
 		return c.Status(404).JSON(
 			fiber.Map{
@@ -175,7 +183,7 @@ func GetUser(c *fiber.Ctx) error {
 				"data":    nil,
 			},
 		)
-	}
+	}    
 	return c.JSON(
 		fiber.Map{
 			"status":  "success",

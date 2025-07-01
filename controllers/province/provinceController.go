@@ -10,10 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
+
 // Paginate
 func GetPaginatedProvince(c *fiber.Ctx) error {
 	db := database.DB
-
 
 	// Parse query parameters for pagination
 	page, err := strconv.Atoi(c.Query("page", "1"))
@@ -55,8 +55,7 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 				AND p.province_uuid = provinces.uuid
 			) AS total_pos, 
 			(
-				SELECT
-				COUNT(DISTINCT ps.uuid)
+				SELECT COUNT(DISTINCT ps.uuid)
 				FROM pos_forms ps  
 				WHERE ps.country_uuid = provinces.country_uuid
 				AND ps.province_uuid = provinces.uuid

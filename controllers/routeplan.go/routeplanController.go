@@ -529,8 +529,8 @@ func GetRouteplanByUserUUID(c *fiber.Ctx) error {
 	userUUID := c.Params("user_uuid")
 	db := database.DB
 
-	var routeplan models.RoutePlan
-	db.Where("user_uuid = ?", userUUID).
+	var routeplan models.RoutePlan   
+	db.Where("user_uuid = ? AND DATE(created_at) = CURRENT_DATE", userUUID).
 		Order("created_at DESC").
 		Preload("RoutePlanItems").
 		First(&routeplan)
