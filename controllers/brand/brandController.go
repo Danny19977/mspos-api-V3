@@ -74,6 +74,74 @@ func GetPaginatedBrands(c *fiber.Ctx) error {
 	})
 }
 
+// Paginate Brands by CountryUUID
+func GetPaginatedBrandsByCountryUUID(c *fiber.Ctx) error {
+	db := database.DB
+
+	CountryUUID := c.Params("country_uuid")
+
+	// Parse query parameters for pagination
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	limit, err := strconv.Atoi(c.Query("limit", "15"))
+	if err != nil || limit <= 0 {
+		limit = 15
+	}
+	offset := (page - 1) * limit
+
+	// Parse search query
+	search := c.Query("search", "")
+
+	var dataList []models.Brand
+	var totalRecords int64
+
+	// Count total records matching the search query
+	db.Model(&models.Brand{}).
+		Where("country_uuid = ?", CountryUUID).
+		Where("name ILIKE ?", "%"+search+"%").
+		Count(&totalRecords)
+
+	err = db.
+		Where("country_uuid = ?", CountryUUID).
+		Where("name ILIKE ?", "%"+search+"%").
+		Offset(offset).
+		Limit(limit).
+		Order("updated_at DESC").
+		Preload("Country").
+		Preload("Province").
+		// Preload("PosFormItems").
+		Find(&dataList).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch provinces",
+			"error":   err.Error(),
+		})
+	}
+
+	// Calculate total pages
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit)) 
+
+	// Prepare pagination metadata
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
+	}
+
+	// Return response
+	return c.JSON(fiber.Map{
+		"status":     "success",
+		"message":    "brands retrieved successfully",
+		"data":       dataList,
+		"pagination": pagination,
+	})
+}
+
 // Paginate Brands by ProvinceUUID
 func GetPaginatedBrandsByProvinceUUID(c *fiber.Ctx) error {
 	db := database.DB
@@ -117,7 +185,7 @@ func GetPaginatedBrandsByProvinceUUID(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Failed to fetch provinces",
+			"message": "Failed to fetch brands",
 			"error":   err.Error(),
 		})
 	}
@@ -138,7 +206,7 @@ func GetPaginatedBrandsByProvinceUUID(c *fiber.Ctx) error {
 	// Return response
 	return c.JSON(fiber.Map{
 		"status":     "success",
-		"message":    "PosFormItems retrieved successfully",
+		"message":    "brands retrieved successfully",
 		"data":       dataList,
 		"pagination": pagination,
 	})

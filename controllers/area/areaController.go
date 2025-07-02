@@ -104,6 +104,105 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 	})
 }
 
+// Paginate Query Area by Country ID
+func GetAreaByCountry(c *fiber.Ctx) error {
+	db := database.DB
+
+	CountryUUID := c.Params("country_uuid")
+
+	// Parse query parameters for pagination
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+	limit, err := strconv.Atoi(c.Query("limit", "15"))
+	if err != nil || limit <= 0 {
+		limit = 15
+	}
+	offset := (page - 1) * limit
+
+	// Parse search query
+	search := c.Query("search", "")
+
+	var dataList []models.Area
+	var totalRecords int64
+
+	// Count total records matching the search query
+	db.Model(&models.Area{}).
+		Where("country_uuid = ?", CountryUUID).
+		Where("name ILIKE ?", "%"+search+"%").
+		Count(&totalRecords)
+
+	// Fetch paginated data
+	err = db.
+		Where("country_uuid = ?", CountryUUID).
+		Where("name ILIKE ?", "%"+search+"%").
+		Select(` 
+			areas.*, 
+			(
+				SELECT COUNT(DISTINCT u2.uuid)
+				FROM users u2 
+				WHERE u2.country_uuid = areas.country_uuid
+				AND u2.province_uuid = areas.province_uuid
+				AND u2.area_uuid = areas.uuid
+			) AS total_users,
+			(
+				SELECT COUNT(DISTINCT p.uuid)
+				FROM pos p  
+				WHERE p.country_uuid = areas.country_uuid 
+				AND p.province_uuid = areas.province_uuid
+				AND p.area_uuid = areas.uuid
+			) AS total_pos, 
+			(
+				SELECT
+				COUNT(DISTINCT ps.uuid)
+				FROM
+				pos_forms ps  
+				WHERE ps.country_uuid = areas.country_uuid
+				AND ps.province_uuid = areas.province_uuid
+				AND ps.area_uuid = areas.uuid
+			) AS total_posforms
+		`).
+		Offset(offset).
+		Limit(limit).
+		Order("updated_at DESC").
+		Preload("Country").
+		Preload("Province").
+		Preload("SubAreas").
+		Preload("Communes").
+		// Preload("Pos").
+		// Preload("Users").
+		// Preload("PosForms").
+		Find(&dataList).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch countries",
+			"error":   err.Error(),
+		})
+	}
+
+	// Calculate total pages
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+
+	// Prepare pagination metadata
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
+	}
+
+	// Return response
+	return c.JSON(fiber.Map{
+		"status":     "success",
+		"message":    "Areas retrieved successfully",
+		"data":       dataList,
+		"pagination": pagination,
+	})
+}
+
 // Paginate Query Area by Asm ID
 func GetAreaByASM(c *fiber.Ctx) error {
 	db := database.DB
