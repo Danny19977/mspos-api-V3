@@ -52,11 +52,11 @@ type User struct {
 	CycloUUID   string `json:"cyclo_uuid" gorm:"type:varchar(255)"`
 	Cyclo       string `json:"cyclo" gorm:"default:''"`
 
-	TotalSup      int64 `json:"total_sup"`
-	TotalDr       int64 `json:"total_dr"`
-	TotalCyclo    int64 `json:"total_cyclo"`
-	TotalPos      int64 `json:"total_pos"`
-	TotalPosForms int64 `json:"total_pos_forms"`
+	TotalSup   int64 `json:"total_sup"`
+	TotalDr    int64 `json:"total_dr"`
+	TotalCyclo int64 `json:"total_cyclo"`
+	TotalPos   int64 `json:"total_pos"`
+	Visites    int64 `json:"visites"`
 
 	RoutePlan []RoutePlan `gorm:"foreignKey:UserUUID;references:UUID"`
 	Pos       []Pos       `gorm:"foreignKey:UserUUID;references:UUID"`

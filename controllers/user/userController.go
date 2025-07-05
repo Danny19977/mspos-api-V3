@@ -174,6 +174,7 @@ func GetUser(c *fiber.Ctx) error {
 		Preload("Commune").
 		Preload("Pos").
 		Preload("PosForms").
+		Preload("RoutePlan").
 		First(&user)
 	if user.Fullname == "" {
 		return c.Status(404).JSON(

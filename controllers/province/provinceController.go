@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 // Paginate
 func GetPaginatedProvince(c *fiber.Ctx) error {
 	db := database.DB
@@ -34,12 +33,14 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Province{}).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON provinces.country_uuid = countries.uuid").
+		Where("provinces.name ILIKE ? OR countries.name ILIKE ?", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON provinces.country_uuid = countries.uuid").
+		Where("provinces.name ILIKE ? OR countries.name ILIKE ?", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			provinces.*, 
 			(
@@ -59,7 +60,7 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 				FROM pos_forms ps  
 				WHERE ps.country_uuid = provinces.country_uuid
 				AND ps.province_uuid = provinces.uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -83,7 +84,7 @@ func GetPaginatedProvince(c *fiber.Ctx) error {
 	}
 
 	// Calculate total pages
-	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit)) 
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
 
 	// Prepare pagination metadata
 	pagination := map[string]interface{}{
@@ -127,14 +128,16 @@ func GetPaginatedProvinceByCountry(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Province{}).
-		Where("country_uuid = ?", CountryUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON provinces.country_uuid = countries.uuid").
+		Where("provinces.country_uuid = ?", CountryUUID).
+		Where("provinces.name ILIKE ? OR countries.name ILIKE ?", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("country_uuid = ?", CountryUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON provinces.country_uuid = countries.uuid").
+		Where("provinces.country_uuid = ?", CountryUUID).
+		Where("provinces.name ILIKE ? OR countries.name ILIKE ?", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			provinces.*, 
 			(
@@ -168,7 +171,7 @@ func GetPaginatedProvinceByCountry(c *fiber.Ctx) error {
 				pos_forms ps  
 				WHERE ps.country_uuid = provinces.country_uuid
 				AND ps.province_uuid = provinces.uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -213,7 +216,6 @@ func GetPaginatedProvinceByCountry(c *fiber.Ctx) error {
 	})
 }
 
-
 // Paginate Query ASM
 func GetPaginatedASM(c *fiber.Ctx) error {
 	db := database.DB
@@ -239,14 +241,16 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Province{}).
-		Where("uuid = ?", ProvinceUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON provinces.country_uuid = countries.uuid").
+		Where("provinces.uuid = ?", ProvinceUUID).
+		Where("provinces.name ILIKE ? OR countries.name ILIKE ?", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("uuid = ?", ProvinceUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON provinces.country_uuid = countries.uuid").
+		Where("provinces.uuid = ?", ProvinceUUID).
+		Where("provinces.name ILIKE ? OR countries.name ILIKE ?", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			provinces.*, 
 			(
@@ -268,7 +272,7 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 				pos_forms ps  
 				WHERE ps.country_uuid = provinces.country_uuid
 				AND ps.province_uuid = provinces.uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).

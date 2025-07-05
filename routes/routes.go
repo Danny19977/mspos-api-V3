@@ -202,7 +202,7 @@ func Setup(app *fiber.App) {
 	po.Get("/all/subareas/:sub_area_uuid", pos.GetAllPosByDR)
 	po.Get("/all/cyclo/:user_uuid", pos.GetAllPosByCyclo)
 	po.Get("/export/excel", pos.GeneratePosExcelReport)
-	po.Get("/map-pos/:uuid", pos.MapPos)
+	po.Get("/map-pos/:pos_uuid", pos.MapPos)
 	po.Post("/create", pos.CreatePos)
 	po.Get("/get/:uuid", pos.GetPos)
 	po.Put("/update/:uuid", pos.UpdatePos)
@@ -247,9 +247,10 @@ func Setup(app *fiber.App) {
 	// Posforms controller
 	posf := api.Group("/posforms")
 	posf.Get("/all/paginate", posform.GetPaginatedPosForm)
+	posf.Get("/all/paginate/country/:country_uuid", posform.GetPaginatedPosFormCountryUUID)
 	posf.Get("/all/paginate/province/:province_uuid", posform.GetPaginatedPosFormProvine)
 	posf.Get("/all/paginate/area/:area_uuid", posform.GetPaginatedPosFormArea)
-	posf.Get("/all/paginate/subarea/:dr_uuid", posform.GetPaginatedPosFormSubArea)
+	posf.Get("/all/paginate/subarea/:sub_area_uuid", posform.GetPaginatedPosFormSubArea)
 	posf.Get("/all/paginate/commune/:user_uuid", posform.GetPaginatedPosFormCommune)
 	posf.Get("/all/paginate/:pos_uuid", posform.GetPaginatedPosFormByPOS)
 	posf.Get("/all/paginate/user/:user_uuid", posform.GetPaginatedPosFormByUserUUID)
@@ -325,13 +326,14 @@ func Setup(app *fiber.App) {
 
 	// Kpi Dashboard
 	kp := dash.Group("/kpi")
-	kp.Get("/table-view-province", dashboard.TotalVisitsByProvince)
-	kp.Get("/table-view-area", dashboard.TotalVisitsByArea)
-	kp.Get("/table-view-subarea", dashboard.TotalVisitsBySubArea)
-	kp.Get("/table-view-commune", dashboard.TotalVisitsByCommune)
+	kp.Get("/total-visits-by-country", dashboard.TotalVisitsByCountry)
+	kp.Get("/total-visits-by-province", dashboard.TotalVisitsByProvince)
+	kp.Get("/total-visits-by-area", dashboard.TotalVisitsByArea)
+	kp.Get("/total-visits-by-subarea", dashboard.TotalVisitsBySubArea)
+	kp.Get("/total-visits-by-commune", dashboard.TotalVisitsByCommune)
 
 	// Summary Dashboard
-	sum := dash.Group("/sammury")
+	sum := dash.Group("/summary")
 	sum.Get("/dr-count", dashboard.DrCount)
 	sum.Get("/pos-count", dashboard.POSCount)
 	sum.Get("/province-count", dashboard.ProvinceCount)

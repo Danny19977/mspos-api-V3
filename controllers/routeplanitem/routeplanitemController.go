@@ -166,8 +166,9 @@ func UpdateRoutePlanItem(c *fiber.Ctx) error {
 
 	db.Where("uuid = ?", uuid).First(&RoutePlanItem)
 
-	db.Save(&RoutePlanItem)
 	RoutePlanItem.Status = updateData.Status
+
+	db.Save(&RoutePlanItem)
 
 	return c.JSON(
 		fiber.Map{

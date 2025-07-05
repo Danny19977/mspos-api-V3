@@ -102,6 +102,97 @@ func GetPaginatedPosForm(c *fiber.Ctx) error {
 }
 
 // Query data province by UUID
+func GetPaginatedPosFormCountryUUID(c *fiber.Ctx) error {
+	db := database.DB
+
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
+
+	// Provide default values if start_date or end_date are empty
+	if start_date == "" {
+		start_date = "1970-01-01T00:00:00Z" // Default start date
+	}
+	if end_date == "" {
+		end_date = "2100-01-01T00:00:00Z" // Default end date
+	}
+
+	CountryUUID := c.Params("country_uuid")
+
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page <= 0 {
+		page = 1 // Default page number
+	}
+	limit, err := strconv.Atoi(c.Query("limit", "15"))
+	if err != nil || limit <= 0 {
+		limit = 15
+	}
+	offset := (page - 1) * limit
+
+	var dataList []models.PosForm
+	var totalRecords int64
+
+	// Build query with joins for better filtering
+	query := db.Model(&models.PosForm{}).
+		Joins("LEFT JOIN countries ON pos_forms.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON pos_forms.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON pos_forms.area_uuid = areas.uuid").
+		Joins("LEFT JOIN sub_areas ON pos_forms.sub_area_uuid = sub_areas.uuid").
+		Joins("LEFT JOIN communes ON pos_forms.commune_uuid = communes.uuid").
+		Joins("LEFT JOIN pos ON pos_forms.pos_uuid = pos.uuid").
+		Where("pos_forms.country_uuid = ?", CountryUUID).
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date)
+
+	// Apply filters
+	query = applyAdvancedFilters(query, c)
+
+	// Count total records
+	query.Count(&totalRecords)
+
+	// Fetch data with pagination
+	err = query.
+		Select("pos_forms.*").
+		Offset(offset).
+		Limit(limit).
+		Order("pos_forms.updated_at DESC").
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Preload("User").
+		Preload("Pos").
+		Preload("PosFormItems").
+		Find(&dataList).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch posforms",
+			"error":   err.Error(),
+		})
+	}
+
+	// Calculate total pages
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+
+	// Prepare pagination metadata
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
+	}
+
+	// Return response
+	return c.JSON(fiber.Map{
+		"status":     "success",
+		"message":    "posforms retrieved successfully",
+		"data":       dataList,
+		"pagination": pagination,
+	})
+}
+
+// Query data province by UUID
 func GetPaginatedPosFormProvine(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -298,7 +389,7 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 		end_date = "2100-01-01T00:00:00Z" // Default end date
 	}
 
-	DrUUID := c.Params("dr_uuid")
+	SubAreaUUID := c.Params("sub_area_uuid")
 
 	page, err := strconv.Atoi(c.Query("page", "1"))
 	if err != nil || page <= 0 {
@@ -321,7 +412,7 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 		Joins("LEFT JOIN sub_areas ON pos_forms.sub_area_uuid = sub_areas.uuid").
 		Joins("LEFT JOIN communes ON pos_forms.commune_uuid = communes.uuid").
 		Joins("LEFT JOIN pos ON pos_forms.pos_uuid = pos.uuid").
-		Where("pos_forms.dr_uuid = ?", DrUUID).
+		Where("pos_forms.sub_area_uuid = ?", SubAreaUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date)
 
 	// Apply filters
@@ -715,25 +806,25 @@ func UpdatePosform(c *fiber.Ctx) error {
 		Comment string `json:"comment"`
 		PosUUID string `json:"pos_uuid"`
 
-		// Latitude  float64 `json:"latitude"`  // Latitude of the user
-		// Longitude float64 `json:"longitude"` // Longitude of the user
-		// Signature string `json:"signature"`
+		Latitude  float64 `json:"latitude"`  // Latitude of the user
+		Longitude float64 `json:"longitude"` // Longitude of the user
+		Signature string  `json:"signature"`
 
-		// CountryUUID  string `json:"country_uuid"`
-		// ProvinceUUID string `json:"province_uuid"`
-		// AreaUUID     string `json:"area_uuid"`
-		// SubAreaUUID  string `json:"sub_area_uuid"`
-		// CommuneUUID  string `json:"commune_uuid"`
+		CountryUUID  string `json:"country_uuid"`
+		ProvinceUUID string `json:"province_uuid"`
+		AreaUUID     string `json:"area_uuid"`
+		SubAreaUUID  string `json:"sub_area_uuid"`
+		CommuneUUID  string `json:"commune_uuid"`
 
-		// AsmUUID   string `json:"asm_uuid"`
-		// Asm       string `json:"asm"`
-		// SupUUID   string `json:"sup_uuid"`
-		// Sup       string `json:"sup"`
-		// DrUUID    string `json:"dr_uuid"`
-		// Dr        string `json:"dr"`
-		// CycloUUID string `json:"cyclo_uuid"`
-		// Cyclo     string `json:"cyclo"`
-		// UserUUID  string `json:"user_uuid"`
+		AsmUUID   string `json:"asm_uuid"`
+		Asm       string `json:"asm"`
+		SupUUID   string `json:"sup_uuid"`
+		Sup       string `json:"sup"`
+		DrUUID    string `json:"dr_uuid"`
+		Dr        string `json:"dr"`
+		CycloUUID string `json:"cyclo_uuid"`
+		Cyclo     string `json:"cyclo"`
+		UserUUID  string `json:"user_uuid"`
 	}
 
 	var updateData UpdateData
@@ -756,25 +847,25 @@ func UpdatePosform(c *fiber.Ctx) error {
 	posform.Comment = updateData.Comment
 	posform.PosUUID = updateData.PosUUID
 
-	// posform.Latitude = updateData.Latitude
-	// posform.Longitude = updateData.Longitude
-	// posform.Signature = updateData.Signature
+	posform.Latitude = updateData.Latitude
+	posform.Longitude = updateData.Longitude
+	posform.Signature = updateData.Signature
 
-	// posform.CountryUUID = updateData.CountryUUID
-	// posform.ProvinceUUID = updateData.ProvinceUUID
-	// posform.AreaUUID = updateData.AreaUUID
-	// posform.SubAreaUUID = updateData.SubAreaUUID
-	// posform.CommuneUUID = updateData.CommuneUUID
+	posform.CountryUUID = updateData.CountryUUID
+	posform.ProvinceUUID = updateData.ProvinceUUID
+	posform.AreaUUID = updateData.AreaUUID
+	posform.SubAreaUUID = updateData.SubAreaUUID
+	posform.CommuneUUID = updateData.CommuneUUID
 
-	// posform.AsmUUID = updateData.AsmUUID
-	// posform.Asm = updateData.Asm
-	// posform.SupUUID = updateData.SupUUID
-	// posform.Sup = updateData.Sup
-	// posform.DrUUID = updateData.DrUUID
-	// posform.Dr = updateData.Dr
-	// posform.CycloUUID = updateData.CycloUUID
-	// posform.Cyclo = updateData.Cyclo
-	// posform.UserUUID = updateData.UserUUID
+	posform.AsmUUID = updateData.AsmUUID
+	posform.Asm = updateData.Asm
+	posform.SupUUID = updateData.SupUUID
+	posform.Sup = updateData.Sup
+	posform.DrUUID = updateData.DrUUID
+	posform.Dr = updateData.Dr
+	posform.CycloUUID = updateData.CycloUUID
+	posform.Cyclo = updateData.Cyclo
+	posform.UserUUID = updateData.UserUUID
 	// posform.Sync = true
 
 	db.Save(&posform)
@@ -1430,16 +1521,24 @@ func applyAdvancedFiltersForExcel(query *gorm.DB, c *fiber.Ctx) *gorm.DB {
 	// Apply all standard filters first
 	query = applyAdvancedFilters(query, c)
 
-	// Additional filters specific to Excel reports
+	// Additional filters specific to Excel reports - support multiple date parameter formats
 	startDate := c.Query("startDate", "")
 	endDate := c.Query("endDate", "")
 
+	// Support legacy parameter names
+	if startDate == "" {
+		startDate = c.Query("start_date", "")
+	}
+	if endDate == "" {
+		endDate = c.Query("end_date", "")
+	}
+
 	// 📅 Filtres par plage de dates personnalisée (uniquement pour Excel)
 	if startDate != "" && endDate != "" {
-		// Validation et parsing des dates
-		startTime, err := time.Parse("2006-01-02", startDate)
+		// Validation et parsing des dates avec support de multiples formats
+		startTime, err := parseFlexibleDate(startDate)
 		if err == nil {
-			endTime, err := time.Parse("2006-01-02", endDate)
+			endTime, err := parseFlexibleDate(endDate)
 			if err == nil {
 				// Ajouter 23:59:59 à la date de fin pour inclure toute la journée
 				endTime = endTime.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
@@ -1448,13 +1547,13 @@ func applyAdvancedFiltersForExcel(query *gorm.DB, c *fiber.Ctx) *gorm.DB {
 		}
 	} else if startDate != "" {
 		// Filtre à partir d'une date de début seulement
-		startTime, err := time.Parse("2006-01-02", startDate)
+		startTime, err := parseFlexibleDate(startDate)
 		if err == nil {
 			query = query.Where("pos_forms.created_at >= ?", startTime)
 		}
 	} else if endDate != "" {
 		// Filtre jusqu'à une date de fin seulement
-		endTime, err := time.Parse("2006-01-02", endDate)
+		endTime, err := parseFlexibleDate(endDate)
 		if err == nil {
 			// Ajouter 23:59:59 à la date de fin pour inclure toute la journée
 			endTime = endTime.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
@@ -1465,6 +1564,29 @@ func applyAdvancedFiltersForExcel(query *gorm.DB, c *fiber.Ctx) *gorm.DB {
 	return query
 }
 
+// parseFlexibleDate parses dates in multiple formats
+func parseFlexibleDate(dateStr string) (time.Time, error) {
+	// List of supported date formats
+	formats := []string{
+		"2006-01-02",                // ISO format
+		"2006-01-02T15:04:05Z",      // ISO with time
+		"2006-01-02T15:04:05Z07:00", // ISO with timezone
+		"02/01/2006",                // DD/MM/YYYY
+		"01/02/2006",                // MM/DD/YYYY
+		"2006/01/02",                // YYYY/MM/DD
+		"02-01-2006",                // DD-MM-YYYY
+		"01-02-2006",                // MM-DD-YYYY
+	} 
+
+	for _, format := range formats {
+		if t, err := time.Parse(format, dateStr); err == nil {
+			return t, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("unable to parse date: %s", dateStr)
+}
+
 // GeneratePosFormExcelReport generates an Excel report for PosForm data
 func GeneratePosFormExcelReport(c *fiber.Ctx) error {
 	db := database.DB
@@ -1472,6 +1594,18 @@ func GeneratePosFormExcelReport(c *fiber.Ctx) error {
 	// Parse query parameters for filtering
 	var dataList []models.PosForm
 	var totalRecords int64
+
+	// Get date parameters for display in report
+	startDate := c.Query("startDate", "")
+	endDate := c.Query("endDate", "")
+
+	// Support legacy parameter names
+	if startDate == "" {
+		startDate = c.Query("start_date", "")
+	}
+	if endDate == "" {
+		endDate = c.Query("end_date", "")
+	}
 
 	// Build query with joins for better filtering
 	query := db.Model(&models.PosForm{}).
@@ -1522,8 +1656,17 @@ func GeneratePosFormExcelReport(c *fiber.Ctx) error {
 	}
 
 	// Create Excel file
+	reportTitle := "Rapport des Formulaires POS"
+	if startDate != "" && endDate != "" {
+		reportTitle = fmt.Sprintf("Rapport des Formulaires POS (%s - %s)", startDate, endDate)
+	} else if startDate != "" {
+		reportTitle = fmt.Sprintf("Rapport des Formulaires POS (depuis %s)", startDate)
+	} else if endDate != "" {
+		reportTitle = fmt.Sprintf("Rapport des Formulaires POS (jusqu'au %s)", endDate)
+	}
+
 	config := utils.ExcelReportConfig{
-		Title:       "Rapport des Formulaires POS",
+		Title:       reportTitle,
 		CompanyName: "MSPOS System",
 		ReportDate:  time.Now(),
 		Author:      "Système de Rapport Automatique",
@@ -1565,6 +1708,17 @@ func GeneratePosFormExcelReport(c *fiber.Ctx) error {
 		"Total Sous-Aires":       countUniqueSubAreasForm(dataList),
 		"Prix Total":             calculateTotalPrice(dataList),
 		"Date de génération":     time.Now().Format("02/01/2006 15:04:05"),
+	}
+
+	// Add date filter information if filters are applied
+	if startDate != "" && endDate != "" {
+		summaryData["Période (Du - Au)"] = fmt.Sprintf("%s - %s", startDate, endDate)
+	} else if startDate != "" {
+		summaryData["Période (Depuis)"] = startDate
+	} else if endDate != "" {
+		summaryData["Période (Jusqu'au)"] = endDate
+	} else {
+		summaryData["Période"] = "Toutes les données"
 	}
 
 	err = utils.AddSummaryTable(f, sheetName, summaryData, 6, styles)

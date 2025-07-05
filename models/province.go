@@ -28,8 +28,7 @@ type Province struct {
 	// PosForms  []PosForm   `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 	// Pos       []Pos       `gorm:"foreignKey:ProvinceUUID;references:UUID"`
 
-	TotalUsers    int64 `json:"total_users"`
-	TotalPos      int64 `json:"total_pos"`
-	TotalPosForms int64 `json:"total_posforms"`
-
+	TotalUsers int64 `json:"total_users"`
+	TotalPos   int64 `json:"total_pos"`
+	Visites    int64 `json:"visites"`
 }

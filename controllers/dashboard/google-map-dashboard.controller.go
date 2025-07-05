@@ -15,7 +15,12 @@ func GoogleMaps(c *fiber.Ctx) error {
 		Latitude  float64 `json:"latitude"`  // Latitude of the user
 		Longitude float64 `json:"longitude"` // Longitude of the user
 		Signature string  `json:"signature"`
-		PosName   string  `json:"pos_name"` // Name of the POS
+		PosName   string  `json:"pos_name"`   // Name of the POS
+		Postype   string  `json:"postype"`    // Type de POS
+		Asm       string  `json:"asm"`        // Name of the ASM
+		Sup       string  `json:"sup"`        // Name of the Supervisor
+		Dr        string  `json:"dr"`         // Name of the DR
+		Cyclo     string  `json:"cyclo"`      // Name of the Cyclo
 		CreatedAt string  `json:"created_at"` // Creation date of the form
 	}
 
@@ -26,7 +31,27 @@ func GoogleMaps(c *fiber.Ctx) error {
 			pos_forms.longitude AS longitude,
 			pos_forms.signature AS signature,
 			pos_forms.created_at AS created_at,
-			pos.name AS pos_name
+			pos.name AS pos_name,
+			pos.postype AS postype,
+			CASE 
+				WHEN pos_forms.signature = pos_forms.asm THEN ''
+				ELSE pos_forms.asm 
+			END AS asm,
+			CASE 
+				WHEN pos_forms.signature = pos_forms.asm THEN '' 
+				ELSE pos_forms.sup 
+			END AS sup,
+			CASE 
+				WHEN pos_forms.signature = pos_forms.asm THEN ''
+				WHEN pos_forms.signature = pos_forms.sup THEN '' 
+				ELSE pos_forms.dr 
+			END AS dr,
+			CASE 
+				WHEN pos_forms.signature = pos_forms.asm THEN ''
+				WHEN pos_forms.signature = pos_forms.sup THEN ''
+				WHEN pos_forms.signature = pos_forms.dr THEN '' 
+				ELSE pos_forms.cyclo 
+			END AS cyclo
 		`).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").

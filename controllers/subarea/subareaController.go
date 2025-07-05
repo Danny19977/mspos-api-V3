@@ -1,6 +1,6 @@
 package Subarea
 
-import ( 
+import (
 	"strconv"
 
 	"github.com/danny19977/mspos-api-v3/database"
@@ -32,11 +32,17 @@ func GetPaginatedSubArea(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.SubArea{}).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			sub_areas.*, 
 			(
@@ -64,7 +70,7 @@ func GetPaginatedSubArea(c *fiber.Ctx) error {
 				AND ps.province_uuid = sub_areas.province_uuid
 				AND ps.area_uuid = sub_areas.area_uuid
 				AND ps.sub_area_uuid = sub_areas.uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -132,13 +138,19 @@ func GetPaginatedSubAreaByCountry(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.SubArea{}).
-		Where("country_uuid = ?", countryUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.country_uuid = ?", countryUUID).
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("country_uuid = ?", countryUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.country_uuid = ?", countryUUID).
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			sub_areas.*, 
 			( 
@@ -166,7 +178,7 @@ func GetPaginatedSubAreaByCountry(c *fiber.Ctx) error {
 				AND ps.province_uuid = sub_areas.province_uuid
 				AND ps.area_uuid = sub_areas.area_uuid
 				AND ps.sub_area_uuid = sub_areas.uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -234,13 +246,19 @@ func GetPaginatedSubAreaByASM(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.SubArea{}).
-		Where("province_uuid = ?", ProvinceUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.province_uuid = ?", ProvinceUUID).
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("province_uuid = ?", ProvinceUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.province_uuid = ?", ProvinceUUID).
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			sub_areas.*, 
 			(
@@ -268,7 +286,7 @@ func GetPaginatedSubAreaByASM(c *fiber.Ctx) error {
 				AND ps.province_uuid = sub_areas.province_uuid
 				AND ps.area_uuid = sub_areas.area_uuid
 				AND ps.sub_area_uuid = sub_areas.uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -336,13 +354,19 @@ func GetPaginatedSubAreaBySup(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.SubArea{}).
-		Where("area_uuid = ?", AreaUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.area_uuid = ?", AreaUUID).
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("area_uuid = ?", AreaUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.area_uuid = ?", AreaUUID).
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			sub_areas.*, 
 			(
@@ -370,7 +394,7 @@ func GetPaginatedSubAreaBySup(c *fiber.Ctx) error {
 				AND ps.province_uuid = sub_areas.province_uuid
 				AND ps.area_uuid = sub_areas.area_uuid
 				AND ps.sub_area_uuid = sub_areas.uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -438,13 +462,19 @@ func GetAllSubAreaDr(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.SubArea{}).
-		Where("uuid = ?", subAreaUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.uuid = ?", subAreaUUID).
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	err = db.
-		Where("uuid = ?", subAreaUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON sub_areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON sub_areas.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON sub_areas.area_uuid = areas.uuid").
+		Where("sub_areas.uuid = ?", subAreaUUID).
+		Where("sub_areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ? OR areas.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			sub_areas.*, 
 			(
@@ -472,7 +502,7 @@ func GetAllSubAreaDr(c *fiber.Ctx) error {
 				AND ps.province_uuid = sub_areas.province_uuid
 				AND ps.area_uuid = sub_areas.area_uuid
 				AND ps.sub_area_uuid = sub_areas.uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).

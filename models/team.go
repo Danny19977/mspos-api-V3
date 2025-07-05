@@ -20,9 +20,9 @@ type Team struct {
 	AsmUUID string `json:"asm_uuid" gorm:"type:varchar(255);not null"`
 	Asm     string `json:"asm" gorm:"default:''"`
 
-	TotalSup      int64 `json:"total_sup"`
-	TotalDr       int64 `json:"total_dr"`
-	TotalCyclo    int64 `json:"total_cyclo"`
-	TotalPos      int64 `json:"total_pos"`
-	TotalPosForms int64 `json:"total_posforms"`
+	TotalSup   int64 `json:"total_sup"`
+	TotalDr    int64 `json:"total_dr"`
+	TotalCyclo int64 `json:"total_cyclo"`
+	TotalPos   int64 `json:"total_pos"`
+	Visites    int64 `json:"visites"`
 }

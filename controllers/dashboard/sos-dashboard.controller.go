@@ -16,8 +16,8 @@ func SosTableViewProvince(c *fiber.Ctx) error {
 	var results []struct {
 		Name             string  `json:"name"`
 		BrandName        string  `json:"brand_name"`
-		TotalFarde       int64   `json:"total_farde"`
-		TotalGlobalFarde int64   `json:"total_global_farde"`
+		TotalFarde       float64 `json:"total_farde"`
+		TotalGlobalFarde float64 `json:"total_global_farde"`
 		Percentage       float64 `json:"percentage"`
 		TotalPos         int64   `json:"total_pos"`
 	}
@@ -26,15 +26,22 @@ func SosTableViewProvince(c *fiber.Ctx) error {
 		Select(`
 		provinces.name AS name,
 		brands.name AS brand_name, 
-		SUM(pos_form_items.number_farde) AS total_farde,
-		SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
-		ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+		ROUND(SUM(pos_form_items.number_farde)::numeric, 2) AS total_farde,
+		(SELECT SUM(pos_form_items.number_farde) 
+		 FROM pos_form_items 
+		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+		 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+		) AS total_global_farde,
+		ROUND((SUM(pos_form_items.number_farde) * 100.0 / (SELECT SUM(pos_form_items.number_farde) 
+		 FROM pos_form_items 
+		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+		 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?))::numeric, 2) AS percentage,
 		(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 		 FROM pos_form_items 
 		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
 		 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
 		 ) AS total_pos
-	`, country_uuid, province_uuid, start_date, end_date).
+	`, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date).
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
@@ -70,8 +77,8 @@ func SosTableViewArea(c *fiber.Ctx) error {
 	var results []struct {
 		Name             string  `json:"name"`
 		BrandName        string  `json:"brand_name"`
-		TotalFarde       int64   `json:"total_farde"`
-		TotalGlobalFarde int64   `json:"total_global_farde"`
+		TotalFarde       float64 `json:"total_farde"`
+		TotalGlobalFarde float64 `json:"total_global_farde"`
 		Percentage       float64 `json:"percentage"`
 		TotalPos         int64   `json:"total_pos"`
 	}
@@ -80,15 +87,22 @@ func SosTableViewArea(c *fiber.Ctx) error {
 		Select(`
 			areas.name AS name,
 			brands.name AS brand_name, 
-			SUM(pos_form_items.number_farde) AS total_farde,
-			SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
-			ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+			ROUND(SUM(pos_form_items.number_farde)::numeric, 2) AS total_farde,
+			(SELECT SUM(pos_form_items.number_farde) 
+			 FROM pos_form_items 
+			 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+			 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+			) AS total_global_farde,
+			ROUND((SUM(pos_form_items.number_farde) * 100.0 / (SELECT SUM(pos_form_items.number_farde) 
+			 FROM pos_form_items 
+			 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+			 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?))::numeric, 2) AS percentage,
 			(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 			FROM pos_form_items 
 			INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
 			WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
 			) AS total_pos
-		`, country_uuid, province_uuid, start_date, end_date).
+		`, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date).
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
@@ -125,8 +139,8 @@ func SosTableViewSubArea(c *fiber.Ctx) error {
 	var results []struct {
 		Name             string  `json:"name"`
 		BrandName        string  `json:"brand_name"`
-		TotalFarde       int64   `json:"total_farde"`
-		TotalGlobalFarde int64   `json:"total_global_farde"`
+		TotalFarde       float64 `json:"total_farde"`
+		TotalGlobalFarde float64 `json:"total_global_farde"`
 		Percentage       float64 `json:"percentage"`
 		TotalPos         int64   `json:"total_pos"`
 	}
@@ -135,15 +149,22 @@ func SosTableViewSubArea(c *fiber.Ctx) error {
 		Select(`
 			sub_areas.name AS name,
 			brands.name AS brand_name, 
-			SUM(pos_form_items.number_farde) AS total_farde,
-			SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
-			ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+			ROUND(SUM(pos_form_items.number_farde)::numeric, 2) AS total_farde,
+			(SELECT SUM(pos_form_items.number_farde) 
+			 FROM pos_form_items 
+			 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+			 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+			) AS total_global_farde,
+			ROUND((SUM(pos_form_items.number_farde) * 100.0 / (SELECT SUM(pos_form_items.number_farde) 
+			 FROM pos_form_items 
+			 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+			 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?))::numeric, 2) AS percentage,
 			(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 			FROM pos_form_items 
 			INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
 			WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
 			) AS total_pos
-		`, country_uuid, province_uuid, area_uuid, start_date, end_date).
+		`, country_uuid, province_uuid, area_uuid, start_date, end_date, country_uuid, province_uuid, area_uuid, start_date, end_date, country_uuid, province_uuid, area_uuid, start_date, end_date).
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ?", country_uuid, province_uuid, area_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
@@ -181,8 +202,8 @@ func SosTableViewCommune(c *fiber.Ctx) error {
 	var results []struct {
 		Name             string  `json:"name"`
 		BrandName        string  `json:"brand_name"`
-		TotalFarde       int64   `json:"total_farde"`
-		TotalGlobalFarde int64   `json:"total_global_farde"`
+		TotalFarde       float64 `json:"total_farde"`
+		TotalGlobalFarde float64 `json:"total_global_farde"`
 		Percentage       float64 `json:"percentage"`
 		TotalPos         int64   `json:"total_pos"`
 	}
@@ -191,15 +212,22 @@ func SosTableViewCommune(c *fiber.Ctx) error {
 		Select(`
 			communes.name AS name,
 			brands.name AS brand_name, 
-			SUM(pos_form_items.number_farde) AS total_farde,
-			SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
-			ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+			ROUND(SUM(pos_form_items.number_farde)::numeric, 2) AS total_farde,
+			(SELECT SUM(pos_form_items.number_farde) 
+			 FROM pos_form_items 
+			 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+			 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
+			) AS total_global_farde,
+			ROUND((SUM(pos_form_items.number_farde) * 100.0 / (SELECT SUM(pos_form_items.number_farde) 
+			 FROM pos_form_items 
+			 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+			 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?))::numeric, 2) AS percentage,
 			(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 			FROM pos_form_items 
 			INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
 			WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?
 			) AS total_pos
-		`, country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date).
+		`, country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date, country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date, country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date).
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ?", country_uuid, province_uuid, area_uuid, sub_area_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
@@ -233,8 +261,8 @@ func SosTotalByBrandByMonth(c *fiber.Ctx) error {
 	var results []struct {
 		BrandName        string  `json:"brand_name"`
 		Month            int     `json:"month"`
-		TotalFarde       int64   `json:"total_farde"`
-		TotalGlobalFarde int64   `json:"total_global_farde"`
+		TotalFarde       float64 `json:"total_farde"`
+		TotalGlobalFarde float64 `json:"total_global_farde"`
 		Percentage       float64 `json:"percentage"`
 		TotalPos         int64   `json:"total_pos"`
 	}
@@ -243,15 +271,22 @@ func SosTotalByBrandByMonth(c *fiber.Ctx) error {
 		Select(`
 		brands.name AS brand_name,
 		EXTRACT(MONTH FROM pos_forms.created_at) AS month, 
-		SUM(pos_form_items.number_farde) AS total_farde,
-		SUM(SUM(pos_form_items.number_farde)) OVER () AS total_global_farde,
-		ROUND(SUM(pos_form_items.number_farde) * 100.0 / SUM(SUM(pos_form_items.number_farde)) OVER (), 2) AS percentage,
+		ROUND(SUM(pos_form_items.number_farde)::numeric, 2) AS total_farde,
+		(SELECT SUM(pos_form_items.number_farde) 
+		 FROM pos_form_items 
+		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+		 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?
+		) AS total_global_farde,
+		ROUND((SUM(pos_form_items.number_farde) * 100.0 / (SELECT SUM(pos_form_items.number_farde) 
+		 FROM pos_form_items 
+		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
+		 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?))::numeric, 2) AS percentage,
 		(SELECT COUNT(DISTINCT pos_forms.pos_uuid) 
 		 FROM pos_form_items 
 		 INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
 		 WHERE pos_form_items.deleted_at IS NULL AND pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?
 		 ) AS total_pos
-	`, country_uuid, year).
+	`, country_uuid, year, country_uuid, year, country_uuid, year).
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Where("pos_forms.country_uuid = ? AND EXTRACT(YEAR FROM pos_forms.created_at) = ?", country_uuid, year).

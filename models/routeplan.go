@@ -17,7 +17,7 @@ type RoutePlan struct {
 	User     User   `gorm:"foreignKey:UserUUID;references:UUID"`
 
 	CountryUUID string  `json:"country_uuid" gorm:"type:varchar(255);not null"`
-	Country     Country `gorm:"foreignKey:CountryUUID;references:UUID"` 
+	Country     Country `gorm:"foreignKey:CountryUUID;references:UUID"`
 
 	ProvinceUUID string   `json:"province_uuid" gorm:"type:varchar(255);not null"`
 	Province     Province `gorm:"foreignKey:ProvinceUUID;references:UUID"`
@@ -34,8 +34,8 @@ type RoutePlan struct {
 	// TotalPOS  int    `json:"total_pos"`
 	Signature string `json:"signature"`
 
-	// TotalRoutePlanItemActive int64 `json:"total_route_plan_item_active" gorm:"-"`
-	// TotalRoutePlanItem       int64 `json:"total_route_plan_item" gorm:"-"`
+	// TotalItemActive int64 `json:"total_item_active" gorm:"-"`
+	// TotalItem       int64 `json:"total_item" gorm:"-"`
 
 	RoutePlanItems []RoutePlanItem `gorm:"foreignKey:RoutePlanUUID;references:UUID"`
 }

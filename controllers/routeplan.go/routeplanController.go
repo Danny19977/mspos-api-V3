@@ -43,26 +43,26 @@ func GetPaginatedRouteplan(c *fiber.Ctx) error {
 		Where(`  
 		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
 		`, "%"+search+"%").
-		Select(`
-			route_plans.*, 
-			COALESCE((
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid 
-				AND r.status = true
-			), 0) AS total_route_plan_item_active,
-			COALESCE((
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid
-			), 0) AS total_route_plan_item
-		`).
+		// Select(`
+		// 	route_plans.*, 
+		// 	COALESCE((
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid 
+		// 		AND r.status = true
+		// 	), 0) AS total_item_active,
+		// 	COALESCE((
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid
+		// 	), 0) AS total_item
+		// `).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -141,26 +141,26 @@ func GetPaginatedRouthplaByProvinceUUID(c *fiber.Ctx) error {
 		Where(`  
 		 EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
 		`, "%"+search+"%").
-		Select(`
-			route_plans.*, 
-			(
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid 
-				AND r.status = true
-			) AS total_route_plan_item_active,
-			 (
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid
-			) AS total_route_plan_item
-		`).
+		// Select(`
+		// 	route_plans.*, 
+		// 	(
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid 
+		// 		AND r.status = true
+		// 	) AS total_item_active,
+		// 	 (
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid
+		// 	) AS total_item
+		// `).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -239,26 +239,26 @@ func GetPaginatedRouthplaByareaUUID(c *fiber.Ctx) error {
 		Where(`  
 		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
 		`, "%"+search+"%").
-		Select(`
-			route_plans.*, 
-			(
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid 
-				AND r.status = true
-			) AS total_route_plan_item_active,
-			 (
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid
-			) AS total_route_plan_item
-		`).
+		// Select(`
+		// 	route_plans.*, 
+		// 	(
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid 
+		// 		AND r.status = true
+		// 	) AS total_item_active,
+		// 	 (
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid
+		// 	) AS total_item
+		// `).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -337,26 +337,26 @@ func GetPaginatedRouthplaBySubareaUUID(c *fiber.Ctx) error {
 		Where(`  
 		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
 		`, "%"+search+"%").
-		Select(`
-			route_plans.*, 
-			(
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid 
-				AND r.status = true
-			) AS total_route_plan_item_active,
-			 (
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid
-			) AS total_route_plan_item
-		`).
+		// Select(`
+		// 	route_plans.*, 
+		// 	(
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid 
+		// 		AND r.status = true
+		// 	) AS total_item_active,
+		// 	 (
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid
+		// 	) AS total_item
+		// `).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").
@@ -435,26 +435,26 @@ func GetPaginatedRouteplaBycommuneUUID(c *fiber.Ctx) error {
 		Where(`  
 		EXISTS(SELECT 1 FROM users WHERE route_plans.user_uuid = users.uuid AND users.fullname ILIKE ?)
 		`, "%"+search+"%").
-		Select(`
-			route_plans.*, 
-			(
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid 
-				AND r.status = true
-			) AS total_route_plan_item_active,
-			 (
-				SELECT
-				COUNT(DISTINCT r.uuid)
-				FROM
-				route_plan_items r 
-				WHERE
-				r.route_plan_uuid = route_plans.uuid
-			) AS total_route_plan_item
-		`).
+		// Select(`
+		// 	route_plans.*, 
+		// 	(
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid 
+		// 		AND r.status = true
+		// 	) AS total_item_active,
+		// 	 (
+		// 		SELECT
+		// 		COUNT(DISTINCT r.uuid)
+		// 		FROM
+		// 		route_plan_items r 
+		// 		WHERE
+		// 		r.route_plan_uuid = route_plans.uuid
+		// 	) AS total_item
+		// `).
 		Offset(offset).
 		Limit(limit).
 		Order("updated_at DESC").

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
- 
+
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/danny19977/mspos-api-v3/utils"
@@ -515,7 +515,7 @@ func GetPaginatedPosByCommuneUserUUIDFilter(c *fiber.Ctx) error {
 		Joins("LEFT JOIN provinces ON pos.province_uuid = provinces.uuid").
 		Joins("LEFT JOIN areas ON pos.area_uuid = areas.uuid").
 		Joins("LEFT JOIN sub_areas ON pos.sub_area_uuid = sub_areas.uuid").
-		Joins("LEFT JOIN communes ON pos.commune_uuid = communes.uuid"). 
+		Joins("LEFT JOIN communes ON pos.commune_uuid = communes.uuid").
 		Where("pos.commune_uuid = ?", communeUUID)
 
 	// Apply advanced filters
@@ -1323,7 +1323,7 @@ func countUniqueSubAreas(posList []models.Pos) int {
 func MapPos(c *fiber.Ctx) error {
 	db := database.DB
 
-	posUUID := c.Params("pos_uuid")
+	posUUID := c.Params("pos_uuid") 
 
 	start_date := c.Query("start_date")
 	end_date := c.Query("end_date")
@@ -1350,10 +1350,25 @@ func MapPos(c *fiber.Ctx) error {
 			pos_forms.created_at AS created_at,
 			pos.name AS pos_name,
 			pos.postype AS postype,
-			pos.asm AS asm,
-			pos.sup AS sup,
-			pos.dr AS dr,
-			pos.cyclo AS cyclo
+			CASE 
+				WHEN pos_forms.signature = pos_forms.asm THEN ''
+				ELSE pos_forms.asm 
+			END AS asm,
+			CASE 
+				WHEN pos_forms.signature = pos_forms.asm THEN '' 
+				ELSE pos_forms.sup 
+			END AS sup,
+			CASE 
+				WHEN pos_forms.signature = pos_forms.asm THEN ''
+				WHEN pos_forms.signature = pos_forms.sup THEN '' 
+				ELSE pos_forms.dr 
+			END AS dr,
+			CASE 
+				WHEN pos_forms.signature = pos_forms.asm THEN ''
+				WHEN pos_forms.signature = pos_forms.sup THEN ''
+				WHEN pos_forms.signature = pos_forms.dr THEN '' 
+				ELSE pos_forms.cyclo 
+			END AS cyclo
 		`).Where("pos_forms.pos_uuid = ?", posUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").

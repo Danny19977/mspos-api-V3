@@ -1,6 +1,6 @@
 package asm
 
-import ( 
+import (
 	"strconv"
 
 	"github.com/danny19977/mspos-api-v3/database"
@@ -30,14 +30,31 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.
-		Where("users.role = ?", "ASM").
-		Where("fullname ILIKE ? ", "%"+search+"%").
-		Count(&totalRecords)
+	countQuery := db.Model(&models.User{}).
+		Where("role = ?", "ASM")
 
-	err = db.
-		Where("users.role = ?", "ASM"). 
-		Where("fullname ILIKE ? ", "%"+search+"%").
+	if search != "" {
+		countQuery = countQuery.Where(`
+		fullname ILIKE ? OR 
+		asm ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	countQuery.Count(&totalRecords)
+
+	// Build the main query
+	query := db.Where("role = ?", "ASM")
+
+	if search != "" {
+		query = query.Where(`
+		fullname ILIKE ? OR 
+		asm ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	err = query.
 		Select(` 
 			users.*, 
 			(
@@ -46,14 +63,14 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 				WHERE u2.role = 'Supervisor' AND u2.province_uuid = users.province_uuid
 			) AS total_sup,
 			(
-				SELECT COUNT(DISTINCT u2.dr_uuid)
-				FROM users u2
-				WHERE u2.role = 'DR' AND u2.province_uuid = users.province_uuid
+				SELECT COUNT(DISTINCT u3.dr_uuid)
+				FROM users u3
+				WHERE u3.role = 'DR' AND u3.province_uuid = users.province_uuid
 			) AS total_dr,
 			(
-				SELECT COUNT(DISTINCT u2.cyclo_uuid)
-				FROM users u2
-				WHERE u2.role = 'Cyclo' AND u2.province_uuid = users.province_uuid
+				SELECT COUNT(DISTINCT u4.cyclo_uuid)
+				FROM users u4
+				WHERE u4.role = 'Cyclo' AND u4.province_uuid = users.province_uuid
 			) AS total_cyclo, 
 			(
 				SELECT COUNT(DISTINCT p.uuid)
@@ -67,15 +84,13 @@ func GetPaginatedASM(c *fiber.Ctx) error {
 				pos_forms ps 
 				WHERE
 				users.province_uuid = ps.province_uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
 		Order("users.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		// Preload("Pos").
-		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -130,16 +145,33 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.
-		Where("users.role = ?", "ASM").
-		Where("users.asm_uuid = ?", UserUUID).
-		Where("fullname ILIKE ? ", "%"+search+"%").
-		Count(&totalRecords)
+	countQuery := db.Model(&models.User{}).
+		Where("role = ?", "ASM").
+		Where("users.asm_uuid = ?", UserUUID)
 
-	err = db.
-		Where("users.role = ?", "ASM").
-		Where("users.asm_uuid = ?", UserUUID).
-		Where("fullname ILIKE ? ", "%"+search+"%").
+	if search != "" {
+		countQuery = countQuery.Where(`
+		fullname ILIKE ? OR 
+		asm ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	countQuery.Count(&totalRecords)
+
+	// Build the main query
+	query := db.Where("role = ?", "ASM").
+		Where("users.asm_uuid = ?", UserUUID)
+
+	if search != "" {
+		query = query.Where(`
+		fullname ILIKE ? OR 
+		asm ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	err = query.
 		Select(` 
 			users.*, 
 			(
@@ -169,15 +201,13 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 				pos_forms ps 
 				WHERE
 				users.province_uuid = ps.province_uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
 		Order("users.updated_at DESC").
 		Preload("Country").
 		Preload("Province").
-		// Preload("Pos").
-		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -187,7 +217,6 @@ func GetPaginatedASMByProvince(c *fiber.Ctx) error {
 			"error":   err.Error(),
 		})
 	}
-
 
 	// Calculate total pages
 	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))

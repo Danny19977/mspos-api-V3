@@ -32,12 +32,16 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Area{}).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON areas.province_uuid = provinces.uuid").
+		Where("areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON areas.province_uuid = provinces.uuid").
+		Where("areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			areas.*, 
 			(
@@ -46,7 +50,7 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 				WHERE u2.country_uuid = areas.country_uuid
 				AND u2.province_uuid = areas.province_uuid
 				AND u2.area_uuid = areas.uuid
-			) AS total_users,  
+			) AS total_users,
 			(
 				SELECT COUNT(DISTINCT p.uuid)
 				FROM pos p 
@@ -56,13 +60,12 @@ func GetPaginatedAreas(c *fiber.Ctx) error {
 			) AS total_pos, 
 			(
 				SELECT
-				COUNT(DISTINCT ps.uuid)
+				COUNT(DISTINCT pf.uuid)
 				FROM
-				pos_forms ps  
-				WHERE ps.country_uuid = areas.country_uuid
-				AND ps.province_uuid = areas.province_uuid
-				AND ps.area_uuid = areas.uuid
-			) AS total_posforms
+				pos_forms pf  
+				WHERE pf.area_uuid = areas.uuid
+				AND pf.area_uuid != ''
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -129,14 +132,18 @@ func GetAreaByCountry(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Area{}).
-		Where("country_uuid = ?", CountryUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON areas.province_uuid = provinces.uuid").
+		Where("areas.country_uuid = ?", CountryUUID).
+		Where("areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("country_uuid = ?", CountryUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON areas.province_uuid = provinces.uuid").
+		Where("areas.country_uuid = ?", CountryUUID).
+		Where("areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			areas.*, 
 			(
@@ -155,13 +162,12 @@ func GetAreaByCountry(c *fiber.Ctx) error {
 			) AS total_pos, 
 			(
 				SELECT
-				COUNT(DISTINCT ps.uuid)
+				COUNT(DISTINCT pf.uuid)
 				FROM
-				pos_forms ps  
-				WHERE ps.country_uuid = areas.country_uuid
-				AND ps.province_uuid = areas.province_uuid
-				AND ps.area_uuid = areas.uuid
-			) AS total_posforms
+				pos_forms pf  
+				WHERE pf.area_uuid = areas.uuid
+				AND pf.area_uuid != ''
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -228,14 +234,18 @@ func GetAreaByASM(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Area{}).
-		Where("province_uuid = ?", ProvinceUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON areas.province_uuid = provinces.uuid").
+		Where("areas.province_uuid = ?", ProvinceUUID).
+		Where("areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("province_uuid = ?", ProvinceUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON areas.province_uuid = provinces.uuid").
+		Where("areas.province_uuid = ?", ProvinceUUID).
+		Where("areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			areas.*, 
 			(
@@ -254,13 +264,12 @@ func GetAreaByASM(c *fiber.Ctx) error {
 			) AS total_pos, 
 			(
 				SELECT
-				COUNT(DISTINCT ps.uuid)
+				COUNT(DISTINCT pf.uuid)
 				FROM
-				pos_forms ps  
-				WHERE ps.country_uuid = areas.country_uuid
-				AND ps.province_uuid = areas.province_uuid
-				AND ps.area_uuid = areas.uuid
-			) AS total_posforms
+				pos_forms pf  
+				WHERE pf.area_uuid = areas.uuid
+				AND pf.area_uuid != ''
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -327,14 +336,18 @@ func GetAreaBySups(c *fiber.Ctx) error {
 
 	// Count total records matching the search query
 	db.Model(&models.Area{}).
-		Where("uuid = ?", AreaUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON areas.province_uuid = provinces.uuid").
+		Where("areas.uuid = ?", AreaUUID).
+		Where("areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalRecords)
 
 	// Fetch paginated data
 	err = db.
-		Where("uuid = ?", AreaUUID).
-		Where("name ILIKE ?", "%"+search+"%").
+		Joins("LEFT JOIN countries ON areas.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON areas.province_uuid = provinces.uuid").
+		Where("areas.uuid = ?", AreaUUID).
+		Where("areas.name ILIKE ? OR countries.name ILIKE ? OR provinces.name ILIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Select(` 
 			areas.*, 
 			(
@@ -353,13 +366,12 @@ func GetAreaBySups(c *fiber.Ctx) error {
 			) AS total_pos, 
 			(
 				SELECT
-				COUNT(DISTINCT ps.uuid)
+				COUNT(DISTINCT pf.uuid)
 				FROM
-				pos_forms ps  
-				WHERE ps.country_uuid = areas.country_uuid
-				AND ps.province_uuid = areas.province_uuid
-				AND ps.area_uuid = areas.uuid
-			) AS total_posforms
+				pos_forms pf  
+				WHERE pf.area_uuid = areas.uuid
+				AND pf.area_uuid != ''
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).

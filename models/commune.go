@@ -32,7 +32,7 @@ type Commune struct {
 
 	// Users []User `gorm:"foreignKey:CommuneUUID;references:UUID"`
 
-	TotalUsers    int64 `json:"total_users"`
-	TotalPos      int64 `json:"total_pos"`
-	TotalPosForms int64 `json:"total_posforms"`
+	TotalUsers int64 `json:"total_users"`
+	TotalPos   int64 `json:"total_pos"`
+	Visites    int64 `json:"visites"`
 }

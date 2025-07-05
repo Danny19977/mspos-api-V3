@@ -27,7 +27,7 @@ func OosTableViewProvince(c *fiber.Ctx) error {
 		provinces.name AS name, 
 		brands.name AS brand_name,
 		SUM(pos_form_items.counter) AS total_count,
-		ROUND(((SUM(SELECT SUM(pos_form_items.counter) / (counter) FROM pos_form_items INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? AND  pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?)) * 100) - 100, 2) AS percentage,
+		ROUND((((SUM(SELECT SUM(pos_form_items.counter) / (counter) FROM pos_form_items INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? AND  pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?)) * 100) - 100)::numeric, 2) AS percentage,
 		(SELECT SUM(counter) FROM pos_form_items INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.created_at BETWEEN ? AND ?) AS total_pos
 		`, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date).
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").

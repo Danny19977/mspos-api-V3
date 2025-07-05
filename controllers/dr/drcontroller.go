@@ -30,30 +30,45 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.
-		Where("users.role = ?", "DR").
-		Where(`
-		title ILIKE ? OR EXISTS 
-		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
-		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
-		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
-		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+	countQuery := db.Model(&models.User{}).
+		Where("role = ?", "DR")
 
-	err = db.
-		Where("users.role = ?", "DR").
-		Where(`
-		title ILIKE ? OR EXISTS 
+	if search != "" {
+		countQuery = countQuery.Where(`
+		title ILIKE ? OR 
+		asm ILIKE ? OR 
+		sup ILIKE ? OR 
+		dr ILIKE ? OR EXISTS 
 		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
 		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
 		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
-		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	countQuery.Count(&totalRecords)
+
+	// Build the main query
+	query := db.Where("role = ?", "DR")
+
+	if search != "" {
+		query = query.Where(`
+		title ILIKE ? OR 
+		asm ILIKE ? OR 
+		sup ILIKE ? OR 
+		dr ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	err = query.
 		Select(`
 			users.*,   
 			(
 				SELECT COUNT(DISTINCT cyclo_uuid)
 				FROM users
-				WHERE role = 'ASM' AND province_uuid = users.province_uuid
+				WHERE role = 'Cyclo' AND province_uuid = users.province_uuid
 				AND area_uuid = users.area_uuid 
 				AND sub_area_uuid = users.sub_area_uuid
 			) AS total_cyclo,
@@ -73,7 +88,7 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 				users.province_uuid = ps.province_uuid
 				AND users.area_uuid = ps.area_uuid
 				AND users.sub_area_uuid = ps.sub_area_uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -82,8 +97,6 @@ func GetPaginatedDr(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Pos").
-		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -138,32 +151,47 @@ func GetPaginatedDrByProvince(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.
-		Where("users.role = ?", "DR").
-		Where("users.asm_uuid = ?", UserUUID).
-		Where(`
-		title ILIKE ? OR EXISTS 
-		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
-		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
-		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
-		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+	countQuery := db.Model(&models.User{}).
+		Where("role = ?", "DR").
+		Where("users.asm_uuid = ?", UserUUID)
 
-	err = db.
-		Where("users.role = ?", "DR").
-		Where("users.asm_uuid = ?", UserUUID).
-		Where(`
-		title ILIKE ? OR EXISTS 
+	if search != "" {
+		countQuery = countQuery.Where(`
+		title ILIKE ? OR 
+		asm ILIKE ? OR 
+		sup ILIKE ? OR 
+		dr ILIKE ? OR EXISTS 
 		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
 		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
 		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
-		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	countQuery.Count(&totalRecords)
+
+	// Build the main query
+	query := db.Where("role = ?", "DR").
+		Where("users.asm_uuid = ?", UserUUID)
+
+	if search != "" {
+		query = query.Where(`
+		title ILIKE ? OR 
+		asm ILIKE ? OR 
+		sup ILIKE ? OR 
+		dr ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	err = query.
 		Select(`
 			users.*,   
 			(
 				SELECT COUNT(DISTINCT cyclo_uuid)
 				FROM users
-				WHERE role = 'DR' AND province_uuid = users.province_uuid
+				WHERE role = 'ASM' AND province_uuid = users.province_uuid
 				AND area_uuid = users.area_uuid  
 			) AS total_cyclo,
 			   (
@@ -182,7 +210,7 @@ func GetPaginatedDrByProvince(c *fiber.Ctx) error {
 				users.province_uuid = ps.province_uuid
 				AND users.area_uuid = ps.area_uuid
 				AND users.sub_area_uuid = ps.sub_area_uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -191,8 +219,6 @@ func GetPaginatedDrByProvince(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Pos").
-		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -247,32 +273,47 @@ func GetPaginatedDrByArea(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.
-		Where("users.role = ?", "DR").
-		Where("users.sup_uuid = ?", UserUUID). 
-		Where(`
-		title ILIKE ? OR EXISTS 
-		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
-		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
-		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
-		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+	countQuery := db.Model(&models.User{}).
+		Where("role = ?", "DR").
+		Where("users.sup_uuid = ?", UserUUID)
 
-	err = db.
-		Where("users.role = ?", "DR").
-		Where("users.sup_uuid = ?", UserUUID). 
-		Where(`
-		title ILIKE ? OR EXISTS 
+	if search != "" {
+		countQuery = countQuery.Where(`
+		title ILIKE ? OR 
+		asm ILIKE ? OR 
+		sup ILIKE ? OR 
+		dr ILIKE ? OR EXISTS 
 		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
 		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
 		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
-		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	countQuery.Count(&totalRecords)
+
+	// Build the main query
+	query := db.Where("role = ?", "DR").
+		Where("users.sup_uuid = ?", UserUUID)
+
+	if search != "" {
+		query = query.Where(`
+		title ILIKE ? OR 
+		asm ILIKE ? OR 
+		sup ILIKE ? OR 
+		dr ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	err = query.
 		Select(`
 			users.*,   
 			(
 				SELECT COUNT(DISTINCT cyclo_uuid)
 				FROM users
-				WHERE role = 'ASM' AND province_uuid = users.province_uuid
+				WHERE role = 'Supervisor' AND province_uuid = users.province_uuid
 				AND area_uuid = users.area_uuid
 			) AS total_cyclo,
 			   (
@@ -291,7 +332,7 @@ func GetPaginatedDrByArea(c *fiber.Ctx) error {
 				users.province_uuid = ps.province_uuid
 				AND users.area_uuid = ps.area_uuid
 				AND users.sub_area_uuid = ps.sub_area_uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -300,8 +341,6 @@ func GetPaginatedDrByArea(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Pos").
-		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {
@@ -356,31 +395,47 @@ func GetPaginatedDrBySubArea(c *fiber.Ctx) error {
 	var totalRecords int64
 
 	// Count total records matching the search query
-	db.Where("users.role = ?", "DR").
-		Where("users.dr_uuid = ?", UserUUID). 
-		Where(`
-		title ILIKE ? OR EXISTS 
-		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
-		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
-		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
-		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&totalRecords)
+	countQuery := db.Model(&models.User{}).
+		Where("role = ?", "DR").
+		Where("users.dr_uuid = ?", UserUUID)
 
-	err = db.
-		Where("users.role = ?", "DR").
-		Where("users.dr_uuid = ?", UserUUID). 
-		Where(`
-		title ILIKE ? OR EXISTS 
+	if search != "" {
+		countQuery = countQuery.Where(`
+		title ILIKE ? OR 
+		asm ILIKE ? OR 
+		sup ILIKE ? OR 
+		dr ILIKE ? OR EXISTS 
 		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
 		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
 		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
-		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	countQuery.Count(&totalRecords)
+
+	// Build the main query
+	query := db.Where("role = ?", "DR").
+		Where("users.dr_uuid = ?", UserUUID)
+
+	if search != "" {
+		query = query.Where(`
+		title ILIKE ? OR 
+		asm ILIKE ? OR 
+		sup ILIKE ? OR 
+		dr ILIKE ? OR EXISTS 
+		(SELECT 1 FROM provinces WHERE users.province_uuid = provinces.uuid AND provinces.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM areas WHERE users.area_uuid = areas.uuid AND areas.name ILIKE ?) OR EXISTS
+		(SELECT 1 FROM sub_areas WHERE users.sub_area_uuid = sub_areas.uuid AND sub_areas.name ILIKE ?)
+		`, "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	err = query.
 		Select(`
 			users.*,   
 			(
 				SELECT COUNT(DISTINCT cyclo_uuid)
 				FROM users
-				WHERE role = 'ASM' AND province_uuid = users.province_uuid
+				WHERE role = 'DR' AND province_uuid = users.province_uuid
 				AND area_uuid = users.area_uuid
 			) AS total_cyclo,
 			   (
@@ -399,7 +454,7 @@ func GetPaginatedDrBySubArea(c *fiber.Ctx) error {
 				users.province_uuid = ps.province_uuid
 				AND users.area_uuid = ps.area_uuid
 				AND users.sub_area_uuid = ps.sub_area_uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -408,8 +463,6 @@ func GetPaginatedDrBySubArea(c *fiber.Ctx) error {
 		Preload("Province").
 		Preload("Area").
 		Preload("SubArea").
-		// Preload("Pos").
-		// Preload("PosForms").
 		Find(&dataList).Error
 
 	if err != nil {

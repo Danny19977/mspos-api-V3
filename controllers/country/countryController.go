@@ -6,7 +6,7 @@ import (
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid" 
+	"github.com/google/uuid"
 )
 
 // Paginate
@@ -56,7 +56,7 @@ func GetPaginatedCountry(c *fiber.Ctx) error {
 				FROM
 				pos_forms ps
 				WHERE ps.country_uuid = countries.uuid
-			) AS total_posforms
+			) AS visites
 		`).
 		Offset(offset).
 		Limit(limit).
@@ -65,7 +65,7 @@ func GetPaginatedCountry(c *fiber.Ctx) error {
 		Preload("Areas").
 		Preload("SubAreas").
 		Preload("Communes").
-		Preload("Brands"). 
+		Preload("Brands").
 		// Preload("Users").
 		// Preload("PosForms").
 		Find(&countries).Error
