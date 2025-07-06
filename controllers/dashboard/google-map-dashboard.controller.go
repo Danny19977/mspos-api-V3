@@ -16,6 +16,7 @@ func GoogleMaps(c *fiber.Ctx) error {
 		Longitude float64 `json:"longitude"` // Longitude of the user
 		Signature string  `json:"signature"`
 		PosName   string  `json:"pos_name"`   // Name of the POS
+		PosUUID   string  `json:"pos_uuid"`   // UUID of the POS
 		Postype   string  `json:"postype"`    // Type de POS
 		Asm       string  `json:"asm"`        // Name of the ASM
 		Sup       string  `json:"sup"`        // Name of the Supervisor
@@ -32,6 +33,7 @@ func GoogleMaps(c *fiber.Ctx) error {
 			pos_forms.signature AS signature,
 			pos_forms.created_at AS created_at,
 			pos.name AS pos_name,
+			pos.uuid AS pos_uuid,
 			pos.postype AS postype,
 			CASE 
 				WHEN pos_forms.signature = pos_forms.asm THEN ''

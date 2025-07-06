@@ -16,13 +16,18 @@ func TotalVisitsByCountry(c *fiber.Ctx) error {
 	end_date := c.Query("end_date")
 
 	var results []struct {
-		Name        string  `json:"name"`
-		UUID        string  `json:"uuid"` // Territoire UUID
-		Signature   string  `json:"signature"`
-		Title       string  `json:"title"`
-		TotalVisits int     `json:"total_visits"`
-		Objectif    float64 `json:"objectif"`
-		Target      int     `json:"target"`
+		Name         string  `json:"name"`
+		UUID         string  `json:"uuid"`
+		CountryUUID  string  `json:"country_uuid"`
+		ProvinceUUID string  `json:"province_uuid"`
+		AreaUUID     string  `json:"area_uuid"`
+		SubAreaUUID  string  `json:"sub_area_uuid"`
+		CommuneUUID  string  `json:"commune_uuid"`
+		Signature    string  `json:"signature"`
+		Title        string  `json:"title"`
+		TotalVisits  int     `json:"total_visits"`
+		Objectif     float64 `json:"objectif"`
+		Target       int     `json:"target"`
 	}
 
 	err := db.Table("pos_forms").
@@ -84,23 +89,31 @@ func TotalVisitsByProvince(c *fiber.Ctx) error {
 	end_date := c.Query("end_date")
 
 	var results []struct {
-		Name        string  `json:"name"`
-		UUID        string  `json:"uuid"`
-		Signature   string  `json:"signature"`
-		Title       string  `json:"title"`
-		TotalVisits int     `json:"total_visits"`
-		Objectif    float64 `json:"objectif"`
-		Target      int     `json:"target"`
+		Name         string  `json:"name"`
+		CountryUUID  string  `json:"country_uuid"`
+		ProvinceUUID string  `json:"province_uuid"`
+		AreaUUID     string  `json:"area_uuid"`
+		SubAreaUUID  string  `json:"sub_area_uuid"`
+		CommuneUUID  string  `json:"commune_uuid"`
+		Signature    string  `json:"signature"`
+		Title        string  `json:"title"`
+		TotalVisits  int     `json:"total_visits"`
+		Objectif     float64 `json:"objectif"`
+		Target       int     `json:"target"`
 	}
 
 	err := db.Table("pos_forms").
 		Select(`
-		provinces.name AS name,
-		provinces.uuid AS uuid, 
-		pos_forms.signature AS signature,
-		users.title AS title, 
-		COUNT(pos_forms.signature) AS total_visits,
-		(ROUND((COUNT(pos_forms.signature) / (
+		provinces.name AS name, 
+		pos_forms.country_uuid AS country_uuid,
+		pos_forms.province_uuid AS province_uuid,
+		pos_forms.area_uuid AS area_uuid,
+		pos_forms.sub_area_uuid AS sub_area_uuid,
+		pos_forms.commune_uuid AS commune_uuid,
+		users.fullname AS signature,
+		users.title AS title,
+		COUNT(pos_forms.uuid) AS total_visits,
+		(ROUND((COUNT(pos_forms.uuid) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 * ((?::date - ?::date) + 1)
 					WHEN users.title = 'Supervisor'  THEN 20 * ((?::date - ?::date) + 1)
@@ -124,8 +137,16 @@ func TotalVisitsByProvince(c *fiber.Ctx) error {
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
-		Group("provinces.name, provinces.uuid, pos_forms.signature, users.title").
-		Order("provinces.name, pos_forms.signature, users.title").
+		Group(`
+			provinces.name, 
+			pos_forms.country_uuid, 
+			pos_forms.province_uuid, 
+			pos_forms.area_uuid, 
+			pos_forms.sub_area_uuid, 
+			pos_forms.commune_uuid, 
+			users.fullname,
+			users.title
+		`).Order("provinces.name").
 		Scan(&results).Error
 
 	if err != nil {

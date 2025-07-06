@@ -465,7 +465,7 @@ func GetPaginatedPosFormSubArea(c *fiber.Ctx) error {
 	})
 }
 
-// Query data commune by UUID
+// Query data commune by UserUUID
 func GetPaginatedPosFormCommune(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -504,6 +504,97 @@ func GetPaginatedPosFormCommune(c *fiber.Ctx) error {
 		Joins("LEFT JOIN communes ON pos_forms.commune_uuid = communes.uuid").
 		Joins("LEFT JOIN pos ON pos_forms.pos_uuid = pos.uuid").
 		Where("pos_forms.user_uuid = ?", UserUUID).
+		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date)
+
+	// Apply filters
+	query = applyAdvancedFilters(query, c)
+
+	// Count total records
+	query.Count(&totalRecords)
+
+	// Fetch data with pagination
+	err = query.
+		Select("pos_forms.*").
+		Offset(offset).
+		Limit(limit).
+		Order("pos_forms.updated_at DESC").
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Preload("User").
+		Preload("Pos").
+		Preload("PosFormItems").
+		Find(&dataList).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to fetch posforms",
+			"error":   err.Error(),
+		})
+	}
+
+	// Calculate total pages
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+
+	// Prepare pagination metadata
+	pagination := map[string]interface{}{
+		"total_records": totalRecords,
+		"total_pages":   totalPages,
+		"current_page":  page,
+		"page_size":     limit,
+	}
+
+	// Return response
+	return c.JSON(fiber.Map{
+		"status":     "success",
+		"message":    "posform retrieved successfully",
+		"data":       dataList,
+		"pagination": pagination,
+	})
+}
+
+// Query data commune by UUID filter
+func GetPaginatedPosFormCommuneFilter(c *fiber.Ctx) error {
+	db := database.DB
+
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
+
+	// Provide default values if start_date or end_date are empty
+	if start_date == "" {
+		start_date = "1970-01-01T00:00:00Z" // Default start date
+	}
+	if end_date == "" {
+		end_date = "2100-01-01T00:00:00Z" // Default end date
+	}
+
+	CommuneUUID := c.Params("commune_uuid")
+
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page <= 0 {
+		page = 1 // Default page number
+	}
+	limit, err := strconv.Atoi(c.Query("limit", "15"))
+	if err != nil || limit <= 0 {
+		limit = 15
+	}
+	offset := (page - 1) * limit
+
+	var dataList []models.PosForm
+	var totalRecords int64
+
+	// Build query with joins for better filtering
+	query := db.Model(&models.PosForm{}).
+		Joins("LEFT JOIN countries ON pos_forms.country_uuid = countries.uuid").
+		Joins("LEFT JOIN provinces ON pos_forms.province_uuid = provinces.uuid").
+		Joins("LEFT JOIN areas ON pos_forms.area_uuid = areas.uuid").
+		Joins("LEFT JOIN sub_areas ON pos_forms.sub_area_uuid = sub_areas.uuid").
+		Joins("LEFT JOIN communes ON pos_forms.commune_uuid = communes.uuid").
+		Joins("LEFT JOIN pos ON pos_forms.pos_uuid = pos.uuid").
+		Where("pos_forms.commune_uuid = ?", CommuneUUID).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date)
 
 	// Apply filters
@@ -1576,7 +1667,7 @@ func parseFlexibleDate(dateStr string) (time.Time, error) {
 		"2006/01/02",                // YYYY/MM/DD
 		"02-01-2006",                // DD-MM-YYYY
 		"01-02-2006",                // MM-DD-YYYY
-	} 
+	}
 
 	for _, format := range formats {
 		if t, err := time.Parse(format, dateStr); err == nil {

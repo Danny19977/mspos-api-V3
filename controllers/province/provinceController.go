@@ -373,10 +373,10 @@ func GetProvince(c *fiber.Ctx) error {
 
 // Get one data by name
 func GetProvinceByName(c *fiber.Ctx) error {
-	name := c.Params("name")
+	uuid := c.Params("uuid")
 	db := database.DB
 	var province models.Province
-	db.Where("name = ?", name).First(&province)
+	db.Where("uuid = ?", uuid).First(&province)
 	if province.Name == "" {
 		return c.Status(404).JSON(
 			fiber.Map{

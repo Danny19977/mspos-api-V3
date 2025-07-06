@@ -601,11 +601,11 @@ func GetSubArea(c *fiber.Ctx) error {
 
 // Get one data by name
 func GetSubAreaByName(c *fiber.Ctx) error {
-	name := c.Params("name")
+	uuid := c.Params("uuid")
 	db := database.DB
 
 	var SubArea models.SubArea
-	db.Where("name = ?", name).
+	db.Where("uuid = ?", uuid).
 		Preload("Country").
 		Preload("Province").
 		Preload("Area").

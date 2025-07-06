@@ -494,10 +494,10 @@ func GetArea(c *fiber.Ctx) error {
 
 // Get one data by name
 func GetAreaByName(c *fiber.Ctx) error {
-	name := c.Params("name")
+	uuid := c.Params("uuid")
 	db := database.DB
 	var area models.Area
-	db.Where("name = ?", name).
+	db.Where("uuid = ?", uuid).
 		Preload("Country").
 		Preload("Province").
 		First(&area)
