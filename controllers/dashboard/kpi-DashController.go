@@ -34,10 +34,10 @@ func TotalVisitsByCountry(c *fiber.Ctx) error {
 		Select(`
 		countries.name AS name,
 		countries.uuid AS uuid, 
-		pos_forms.signature AS signature,
+		users.fullname AS signature,
 		users.title AS title, 
-		COUNT(pos_forms.signature) AS total_visits,
-		(ROUND((COUNT(pos_forms.signature) / (
+		COUNT(pos_forms.uuid) AS total_visits,
+		(ROUND((COUNT(pos_forms.uuid) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 * ((?::date - ?::date) + 1)
 					WHEN users.title = 'Supervisor'  THEN 20 * ((?::date - ?::date) + 1)
@@ -61,8 +61,8 @@ func TotalVisitsByCountry(c *fiber.Ctx) error {
 		Where("pos_forms.country_uuid = ?", country_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
-		Group("countries.name, countries.uuid, pos_forms.signature, users.title").
-		Order("countries.name, pos_forms.signature, users.title").
+		Group("countries.name, countries.uuid, users.fullname, users.title, users.uuid").
+		Order("countries.name, users.fullname, users.title").
 		Scan(&results).Error
 
 	if err != nil {
@@ -145,8 +145,9 @@ func TotalVisitsByProvince(c *fiber.Ctx) error {
 			pos_forms.sub_area_uuid, 
 			pos_forms.commune_uuid, 
 			users.fullname,
-			users.title
-		`).Order("provinces.name").
+			users.title,
+			users.uuid
+		`).Order("provinces.name, users.fullname").
 		Scan(&results).Error
 
 	if err != nil {
@@ -186,10 +187,10 @@ func TotalVisitsByArea(c *fiber.Ctx) error {
 		Select(`
 		areas.name AS name,
 		areas.uuid AS uuid,
-		pos_forms.signature AS signature,
+		users.fullname AS signature,
 		users.title AS title, 
-		COUNT(pos_forms.signature) AS total_visits,
-		(ROUND((COUNT(pos_forms.signature) / (
+		COUNT(pos_forms.uuid) AS total_visits,
+		(ROUND((COUNT(pos_forms.uuid) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 * ((?::date - ?::date) + 1)
 					WHEN users.title = 'Supervisor'  THEN 20 * ((?::date - ?::date) + 1)
@@ -213,8 +214,8 @@ func TotalVisitsByArea(c *fiber.Ctx) error {
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?", country_uuid, province_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
-		Group("areas.name, areas.uuid, pos_forms.signature, users.title").
-		Order("areas.name, pos_forms.signature").
+		Group("areas.name, areas.uuid, users.fullname, users.title, users.uuid").
+		Order("areas.name, users.fullname").
 		Scan(&results).Error
 
 	if err != nil {
@@ -255,10 +256,10 @@ func TotalVisitsBySubArea(c *fiber.Ctx) error {
 		Select(`
 		sub_areas.name AS name,
 		sub_areas.uuid AS uuid,
-		pos_forms.signature AS signature,
+		users.fullname AS signature,
 		users.title AS title, 
-		COUNT(pos_forms.signature) AS total_visits,
-		(ROUND((COUNT(pos_forms.signature) / (
+		COUNT(pos_forms.uuid) AS total_visits,
+		(ROUND((COUNT(pos_forms.uuid) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 * ((?::date - ?::date) + 1)
 					WHEN users.title = 'Supervisor'  THEN 20 * ((?::date - ?::date) + 1)
@@ -282,8 +283,8 @@ func TotalVisitsBySubArea(c *fiber.Ctx) error {
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ?", country_uuid, province_uuid, area_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
-		Group("sub_areas.name, sub_areas.uuid, pos_forms.signature, users.title").
-		Order("sub_areas.name, pos_forms.signature").
+		Group("sub_areas.name, sub_areas.uuid, users.fullname, users.title, users.uuid").
+		Order("sub_areas.name, users.fullname").
 		Scan(&results).Error
 
 	if err != nil {
@@ -325,10 +326,10 @@ func TotalVisitsByCommune(c *fiber.Ctx) error {
 		Select(`
 		communes.name AS name,
 		communes.uuid AS uuid,
-		pos_forms.signature AS signature,
+		users.fullname AS signature,
 		users.title AS title, 
-		COUNT(pos_forms.signature) AS total_visits,
-		(ROUND((COUNT(pos_forms.signature) / (
+		COUNT(pos_forms.uuid) AS total_visits,
+		(ROUND((COUNT(pos_forms.uuid) / (
 			CASE
 					WHEN users.title = 'ASM'  THEN 10 * ((?::date - ?::date) + 1)
 					WHEN users.title = 'Supervisor'  THEN 20 * ((?::date - ?::date) + 1)
@@ -348,12 +349,12 @@ func TotalVisitsByCommune(c *fiber.Ctx) error {
 		) AS target
 		`, end_date, start_date, end_date, start_date, end_date, start_date, end_date, start_date, end_date, start_date, end_date, start_date, end_date, start_date, end_date, start_date).
 		Joins("JOIN users ON users.uuid = pos_forms.user_uuid").
-		Joins("JOIN communes ON pos_forms.sub_area_uuid = communes.uuid").
+		Joins("JOIN communes ON pos_forms.commune_uuid = communes.uuid").
 		Where("pos_forms.country_uuid = ? AND pos_forms.province_uuid = ? AND pos_forms.area_uuid = ? AND pos_forms.sub_area_uuid = ?", country_uuid, province_uuid, area_uuid, sub_area_uuid).
 		Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
-		Group("communes.name, communes.uuid, pos_forms.signature, users.title").
-		Order("communes.name, pos_forms.signature").
+		Group("communes.name, communes.uuid, users.fullname, users.title, users.uuid").
+		Order("communes.name, users.fullname").
 		Scan(&results).Error
 
 	if err != nil {
