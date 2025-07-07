@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/danny19977/mspos-api-v3/database"
@@ -26,36 +27,28 @@ func NdTableViewProvince(c *fiber.Ctx) error {
 	}
 
 	sqlQuery := `
+	   
 		SELECT 
-			provinces.name AS name,
-			provinces.uuid AS uuid,
-			brands.name AS brand,
-			COUNT(DISTINCT pos_form_items.uuid) AS presence,
-			(SELECT COUNT(DISTINCT pos_forms.uuid) 
-			 FROM pos_forms 
-			 WHERE pos_forms.country_uuid = ? 
-			 AND pos_forms.province_uuid = ?
-			 AND pos_forms.created_at BETWEEN ? AND ?
-			 AND pos_forms.deleted_at IS NULL
-			) AS visits,
-			CASE 
-				WHEN (SELECT COUNT(DISTINCT pos_form_items.uuid) 
-					  FROM pos_form_items
-					  INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
-					  WHERE pos_forms.country_uuid = ? 
-					  AND pos_forms.province_uuid = ?
-					  AND pos_forms.created_at BETWEEN ? AND ?
-					  AND pos_forms.deleted_at IS NULL) > 0 
-				THEN (COUNT(DISTINCT pos_form_items.uuid) * 100.0 / 
-					  (SELECT COUNT(DISTINCT pos_form_items.uuid) 
-					   FROM pos_form_items
-					   INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
-					   WHERE pos_forms.country_uuid = ? 
-					   AND pos_forms.province_uuid = ?
-					   AND pos_forms.created_at BETWEEN ? AND ?
-					   AND pos_forms.deleted_at IS NULL))
-				ELSE 0
-			END AS pourcent
+		provinces.name AS name,
+		provinces.uuid AS uuid,
+		brands.name AS brand,
+
+		COUNT(pos_form_items.uuid) AS presence,
+
+		(SELECT COUNT(pos_forms.uuid) FROM pos_forms 
+		WHERE pos_forms.country_uuid = ? 
+		AND pos_forms.province_uuid = ?
+		AND pos_forms.created_at BETWEEN ? AND ?
+		AND pos_forms.deleted_at IS NULL
+		) AS visits,
+
+		(COUNT(pos_form_items.uuid) * 100 / (
+		SELECT COUNT(pos_forms.uuid) FROM pos_forms 
+		WHERE pos_forms.country_uuid = ? AND pos_forms.province_uuid = ?
+		AND pos_forms.created_at BETWEEN ? AND ?
+		AND pos_forms.deleted_at IS NULL
+		)) AS pourcent
+		
 		FROM pos_form_items 
 		INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
 		INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid
@@ -66,7 +59,7 @@ func NdTableViewProvince(c *fiber.Ctx) error {
 		GROUP BY provinces.name, provinces.uuid, brands.name
 		ORDER BY pourcent DESC;
 	`
-	rows, err := db.Raw(sqlQuery, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date).Rows()
+	rows, err := db.Raw(sqlQuery, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date).Rows()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
@@ -131,35 +124,27 @@ func NdTableViewArea(c *fiber.Ctx) error {
 
 	sqlQuery := `
 		SELECT  
-			areas.name AS name,
-			areas.uuid AS uuid,
-			brands.name AS brand,
-			COUNT(DISTINCT pos_form_items.uuid) AS presence,
-			(SELECT COUNT(DISTINCT pos_forms.uuid) 
-			 FROM pos_forms 
-			 WHERE pos_forms.country_uuid = ? 
-			 AND pos_forms.province_uuid = ? 
-			 AND pos_forms.created_at BETWEEN ? AND ?
-			 AND pos_forms.deleted_at IS NULL
-			) AS visits,
-			CASE 
-				WHEN (SELECT COUNT(DISTINCT pos_form_items.uuid) 
-					  FROM pos_form_items
-					  INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
-					  WHERE pos_forms.country_uuid = ? 
-					  AND pos_forms.province_uuid = ?
-					  AND pos_forms.created_at BETWEEN ? AND ?
-					  AND pos_forms.deleted_at IS NULL) > 0 
-				THEN (COUNT(DISTINCT pos_form_items.uuid) * 100.0 / 
-					  (SELECT COUNT(DISTINCT pos_form_items.uuid) 
-					   FROM pos_form_items
-					   INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
-					   WHERE pos_forms.country_uuid = ? 
-					   AND pos_forms.province_uuid = ?
-					   AND pos_forms.created_at BETWEEN ? AND ?
-					   AND pos_forms.deleted_at IS NULL))
-				ELSE 0
-			END AS pourcent
+		areas.name AS name,
+		areas.uuid AS uuid,
+		brands.name AS brand,
+
+		COUNT(pos_form_items.uuid) AS presence,
+
+		(SELECT COUNT(pos_forms.uuid) FROM pos_forms 
+		WHERE pos_forms.country_uuid = ? AND 
+		pos_forms.province_uuid = ? 
+		AND pos_forms.created_at BETWEEN ? AND ?
+		AND pos_forms.deleted_at IS NULL
+		) AS visits,
+
+		(COUNT(pos_form_items.uuid) * 100 / (
+		SELECT COUNT(pos_forms.uuid) FROM pos_forms 
+		WHERE pos_forms.country_uuid = ? AND 
+		pos_forms.province_uuid = ?
+		AND pos_forms.created_at BETWEEN ? AND ?
+		AND pos_forms.deleted_at IS NULL
+		)) AS pourcent
+		
 		FROM pos_form_items
 		INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
 		INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid
@@ -171,7 +156,7 @@ func NdTableViewArea(c *fiber.Ctx) error {
 		GROUP BY areas.name, areas.uuid, brands.name
 		ORDER BY pourcent DESC;
 	`
-	rows, err := db.Raw(sqlQuery, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date).Rows()
+	rows, err := db.Raw(sqlQuery, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date, country_uuid, province_uuid, start_date, end_date).Rows()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
@@ -236,37 +221,30 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 	}
 
 	sqlQuery := `
+	   
 		SELECT  
-			sub_areas.name AS name,
-			sub_areas.uuid AS uuid,
-			brands.name AS brand,
-			COUNT(DISTINCT pos_form_items.uuid) AS presence,
-			(SELECT COUNT(DISTINCT pos_forms.uuid) 
-			 FROM pos_forms 
-			 WHERE pos_forms.country_uuid = ? 
-			 AND pos_forms.province_uuid = ? 
-			 AND pos_forms.area_uuid = ?
-			 AND pos_forms.created_at BETWEEN ? AND ?
-			 AND pos_forms.deleted_at IS NULL
-			) AS visits,
-			CASE 
-				WHEN (SELECT COUNT(DISTINCT pos_forms.uuid) 
-					  FROM pos_forms 
-					  WHERE pos_forms.country_uuid = ? 
-					  AND pos_forms.province_uuid = ? 
-					  AND pos_forms.area_uuid = ?
-					  AND pos_forms.created_at BETWEEN ? AND ?
-					  AND pos_forms.deleted_at IS NULL) > 0 
-				THEN (COUNT(DISTINCT pos_form_items.uuid) * 100.0 / 
-					  (SELECT COUNT(DISTINCT pos_forms.uuid) 
-					   FROM pos_forms 
-					   WHERE pos_forms.country_uuid = ? 
-					   AND pos_forms.province_uuid = ? 
-					   AND pos_forms.area_uuid = ?
-					   AND pos_forms.created_at BETWEEN ? AND ?
-					   AND pos_forms.deleted_at IS NULL))
-				ELSE 0
-			END AS pourcent
+		sub_areas.name AS name,
+		sub_areas.uuid AS uuid,
+		brands.name AS brand,
+
+		COUNT(pos_form_items.uuid) AS presence,
+
+		(SELECT COUNT(pos_forms.uuid) FROM pos_forms 
+			WHERE pos_forms.country_uuid = ? 
+			AND pos_forms.province_uuid = ? 
+			AND pos_forms.area_uuid = ?
+			AND pos_forms.created_at BETWEEN ? AND ?
+			AND pos_forms.deleted_at IS NULL
+		) AS visits,
+
+		(COUNT(pos_form_items.uuid) * 100 / (
+		SELECT COUNT(pos_forms.uuid) FROM pos_forms 
+		WHERE pos_forms.country_uuid = ? 
+		AND pos_forms.province_uuid = ? 
+		AND pos_forms.area_uuid = ?
+		AND pos_forms.created_at BETWEEN ? AND ?
+		AND pos_forms.deleted_at IS NULL
+		)) AS pourcent
 		FROM pos_form_items 
 		INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
 		INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid 
@@ -281,7 +259,6 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 	`
 
 	rows, err := db.Raw(sqlQuery,
-		country_uuid, province_uuid, area_uuid, start_date, end_date,
 		country_uuid, province_uuid, area_uuid, start_date, end_date,
 		country_uuid, province_uuid, area_uuid, start_date, end_date,
 		country_uuid, province_uuid, area_uuid, start_date, end_date).Rows()
@@ -305,7 +282,6 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 				"error":   err.Error(),
 			})
 		}
-
 		results = append(results, struct {
 			Name     string  `json:"name"`
 			UUID     string  `json:"uuid"`
@@ -359,39 +335,27 @@ func NdTableViewCommune(c *fiber.Ctx) error {
 
 	sqlQuery := `
 		SELECT  
-			communes.name AS name,
-			communes.uuid AS uuid,
-			brands.name AS brand,
-			COUNT(DISTINCT pos_form_items.uuid) AS presence,
-			(SELECT COUNT(DISTINCT pos_forms.uuid) 
-			 FROM pos_forms 
-			 WHERE pos_forms.country_uuid = ? 
-			 AND pos_forms.province_uuid = ? 
-			 AND pos_forms.area_uuid = ? 
-			 AND pos_forms.sub_area_uuid = ?
-			 AND pos_forms.created_at BETWEEN ? AND ?
-			 AND pos_forms.deleted_at IS NULL
-			) AS visits,
-			CASE 
-				WHEN (SELECT COUNT(DISTINCT pos_forms.uuid) 
-					  FROM pos_forms 
-					  WHERE pos_forms.country_uuid = ? 
-					  AND pos_forms.province_uuid = ? 
-					  AND pos_forms.area_uuid = ? 
-					  AND pos_forms.sub_area_uuid = ?
-					  AND pos_forms.created_at BETWEEN ? AND ?
-					  AND pos_forms.deleted_at IS NULL) > 0 
-				THEN (COUNT(DISTINCT pos_form_items.uuid) * 100.0 / 
-					  (SELECT COUNT(DISTINCT pos_forms.uuid) 
-					   FROM pos_forms 
-					   WHERE pos_forms.country_uuid = ? 
-					   AND pos_forms.province_uuid = ? 
-					   AND pos_forms.area_uuid = ? 
-					   AND pos_forms.sub_area_uuid = ?
-					   AND pos_forms.created_at BETWEEN ? AND ?
-					   AND pos_forms.deleted_at IS NULL))
-				ELSE 0
-			END AS pourcent
+		communes.name AS name,
+		communes.uuid AS uuid,
+		brands.name AS brand,
+		COUNT(pos_form_items.uuid) AS presence,
+		(SELECT COUNT(pos_forms.uuid) FROM pos_forms 
+		WHERE pos_forms.country_uuid = ? 
+		AND pos_forms.province_uuid = ? 
+		AND pos_forms.area_uuid = ? 
+		AND pos_forms.sub_area_uuid = ?
+		AND pos_forms.created_at BETWEEN ? AND ?
+		AND pos_forms.deleted_at IS NULL
+		) AS visits,
+		(COUNT(pos_form_items.uuid) * 100.0 / (
+		SELECT COUNT(pos_forms.uuid) FROM pos_forms 
+		WHERE pos_forms.country_uuid = ? 
+		AND pos_forms.province_uuid = ? 
+		AND pos_forms.area_uuid = ? 
+		AND pos_forms.sub_area_uuid = ?
+		AND pos_forms.created_at BETWEEN ? AND ?
+		AND pos_forms.deleted_at IS NULL
+		)) AS pourcent
 		FROM pos_form_items 
 		INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid
 		INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid 
@@ -407,7 +371,6 @@ func NdTableViewCommune(c *fiber.Ctx) error {
 	`
 
 	rows, err := db.Raw(sqlQuery,
-		country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date,
 		country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date,
 		country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date,
 		country_uuid, province_uuid, area_uuid, sub_area_uuid, start_date, end_date).Rows()
@@ -448,6 +411,16 @@ func NdTableViewCommune(c *fiber.Ctx) error {
 		})
 	}
 
+	json, err := json.Marshal(results)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Failed to marshal results",
+			"error":   err.Error(),
+		})
+	}
+	fmt.Println("JSON Results:", string(json))
+
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "chartData data",
@@ -473,8 +446,8 @@ func NdTotalByBrandByMonth(c *fiber.Ctx) error {
 		SELECT
 			brands.name AS brand,
 			EXTRACT(MONTH FROM pos_forms.created_at) AS month,
-			COUNT(brands.name) AS presence,
-			(COUNT(brands.name) * 100 / (
+			COUNT(pos_form_items.uuid) AS presence,
+			(COUNT(pos_form_items.uuid) * 100 / (
 				SELECT COUNT(pos_forms.uuid) FROM pos_forms 
 				WHERE pos_forms.country_uuid = ? 
 				AND EXTRACT(YEAR FROM pos_forms.created_at) = ?

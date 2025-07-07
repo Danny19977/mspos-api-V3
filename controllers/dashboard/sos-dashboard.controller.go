@@ -15,6 +15,7 @@ func SosTableViewProvince(c *fiber.Ctx) error {
 
 	var results []struct {
 		Name             string  `json:"name"`
+		UUID             string  `json:"uuid"`
 		BrandName        string  `json:"brand_name"`
 		TotalFarde       float64 `json:"total_farde"`
 		TotalGlobalFarde float64 `json:"total_global_farde"`
@@ -25,6 +26,7 @@ func SosTableViewProvince(c *fiber.Ctx) error {
 	err := db.Table("pos_form_items").
 		Select(`
 		provinces.name AS name,
+		provinces.uuid AS uuid,
 		brands.name AS brand_name, 
 		ROUND(SUM(pos_form_items.number_farde)::numeric, 2) AS total_farde,
 		(SELECT SUM(pos_form_items.number_farde) 
@@ -48,7 +50,7 @@ func SosTableViewProvince(c *fiber.Ctx) error {
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Joins("INNER JOIN provinces ON pos_forms.province_uuid = provinces.uuid").
-		Group("provinces.name, brands.name").
+		Group("provinces.name, provinces.uuid, brands.name").
 		Scan(&results).Error
 
 	if err != nil {
@@ -76,6 +78,7 @@ func SosTableViewArea(c *fiber.Ctx) error {
 
 	var results []struct {
 		Name             string  `json:"name"`
+		UUID             string  `json:"uuid"`
 		BrandName        string  `json:"brand_name"`
 		TotalFarde       float64 `json:"total_farde"`
 		TotalGlobalFarde float64 `json:"total_global_farde"`
@@ -86,6 +89,7 @@ func SosTableViewArea(c *fiber.Ctx) error {
 	err := db.Table("pos_form_items").
 		Select(`
 			areas.name AS name,
+			areas.uuid AS uuid,
 			brands.name AS brand_name, 
 			ROUND(SUM(pos_form_items.number_farde)::numeric, 2) AS total_farde,
 			(SELECT SUM(pos_form_items.number_farde) 
@@ -109,7 +113,7 @@ func SosTableViewArea(c *fiber.Ctx) error {
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Joins("INNER JOIN areas ON pos_forms.area_uuid = areas.uuid").
-		Group("areas.name, brands.name").
+		Group("areas.name, areas.uuid, brands.name").
 		Scan(&results).Error
 
 	if err != nil {
@@ -138,6 +142,7 @@ func SosTableViewSubArea(c *fiber.Ctx) error {
 
 	var results []struct {
 		Name             string  `json:"name"`
+		UUID             string  `json:"uuid"`
 		BrandName        string  `json:"brand_name"`
 		TotalFarde       float64 `json:"total_farde"`
 		TotalGlobalFarde float64 `json:"total_global_farde"`
@@ -148,6 +153,7 @@ func SosTableViewSubArea(c *fiber.Ctx) error {
 	err := db.Table("pos_form_items").
 		Select(`
 			sub_areas.name AS name,
+			sub_areas.uuid AS uuid,
 			brands.name AS brand_name, 
 			ROUND(SUM(pos_form_items.number_farde)::numeric, 2) AS total_farde,
 			(SELECT SUM(pos_form_items.number_farde) 
@@ -171,7 +177,7 @@ func SosTableViewSubArea(c *fiber.Ctx) error {
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Joins("INNER JOIN sub_areas ON pos_forms.sub_area_uuid = sub_areas.uuid").
-		Group("sub_areas.name, brands.name").
+		Group("sub_areas.name, sub_areas.uuid, brands.name").
 		Scan(&results).Error
 
 	if err != nil {
@@ -201,6 +207,7 @@ func SosTableViewCommune(c *fiber.Ctx) error {
 
 	var results []struct {
 		Name             string  `json:"name"`
+		UUID             string  `json:"uuid"`
 		BrandName        string  `json:"brand_name"`
 		TotalFarde       float64 `json:"total_farde"`
 		TotalGlobalFarde float64 `json:"total_global_farde"`
@@ -211,6 +218,7 @@ func SosTableViewCommune(c *fiber.Ctx) error {
 	err := db.Table("pos_form_items").
 		Select(`
 			communes.name AS name,
+			communes.uuid AS uuid,
 			brands.name AS brand_name, 
 			ROUND(SUM(pos_form_items.number_farde)::numeric, 2) AS total_farde,
 			(SELECT SUM(pos_form_items.number_farde) 
@@ -234,7 +242,7 @@ func SosTableViewCommune(c *fiber.Ctx) error {
 		Joins("INNER JOIN pos_forms ON pos_form_items.pos_form_uuid = pos_forms.uuid").
 		Joins("INNER JOIN brands ON pos_form_items.brand_uuid = brands.uuid").
 		Joins("INNER JOIN communes ON pos_forms.commune_uuid = communes.uuid").
-		Group("communes.name, brands.name").
+		Group("communes.name, communes.uuid, brands.name").
 		Scan(&results).Error
 
 	if err != nil {
