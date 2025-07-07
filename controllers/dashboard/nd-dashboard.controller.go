@@ -132,7 +132,8 @@ func NdTableViewArea(c *fiber.Ctx) error {
 
 		(SELECT COUNT(pos_forms.uuid) FROM pos_forms 
 		WHERE pos_forms.country_uuid = ? AND 
-		pos_forms.province_uuid = ? 
+		pos_forms.province_uuid = ? AND
+		pos_forms.area_uuid = areas.uuid 
 		AND pos_forms.created_at BETWEEN ? AND ?
 		AND pos_forms.deleted_at IS NULL
 		) AS visits,
@@ -141,6 +142,7 @@ func NdTableViewArea(c *fiber.Ctx) error {
 		SELECT COUNT(pos_forms.uuid) FROM pos_forms 
 		WHERE pos_forms.country_uuid = ? AND 
 		pos_forms.province_uuid = ?
+		AND pos_forms.area_uuid = areas.uuid
 		AND pos_forms.created_at BETWEEN ? AND ?
 		AND pos_forms.deleted_at IS NULL
 		)) AS pourcent
@@ -233,6 +235,7 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 			WHERE pos_forms.country_uuid = ? 
 			AND pos_forms.province_uuid = ? 
 			AND pos_forms.area_uuid = ?
+			AND pos_forms.sub_area_uuid = sub_areas.uuid
 			AND pos_forms.created_at BETWEEN ? AND ?
 			AND pos_forms.deleted_at IS NULL
 		) AS visits,
@@ -242,6 +245,7 @@ func NdTableViewSubArea(c *fiber.Ctx) error {
 		WHERE pos_forms.country_uuid = ? 
 		AND pos_forms.province_uuid = ? 
 		AND pos_forms.area_uuid = ?
+		AND pos_forms.sub_area_uuid = sub_areas.uuid
 		AND pos_forms.created_at BETWEEN ? AND ?
 		AND pos_forms.deleted_at IS NULL
 		)) AS pourcent
@@ -344,6 +348,7 @@ func NdTableViewCommune(c *fiber.Ctx) error {
 		AND pos_forms.province_uuid = ? 
 		AND pos_forms.area_uuid = ? 
 		AND pos_forms.sub_area_uuid = ?
+		AND pos_forms.commune_uuid = communes.uuid
 		AND pos_forms.created_at BETWEEN ? AND ?
 		AND pos_forms.deleted_at IS NULL
 		) AS visits,
@@ -353,6 +358,7 @@ func NdTableViewCommune(c *fiber.Ctx) error {
 		AND pos_forms.province_uuid = ? 
 		AND pos_forms.area_uuid = ? 
 		AND pos_forms.sub_area_uuid = ?
+		AND pos_forms.commune_uuid = communes.uuid
 		AND pos_forms.created_at BETWEEN ? AND ?
 		AND pos_forms.deleted_at IS NULL
 		)) AS pourcent
@@ -446,8 +452,8 @@ func NdTotalByBrandByMonth(c *fiber.Ctx) error {
 		SELECT
 			brands.name AS brand,
 			EXTRACT(MONTH FROM pos_forms.created_at) AS month,
-			COUNT(pos_form_items.uuid) AS presence,
-			(COUNT(pos_form_items.uuid) * 100 / (
+			COUNT(brands.name) AS presence,
+			(COUNT(brands.name) * 100 / (
 				SELECT COUNT(pos_forms.uuid) FROM pos_forms 
 				WHERE pos_forms.country_uuid = ? 
 				AND EXTRACT(YEAR FROM pos_forms.created_at) = ?
