@@ -334,6 +334,10 @@ func Setup(app *fiber.App) {
 	kp.Get("/total-visits-by-commune", dashboard.TotalVisitsByCommune)
 
 	// Summary Dashboard
-	// sum := dash.Group("/summary")
+	sum := dash.Group("/summary")
+	sum.Get("/executive", dashboard.ExecutiveSummary)
+	sum.Get("/regional", dashboard.RegionalSummary)
+	sum.Get("/quick", dashboard.QuickDashboard)
+	sum.Get("/competitive", dashboard.CompetitiveAnalysis)
 
 }
