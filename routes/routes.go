@@ -302,6 +302,12 @@ func Setup(app *fiber.App) {
 	nd.Get("/table-view-commune", dashboard.NdTableViewCommune)
 	nd.Get("/line-chart-by-month", dashboard.NdTotalByBrandByMonth)
 
+	// ND Bar Chart routes
+	nd.Get("/bar-chart-province", dashboard.NdBarChartProvince)
+	nd.Get("/bar-chart-area", dashboard.NdBarChartArea)
+	nd.Get("/bar-chart-subarea", dashboard.NdBarChartSubArea)
+	nd.Get("/bar-chart-commune", dashboard.NdBarChartCommune)
+
 	// SOS Dashboard
 	sos := dash.Group("/share-of-stock")
 	sos.Get("/table-view-province", dashboard.SosTableViewProvince)
@@ -309,6 +315,12 @@ func Setup(app *fiber.App) {
 	sos.Get("/table-view-subarea", dashboard.SosTableViewSubArea)
 	sos.Get("/table-view-commune", dashboard.SosTableViewCommune)
 	sos.Get("/line-chart-by-month", dashboard.SosTotalByBrandByMonth)
+
+	// SOS Bar Chart routes
+	sos.Get("/bar-chart-province", dashboard.SosBarChartProvince)
+	sos.Get("/bar-chart-area", dashboard.SosBarChartArea)
+	sos.Get("/bar-chart-subarea", dashboard.SosBarChartSubArea)
+	sos.Get("/bar-chart-commune", dashboard.SosBarChartCommune)
 
 	// Google Map Dashboard
 	gm := dash.Group("/google-map")
@@ -334,10 +346,6 @@ func Setup(app *fiber.App) {
 	kp.Get("/total-visits-by-commune", dashboard.TotalVisitsByCommune)
 
 	// Summary Dashboard
-	sum := dash.Group("/summary")
-	sum.Get("/executive", dashboard.ExecutiveSummary)
-	sum.Get("/regional", dashboard.RegionalSummary)
-	sum.Get("/quick", dashboard.QuickDashboard)
-	sum.Get("/competitive", dashboard.CompetitiveAnalysis)
+	// sum := dash.Group("/summary")
 
 }

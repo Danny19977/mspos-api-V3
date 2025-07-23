@@ -442,10 +442,10 @@ func GetAllAreasByProvinceUUID(c *fiber.Ctx) error {
 
 // query data
 func GetAreaByID(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
+	id := c.Params("id")
 	db := database.DB
 	var areas []models.Area
-	db.Where("province_uuid = ?", uuid).Find(&areas)
+	db.Where("province_uuid = ?", id).Find(&areas)
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
@@ -456,20 +456,14 @@ func GetAreaByID(c *fiber.Ctx) error {
 
 // query data
 func GetSupAreaByID(c *fiber.Ctx) error {
-	uuid := c.Params("uuid")
+	id := c.Params("id")
 	db := database.DB
 	var areas []models.Area
-
-	// Get areas by finding users with the supervisor UUID and getting their distinct areas
-	db.Table("areas").
-		Joins("JOIN users ON users.area_uuid = areas.uuid").
-		Where("users.sup_uuid = ? AND users.deleted_at IS NULL AND areas.deleted_at IS NULL", uuid).
-		Distinct().
-		Find(&areas)
+	db.Where("sup_uuid = ?", id).Find(&areas)
 
 	return c.JSON(fiber.Map{
 		"status":  "success",
-		"message": "areas by supervisor found",
+		"message": "poss by id found",
 		"data":    areas,
 	})
 }
