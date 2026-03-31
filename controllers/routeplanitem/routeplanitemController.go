@@ -5,7 +5,7 @@ import (
 
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/models"
-	"github.com/danny19977/mspos-api-v3/utils"
+	// "github.com/danny19977/mspos-api-v3/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -129,7 +129,7 @@ func CreateRoutePlanItem(c *fiber.Ctx) error {
 		return err
 	}
 
-	p.UUID = utils.GenerateUUID()
+	// p.UUID = utils.GenerateUUID()
 	database.DB.Create(p)
 
 	return c.JSON(
