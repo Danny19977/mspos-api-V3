@@ -112,16 +112,17 @@ func NDTableViewProvince(c *fiber.Ctx) error {
 			b.uuid                                                           AS brand_uuid,
 			COALESCE(nd.nd_pos, 0)                                           AS nd_pos,
 			COALESCE(v.total_pos, 0)                                         AS total_pos,
+			COALESCE(v.total_posforms, 0)                                    AS total_posforms,
 			COALESCE(u.universe_pos, 0)                                      AS universe_pos,
 			ROUND((COALESCE(nd.nd_pos, 0) * 100.0 /
 			       NULLIF(COALESCE(v.total_posforms, 0), 0))::numeric, 2)   AS nd_percent,
 			ROUND((COALESCE(v.total_pos, 0) * 100.0 /
 			       NULLIF(COALESCE(u.universe_pos, 0), 0))::numeric, 2)     AS reach_rate
-		FROM universe u
-		INNER JOIN provinces pr ON pr.uuid = u.province_uuid
-		CROSS JOIN brands b
-		LEFT  JOIN nd_counts nd ON nd.province_uuid = u.province_uuid AND nd.brand_uuid = b.uuid
-		LEFT  JOIN visited v    ON v.province_uuid  = u.province_uuid
+		FROM nd_counts nd
+		INNER JOIN provinces pr ON pr.uuid = nd.province_uuid
+		INNER JOIN brands b     ON b.uuid  = nd.brand_uuid
+		INNER JOIN universe u   ON u.province_uuid = nd.province_uuid
+		LEFT  JOIN visited v    ON v.province_uuid  = nd.province_uuid
 		ORDER BY pr.name, nd_percent DESC
 	`
 
@@ -133,6 +134,7 @@ func NDTableViewProvince(c *fiber.Ctx) error {
 		BrandUUID      string  `json:"brand_uuid"`
 		NdPos          int64   `json:"nd_pos"`
 		TotalPos       int64   `json:"total_pos"`
+		TotalPosforms  int64   `json:"total_posforms"`
 		UniversePos    int64   `json:"universe_pos"`
 		NdPercent      float64 `json:"nd_percent"`
 		ReachRate      float64 `json:"reach_rate"`
@@ -219,16 +221,17 @@ func NDTableViewArea(c *fiber.Ctx) error {
 			b.uuid                                                            AS brand_uuid,
 			COALESCE(nd.nd_pos, 0)                                            AS nd_pos,
 			COALESCE(v.total_pos, 0)                                          AS total_pos,
+			COALESCE(v.total_posforms, 0)                                     AS total_posforms,
 			COALESCE(u.universe_pos, 0)                                       AS universe_pos,
 			ROUND((COALESCE(nd.nd_pos, 0) * 100.0 /
 			       NULLIF(COALESCE(v.total_posforms, 0), 0))::numeric, 2)    AS nd_percent,
 			ROUND((COALESCE(v.total_pos, 0) * 100.0 /
 			       NULLIF(COALESCE(u.universe_pos, 0), 0))::numeric, 2)      AS reach_rate
-		FROM universe u
-		INNER JOIN areas a ON a.uuid = u.area_uuid
-		CROSS JOIN brands b
-		LEFT  JOIN nd_counts nd ON nd.area_uuid = u.area_uuid AND nd.brand_uuid = b.uuid
-		LEFT  JOIN visited v    ON v.area_uuid  = u.area_uuid
+		FROM nd_counts nd
+		INNER JOIN areas a    ON a.uuid  = nd.area_uuid
+		INNER JOIN brands b   ON b.uuid  = nd.brand_uuid
+		INNER JOIN universe u ON u.area_uuid = nd.area_uuid
+		LEFT  JOIN visited v  ON v.area_uuid = nd.area_uuid
 		ORDER BY a.name, nd_percent DESC
 	`
 
@@ -240,6 +243,7 @@ func NDTableViewArea(c *fiber.Ctx) error {
 		BrandUUID      string  `json:"brand_uuid"`
 		NdPos          int64   `json:"nd_pos"`
 		TotalPos       int64   `json:"total_pos"`
+		TotalPosforms  int64   `json:"total_posforms"`
 		UniversePos    int64   `json:"universe_pos"`
 		NdPercent      float64 `json:"nd_percent"`
 		ReachRate      float64 `json:"reach_rate"`
@@ -326,16 +330,17 @@ func NDTableViewSubArea(c *fiber.Ctx) error {
 			b.uuid                                                            AS brand_uuid,
 			COALESCE(nd.nd_pos, 0)                                            AS nd_pos,
 			COALESCE(v.total_pos, 0)                                          AS total_pos,
+			COALESCE(v.total_posforms, 0)                                     AS total_posforms,
 			COALESCE(u.universe_pos, 0)                                       AS universe_pos,
 			ROUND((COALESCE(nd.nd_pos, 0) * 100.0 /
 			       NULLIF(COALESCE(v.total_posforms, 0), 0))::numeric, 2)    AS nd_percent,
 			ROUND((COALESCE(v.total_pos, 0) * 100.0 /
 			       NULLIF(COALESCE(u.universe_pos, 0), 0))::numeric, 2)      AS reach_rate
-		FROM universe u
-		INNER JOIN sub_areas sa ON sa.uuid = u.sub_area_uuid
-		CROSS JOIN brands b
-		LEFT  JOIN nd_counts nd ON nd.sub_area_uuid = u.sub_area_uuid AND nd.brand_uuid = b.uuid
-		LEFT  JOIN visited v    ON v.sub_area_uuid  = u.sub_area_uuid
+		FROM nd_counts nd
+		INNER JOIN sub_areas sa ON sa.uuid = nd.sub_area_uuid
+		INNER JOIN brands b     ON b.uuid  = nd.brand_uuid
+		INNER JOIN universe u   ON u.sub_area_uuid = nd.sub_area_uuid
+		LEFT  JOIN visited v    ON v.sub_area_uuid  = nd.sub_area_uuid
 		ORDER BY sa.name, nd_percent DESC
 	`
 
@@ -347,6 +352,7 @@ func NDTableViewSubArea(c *fiber.Ctx) error {
 		BrandUUID      string  `json:"brand_uuid"`
 		NdPos          int64   `json:"nd_pos"`
 		TotalPos       int64   `json:"total_pos"`
+		TotalPosforms  int64   `json:"total_posforms"`
 		UniversePos    int64   `json:"universe_pos"`
 		NdPercent      float64 `json:"nd_percent"`
 		ReachRate      float64 `json:"reach_rate"`
@@ -433,16 +439,17 @@ func NDTableViewCommune(c *fiber.Ctx) error {
 			b.uuid                                                            AS brand_uuid,
 			COALESCE(nd.nd_pos, 0)                                            AS nd_pos,
 			COALESCE(v.total_pos, 0)                                          AS total_pos,
+			COALESCE(v.total_posforms, 0)                                     AS total_posforms,
 			COALESCE(u.universe_pos, 0)                                       AS universe_pos,
 			ROUND((COALESCE(nd.nd_pos, 0) * 100.0 /
 			       NULLIF(COALESCE(v.total_posforms, 0), 0))::numeric, 2)    AS nd_percent,
 			ROUND((COALESCE(v.total_pos, 0) * 100.0 /
 			       NULLIF(COALESCE(u.universe_pos, 0), 0))::numeric, 2)      AS reach_rate
-		FROM universe u
-		INNER JOIN communes cm ON cm.uuid = u.commune_uuid
-		CROSS JOIN brands b
-		LEFT  JOIN nd_counts nd ON nd.commune_uuid = u.commune_uuid AND nd.brand_uuid = b.uuid
-		LEFT  JOIN visited v    ON v.commune_uuid  = u.commune_uuid
+		FROM nd_counts nd
+		INNER JOIN communes cm ON cm.uuid = nd.commune_uuid
+		INNER JOIN brands b    ON b.uuid  = nd.brand_uuid
+		INNER JOIN universe u  ON u.commune_uuid = nd.commune_uuid
+		LEFT  JOIN visited v   ON v.commune_uuid  = nd.commune_uuid
 		ORDER BY cm.name, nd_percent DESC
 	`
 
@@ -454,6 +461,7 @@ func NDTableViewCommune(c *fiber.Ctx) error {
 		BrandUUID      string  `json:"brand_uuid"`
 		NdPos          int64   `json:"nd_pos"`
 		TotalPos       int64   `json:"total_pos"`
+		TotalPosforms  int64   `json:"total_posforms"`
 		UniversePos    int64   `json:"universe_pos"`
 		NdPercent      float64 `json:"nd_percent"`
 		ReachRate      float64 `json:"reach_rate"`
@@ -798,7 +806,10 @@ func NDLineChartByMonth(c *fiber.Ctx) error {
 //	avg_nd_percent      — average ND% across all brands
 //	total_brands        — number of distinct brands measured
 //	reach_rate          — visited / universe × 100
-//	coverage_index      — nd_pos / universe × 100
+//	coverage_index      — universe / visited × 100
+//	total_team          — total team members in territory
+//	active_team         — team members who made at least one visit in period
+//	team_active_pct     — active_team / total_team × 100
 func NDSummaryKPI(c *fiber.Ctx) error {
 	db := database.DB
 
@@ -824,6 +835,9 @@ func NDSummaryKPI(c *fiber.Ctx) error {
 		TotalBrands      int64   `json:"total_brands"`
 		ReachRate        float64 `json:"reach_rate"`
 		CoverageIndex    float64 `json:"coverage_index"`
+		TotalTeam        int64   `json:"total_team"`
+		ActiveTeam       int64   `json:"active_team"`
+		TeamActivePct    float64 `json:"team_active_pct"`
 	}
 
 	sqlQuery := `
@@ -871,6 +885,27 @@ func NDSummaryKPI(c *fiber.Ctx) error {
 			  AND pf.created_at >= @start_date AND pf.created_at <= @end_date
 			  AND pf.deleted_at IS NULL
 		),
+		total_team AS (
+			SELECT COUNT(u.uuid) AS cnt
+			FROM users u
+			WHERE u.country_uuid = @country_uuid
+			  AND (@province_uuid = '' OR u.province_uuid = @province_uuid)
+			  AND (@area_uuid     = '' OR u.area_uuid     = @area_uuid)
+			  AND (@sub_area_uuid = '' OR u.sub_area_uuid = @sub_area_uuid)
+			  AND (@commune_uuid  = '' OR u.commune_uuid  = @commune_uuid)
+			  AND u.deleted_at IS NULL
+		),
+		active_team AS (
+			SELECT COUNT(DISTINCT pf.user_uuid) AS cnt
+			FROM pos_forms pf
+			WHERE pf.country_uuid = @country_uuid
+			  AND (@province_uuid = '' OR pf.province_uuid = @province_uuid)
+			  AND (@area_uuid     = '' OR pf.area_uuid     = @area_uuid)
+			  AND (@sub_area_uuid = '' OR pf.sub_area_uuid = @sub_area_uuid)
+			  AND (@commune_uuid  = '' OR pf.commune_uuid  = @commune_uuid)
+			  AND pf.created_at >= @start_date AND pf.created_at <= @end_date
+			  AND pf.deleted_at IS NULL
+		),
 		brand_nd AS (
 			SELECT
 				pfi.brand_uuid,
@@ -895,8 +930,12 @@ func NDSummaryKPI(c *fiber.Ctx) error {
 			(SELECT COUNT(*) FROM brand_nd)                                    AS total_brands,
 			ROUND(((SELECT cnt FROM visited) * 100.0 /
 			       NULLIF((SELECT cnt FROM universe), 0))::numeric, 2)        AS reach_rate,
-			ROUND(((SELECT cnt FROM nd_pos) * 100.0 /
-			       NULLIF((SELECT cnt FROM posforms), 0))::numeric, 2)        AS coverage_index
+			ROUND(((SELECT cnt FROM universe) * 100.0 /
+			       NULLIF((SELECT cnt FROM visited), 0))::numeric, 2)         AS coverage_index,
+			(SELECT cnt FROM total_team)                                       AS total_team,
+			(SELECT cnt FROM active_team)                                      AS active_team,
+			ROUND(((SELECT cnt FROM active_team) * 100.0 /
+			       NULLIF((SELECT cnt FROM total_team), 0))::numeric, 2)      AS team_active_pct
 	`
 
 	var kpi KPI
