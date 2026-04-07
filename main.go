@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
+
 	"github.com/danny19977/mspos-api-v3/database"
 	"github.com/danny19977/mspos-api-v3/routes"
 	"github.com/gofiber/fiber/v2"
@@ -22,12 +24,15 @@ func getPort() string {
 	return port
 }
 
-
 func main() {
 
 	database.Connect()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ReadTimeout:  120 * time.Second,
+		WriteTimeout: 120 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	})
 
 	// Initialize default config
 	app.Use(logger.New())
@@ -35,7 +40,7 @@ func main() {
 	// Middleware
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "https://mspos-v3.onrender.com, http://localhost:4200, http://192.168.153.229:4200, http://192.168.160.229:4200",
-		AllowHeaders:     "Origin, Content-Type, Accept",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowCredentials: true,
 		AllowMethods: strings.Join([]string{
 			fiber.MethodGet,

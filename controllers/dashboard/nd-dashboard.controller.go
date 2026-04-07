@@ -23,25 +23,14 @@ import (
 // ║  SECTION 5 — ADVANCED       : Brand×Territory Heatmap / Period Evolution     ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-// runRaw executes a raw named-param query inside a transaction that minimises
-// shared-memory usage, preventing SQLSTATE 53100 on containers with small
-// /dev/shm (e.g. Render.com, Docker with default shm_size).
-//   - work_mem '64kB'     — PostgreSQL minimum; forces spill-to-disk over
-//     large in-memory hash/sort buffers.
-//   - enable_hashagg off  — replaces HashAggregate with GroupAggregate (no
-//     shared-memory hash table).
-//   - enable_hashjoin off — replaces HashJoin with MergeJoin/NestLoop.
+// runRaw executes a raw named-param query inside a transaction.
+// work_mem is kept at a reasonable 8 MB so that sort and hash operations
+// can complete in memory on typical datasets without exhausting /dev/shm.
+// Hash operators are re-enabled so the planner can choose the fastest plan.
 func runRaw(db *gorm.DB, query string, params map[string]interface{}, dest interface{}) error {
 	return db.Transaction(func(tx *gorm.DB) error {
-		stmts := []string{
-			"SET LOCAL work_mem = '64kB'",
-			"SET LOCAL enable_hashagg = off",
-			"SET LOCAL enable_hashjoin = off",
-		}
-		for _, s := range stmts {
-			if err := tx.Exec(s).Error; err != nil {
-				return err
-			}
+		if err := tx.Exec("SET LOCAL work_mem = '8MB'").Error; err != nil {
+			return err
 		}
 		return tx.Raw(query, params).Scan(dest).Error
 	})
