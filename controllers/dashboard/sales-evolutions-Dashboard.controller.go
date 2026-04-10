@@ -1385,6 +1385,83 @@ func SalesHeatmapByDayOfWeek(c *fiber.Ctx) error {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SECTION 10 — PRICE PIE CHART
+// Distribution of declared prices: for each distinct price declared on a
+// pos_form, count the number of visits and its share of the total.
+// Returns: price (FC), count (visits), share_pct (%)
+// ─────────────────────────────────────────────────────────────────────────────
+
+func PricePieChart(c *fiber.Ctx) error {
+	db := database.DB
+
+	country_uuid := c.Query("country_uuid")
+	province_uuid := c.Query("province_uuid")
+	area_uuid := c.Query("area_uuid")
+	sub_area_uuid := c.Query("sub_area_uuid")
+	commune_uuid := c.Query("commune_uuid")
+	start_date := c.Query("start_date")
+	end_date := c.Query("end_date")
+
+	type Result struct {
+		Price    float64 `json:"price"`
+		Count    int64   `json:"count"`
+		SharePct float64 `json:"share_pct"`
+	}
+
+	geoFilter := "pf.country_uuid = ?"
+	geoVals := []interface{}{country_uuid}
+
+	if province_uuid != "" {
+		geoFilter += " AND pf.province_uuid = ?"
+		geoVals = append(geoVals, province_uuid)
+	}
+	if area_uuid != "" {
+		geoFilter += " AND pf.area_uuid = ?"
+		geoVals = append(geoVals, area_uuid)
+	}
+	if sub_area_uuid != "" {
+		geoFilter += " AND pf.sub_area_uuid = ?"
+		geoVals = append(geoVals, sub_area_uuid)
+	}
+	if commune_uuid != "" {
+		geoFilter += " AND pf.commune_uuid = ?"
+		geoVals = append(geoVals, commune_uuid)
+	}
+
+	args := append(geoVals, start_date, end_date)
+
+	sqlQuery := `
+		WITH base AS (
+			SELECT
+				pf.price,
+				COUNT(*) AS cnt
+			FROM pos_forms pf
+			WHERE ` + geoFilter + `
+			  AND pf.created_at BETWEEN ? AND ?
+			  AND pf.deleted_at IS NULL
+			  AND pf.price > 0
+			GROUP BY pf.price
+		),
+		total AS (SELECT COALESCE(SUM(cnt), 1) AS total_cnt FROM base)
+		SELECT
+			b.price,
+			b.cnt                                               AS count,
+			ROUND(b.cnt * 100.0 / t.total_cnt, 2)              AS share_pct
+		FROM base b, total t
+		ORDER BY b.cnt DESC;
+	`
+
+	var results []Result
+	err := db.Raw(sqlQuery, args...).Scan(&results).Error
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status": "error", "message": "Failed to fetch price distribution", "error": err.Error(),
+		})
+	}
+	return c.JSON(fiber.Map{"status": "success", "message": "Price pie chart", "data": results})
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SECTION 9 — SALES SUMMARY KPI CARD
 // Single-request KPI card for the top of the dashboard:
 // total farde, sold, revenue, visits, active POS, brands, avg price,

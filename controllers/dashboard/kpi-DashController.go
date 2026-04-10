@@ -14,7 +14,22 @@ import (
 // ═════════════════════════════════════════════════════════════════════════════
 // 🎯 ADVANCED KPI SYSTEM - COMPREHENSIVE TERRITORY & TEAM PERFORMANCE ANALYTICS
 // Support: Territory | Team | POS | Field Execution | Period Comparison | ND Analysis
+// Business rule: only Monday–Saturday visits are counted (no Sundays).
 // ═════════════════════════════════════════════════════════════════════════════
+
+// countWorkingDays returns the number of Mon–Sat days in [start, end] inclusive.
+func countWorkingDays(start, end time.Time) int {
+	count := 0
+	for d := start; !d.After(end); d = d.AddDate(0, 0, 1) {
+		if d.Weekday() != time.Sunday {
+			count++
+		}
+	}
+	if count < 1 {
+		return 1
+	}
+	return count
+}
 
 // TotalVisitsByCountry returns visits grouped by country with targets & achievement %
 func TotalVisitsByCountry(c *fiber.Ctx) error {
@@ -33,6 +48,7 @@ func TotalVisitsByCountry(c *fiber.Ctx) error {
 	var results []struct {
 		Name         string  `json:"name"`
 		UUID         string  `json:"uuid"`
+		UserUUID     string  `json:"user_uuid"`
 		CountryUUID  string  `json:"country_uuid"`
 		ProvinceUUID string  `json:"province_uuid"`
 		AreaUUID     string  `json:"area_uuid"`
@@ -48,7 +64,8 @@ func TotalVisitsByCountry(c *fiber.Ctx) error {
 	query := db.Table("pos_forms").
 		Select(`
 		countries.name AS name,
-		countries.uuid AS uuid, 
+		countries.uuid AS uuid,
+		users.uuid AS user_uuid,
 		users.fullname AS signature,
 		users.title AS title, 
 		COUNT(pos_forms.uuid) AS total_visits,
@@ -95,9 +112,10 @@ func TotalVisitsByCountry(c *fiber.Ctx) error {
 	}
 
 	query = query.Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("pos_forms.deleted_at IS NULL")
+		Where("pos_forms.deleted_at IS NULL").
+		Where("EXTRACT(DOW FROM pos_forms.created_at) != 0")
 
-	err := query.Group("countries.name, countries.uuid, users.fullname, users.title, users.uuid").
+	err := query.Group("countries.name, countries.uuid, users.uuid, users.fullname, users.title").
 		Order("countries.name, users.fullname, users.title").
 		Scan(&results).Error
 
@@ -132,6 +150,7 @@ func TotalVisitsByProvince(c *fiber.Ctx) error {
 
 	var results []struct {
 		Name         string  `json:"name"`
+		UserUUID     string  `json:"user_uuid"`
 		CountryUUID  string  `json:"country_uuid"`
 		ProvinceUUID string  `json:"province_uuid"`
 		AreaUUID     string  `json:"area_uuid"`
@@ -146,7 +165,8 @@ func TotalVisitsByProvince(c *fiber.Ctx) error {
 
 	query := db.Table("pos_forms").
 		Select(`
-		provinces.name AS name, 
+		provinces.name AS name,
+		users.uuid AS user_uuid,
 		pos_forms.country_uuid AS country_uuid,
 		pos_forms.province_uuid AS province_uuid,
 		pos_forms.area_uuid AS area_uuid,
@@ -195,18 +215,19 @@ func TotalVisitsByProvince(c *fiber.Ctx) error {
 	}
 
 	query = query.Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
-		Where("pos_forms.deleted_at IS NULL")
+		Where("pos_forms.deleted_at IS NULL").
+		Where("EXTRACT(DOW FROM pos_forms.created_at) != 0")
 
 	err := query.Group(`
 			provinces.name, 
+			users.uuid,
 			pos_forms.country_uuid, 
 			pos_forms.province_uuid, 
 			pos_forms.area_uuid, 
 			pos_forms.sub_area_uuid, 
 			pos_forms.commune_uuid, 
 			users.fullname,
-			users.title,
-			users.uuid
+			users.title
 		`).Order("provinces.name, users.fullname").
 		Scan(&results).Error
 
@@ -242,6 +263,7 @@ func TotalVisitsByArea(c *fiber.Ctx) error {
 	var results []struct {
 		Name        string  `json:"name"`
 		UUID        string  `json:"uuid"`
+		UserUUID    string  `json:"user_uuid"`
 		Signature   string  `json:"signature"`
 		Title       string  `json:"title"`
 		TotalVisits int     `json:"total_visits"`
@@ -253,6 +275,7 @@ func TotalVisitsByArea(c *fiber.Ctx) error {
 		Select(`
 		areas.name AS name,
 		areas.uuid AS uuid,
+		users.uuid AS user_uuid,
 		users.fullname AS signature,
 		users.title AS title, 
 		COUNT(pos_forms.uuid) AS total_visits,
@@ -297,7 +320,8 @@ func TotalVisitsByArea(c *fiber.Ctx) error {
 
 	err := query.Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
-		Group("areas.name, areas.uuid, users.fullname, users.title, users.uuid").
+		Where("EXTRACT(DOW FROM pos_forms.created_at) != 0").
+		Group("areas.name, areas.uuid, users.uuid, users.fullname, users.title").
 		Order("areas.name, users.fullname").
 		Scan(&results).Error
 
@@ -333,6 +357,7 @@ func TotalVisitsBySubArea(c *fiber.Ctx) error {
 	var results []struct {
 		Name        string  `json:"name"`
 		UUID        string  `json:"uuid"`
+		UserUUID    string  `json:"user_uuid"`
 		Signature   string  `json:"signature"`
 		Title       string  `json:"title"`
 		TotalVisits int     `json:"total_visits"`
@@ -344,6 +369,7 @@ func TotalVisitsBySubArea(c *fiber.Ctx) error {
 		Select(`
 		sub_areas.name AS name,
 		sub_areas.uuid AS uuid,
+		users.uuid AS user_uuid,
 		users.fullname AS signature,
 		users.title AS title, 
 		COUNT(pos_forms.uuid) AS total_visits,
@@ -385,7 +411,8 @@ func TotalVisitsBySubArea(c *fiber.Ctx) error {
 
 	err := query.Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
-		Group("sub_areas.name, sub_areas.uuid, users.fullname, users.title, users.uuid").
+		Where("EXTRACT(DOW FROM pos_forms.created_at) != 0").
+		Group("sub_areas.name, sub_areas.uuid, users.uuid, users.fullname, users.title").
 		Order("sub_areas.name, users.fullname").
 		Scan(&results).Error
 
@@ -420,6 +447,7 @@ func TotalVisitsByCommune(c *fiber.Ctx) error {
 	var results []struct {
 		Name        string  `json:"name"`
 		UUID        string  `json:"uuid"`
+		UserUUID    string  `json:"user_uuid"`
 		Signature   string  `json:"signature"`
 		Title       string  `json:"title"`
 		TotalVisits int     `json:"total_visits"`
@@ -431,6 +459,7 @@ func TotalVisitsByCommune(c *fiber.Ctx) error {
 		Select(`
 		communes.name AS name,
 		communes.uuid AS uuid,
+		users.uuid AS user_uuid,
 		users.fullname AS signature,
 		users.title AS title, 
 		COUNT(pos_forms.uuid) AS total_visits,
@@ -466,7 +495,8 @@ func TotalVisitsByCommune(c *fiber.Ctx) error {
 
 	err := query.Where("pos_forms.created_at BETWEEN ? AND ?", start_date, end_date).
 		Where("pos_forms.deleted_at IS NULL").
-		Group("communes.name, communes.uuid, users.fullname, users.title, users.uuid").
+		Where("EXTRACT(DOW FROM pos_forms.created_at) != 0").
+		Group("communes.name, communes.uuid, users.uuid, users.fullname, users.title").
 		Order("communes.name, users.fullname").
 		Scan(&results).Error
 
@@ -498,6 +528,23 @@ func KpiUserVisitSummary(c *fiber.Ctx) error {
 	end_date := c.Query("end_date")
 	title_filter := c.Query("title")
 	user_uuid := c.Query("user_uuid")
+
+	// Precompute Mon–Sat day counts so targets exclude Sundays.
+	now := time.Now()
+	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	monthEnd := monthStart.AddDate(0, 1, -1)
+	monthWorkDays := countWorkingDays(monthStart, monthEnd)
+
+	yearStart := time.Date(now.Year(), time.January, 1, 0, 0, 0, 0, now.Location())
+	yearEnd := time.Date(now.Year(), time.December, 31, 0, 0, 0, 0, now.Location())
+	yearWorkDays := countWorkingDays(yearStart, yearEnd)
+
+	workDays := 1
+	if sd, err2 := time.Parse("2006-01-02", start_date); err2 == nil {
+		if ed, err2 := time.Parse("2006-01-02", end_date); err2 == nil {
+			workDays = countWorkingDays(sd, ed)
+		}
+	}
 
 	var results []struct {
 		UserUUID      string  `json:"user_uuid"`
@@ -544,7 +591,7 @@ func KpiUserVisitSummary(c *fiber.Ctx) error {
 				WHEN users.title = 'Supervisor'   THEN 20
 				WHEN users.title IN ('DR','Cyclo') THEN 40
 				ELSE 0
-			END * EXTRACT(DAY FROM (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month - 1 day'))::int)
+				END * ?)
 				AS monthly_target,
 			ROUND(
 				COUNT(pos_forms.uuid) FILTER (WHERE DATE_TRUNC('month', pos_forms.created_at) = DATE_TRUNC('month', CURRENT_DATE))::numeric
@@ -553,7 +600,7 @@ func KpiUserVisitSummary(c *fiber.Ctx) error {
 					      WHEN users.title = 'Supervisor' THEN 20
 					      WHEN users.title IN ('DR','Cyclo') THEN 40
 					      ELSE 1 END)
-					* EXTRACT(DAY FROM (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month - 1 day'))
+					* ?
 				, 0) * 100
 			, 2) AS monthly_pct,
 			COUNT(pos_forms.uuid) FILTER (WHERE DATE_TRUNC('year', pos_forms.created_at) = DATE_TRUNC('year', CURRENT_DATE))
@@ -563,7 +610,7 @@ func KpiUserVisitSummary(c *fiber.Ctx) error {
 				WHEN users.title = 'Supervisor'   THEN 20
 				WHEN users.title IN ('DR','Cyclo') THEN 40
 				ELSE 0
-			END * EXTRACT(DOY FROM (DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year - 1 day'))::int)
+				END * ?)
 				AS yearly_target,
 			ROUND(
 				COUNT(pos_forms.uuid) FILTER (WHERE DATE_TRUNC('year', pos_forms.created_at) = DATE_TRUNC('year', CURRENT_DATE))::numeric
@@ -572,7 +619,7 @@ func KpiUserVisitSummary(c *fiber.Ctx) error {
 					      WHEN users.title = 'Supervisor' THEN 20
 					      WHEN users.title IN ('DR','Cyclo') THEN 40
 					      ELSE 1 END)
-					* EXTRACT(DOY FROM (DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year - 1 day'))
+					* ?
 				, 0) * 100
 			, 2) AS yearly_pct,
 			COUNT(pos_forms.uuid) FILTER (WHERE pos_forms.created_at BETWEEN ?::date AND ?::date)
@@ -582,7 +629,7 @@ func KpiUserVisitSummary(c *fiber.Ctx) error {
 				WHEN users.title = 'Supervisor'   THEN 20
 				WHEN users.title IN ('DR','Cyclo') THEN 40
 				ELSE 0
-			END * ((?::date - ?::date) + 1))
+				END * ?)
 				AS range_target,
 			ROUND(
 				COUNT(pos_forms.uuid) FILTER (WHERE pos_forms.created_at BETWEEN ?::date AND ?::date)::numeric
@@ -591,18 +638,21 @@ func KpiUserVisitSummary(c *fiber.Ctx) error {
 					      WHEN users.title = 'Supervisor' THEN 20
 					      WHEN users.title IN ('DR','Cyclo') THEN 40
 					      ELSE 1 END)
-					* ((?::date - ?::date) + 1)
+					* ?
 				, 0) * 100
 			, 2) AS range_pct
 		`,
+			monthWorkDays, monthWorkDays,
+			yearWorkDays, yearWorkDays,
 			start_date, end_date,
-			end_date, start_date,
+			workDays,
 			start_date, end_date,
-			end_date, start_date,
+			workDays,
 		).
 		Joins("JOIN users ON users.uuid = pos_forms.user_uuid").
 		Where("pos_forms.country_uuid = ?", country_uuid).
-		Where("pos_forms.deleted_at IS NULL")
+		Where("pos_forms.deleted_at IS NULL").
+		Where("EXTRACT(DOW FROM pos_forms.created_at) != 0")
 
 	if province_uuid != "" {
 		query = query.Where("pos_forms.province_uuid = ?", province_uuid)
@@ -693,7 +743,8 @@ func GetKPITerritoryOverview(c *fiber.Ctx) error {
 		Joins("LEFT JOIN sub_areas sa ON pf.sub_area_uuid = sa.uuid").
 		Joins("LEFT JOIN communes com ON pf.commune_uuid = com.uuid").
 		Where("pf.created_at BETWEEN ? AND ?", start, end).
-		Where("pf.deleted_at IS NULL")
+		Where("pf.deleted_at IS NULL").
+		Where("EXTRACT(DOW FROM pf.created_at) != 0")
 
 	var groupCol, nameCol, uuidCol string
 	switch level {
@@ -840,6 +891,7 @@ func GetAgentPerformanceDetails(c *fiber.Ctx) error {
 	db.Table("pos_forms pf").
 		Joins("LEFT JOIN users u ON pf.user_uuid = u.uuid").
 		Where("pf.user_uuid = ? AND pf.created_at BETWEEN ? AND ?", agentUUID, start, end).
+		Where("EXTRACT(DOW FROM pf.created_at) != 0").
 		Select(`
 			u.uuid,
 			u.fullname,
@@ -876,6 +928,7 @@ func GetAgentPerformanceDetails(c *fiber.Ctx) error {
 		var dailyData []DailyBreakdown
 		db.Table("pos_forms pf").
 			Where("pf.user_uuid = ? AND pf.created_at BETWEEN ? AND ?", agentUUID, start, end).
+			Where("EXTRACT(DOW FROM pf.created_at) != 0").
 			Select(`
 				DATE(pf.created_at),
 				COUNT(DISTINCT pf.uuid),
@@ -939,7 +992,7 @@ func GetPOSLevelInsights(c *fiber.Ctx) error {
 
 	query := db.Table("pos p").
 		Joins("LEFT JOIN communes c ON p.commune_uuid = c.uuid").
-		Joins("LEFT JOIN pos_forms pf ON p.uuid = pf.pos_uuid AND pf.created_at BETWEEN ? AND ?", start, end).
+		Joins("LEFT JOIN pos_forms pf ON p.uuid = pf.pos_uuid AND pf.created_at BETWEEN ? AND ? AND EXTRACT(DOW FROM pf.created_at) != 0", start, end).
 		Where("p.commune_uuid = ?", communeUUID).
 		Select(`
 			p.uuid,
@@ -995,6 +1048,7 @@ func GetKPITargetVsActual(c *fiber.Ctx) error {
 	level := c.Query("level", "area")
 	startDate := c.Query("start_date")
 	endDate := c.Query("end_date")
+	countryUUID := c.Query("country_uuid")
 
 	var start, end time.Time
 	if startDate != "" {
@@ -1009,10 +1063,10 @@ func GetKPITargetVsActual(c *fiber.Ctx) error {
 	}
 
 	type TargetAnalysis struct {
-		Territory             string  `json:"territory"`
-		ActualVisits          int64   `json:"actual_visits"`
-		TargetVisits          int64   `json:"target_visits"`
-		AchievementPercentage float64 `json:"achievement_percentage"`
+		Territory             string  `json:"territory"              gorm:"column:territory"`
+		ActualVisits          int64   `json:"actual_visits"          gorm:"column:actual_visits"`
+		TargetVisits          int64   `json:"target_visits"          gorm:"column:target_visits"`
+		AchievementPercentage float64 `json:"achievement_percentage" gorm:"column:achievement_percentage"`
 		Status                string  `json:"status"`
 		RiskLevel             string  `json:"risk_level"`
 	}
@@ -1024,28 +1078,41 @@ func GetKPITargetVsActual(c *fiber.Ctx) error {
 	case "province":
 		groupCol = "pf.province_uuid"
 		nameCol = "pr.name"
-	case "area":
-		groupCol = "pf.area_uuid"
-		nameCol = "a.name"
-	default:
+	default: // area
 		groupCol = "pf.area_uuid"
 		nameCol = "a.name"
 	}
 
+	// Working days in the selected range (exclude Sundays)
+	workingDays := 0
+	for d := start; !d.After(end); d = d.AddDate(0, 0, 1) {
+		if d.Weekday() != time.Sunday {
+			workingDays++
+		}
+	}
+	// Target = 10 visits per working day per territory
+	targetVisits := int64(10 * workingDays)
+
 	query := db.Table("pos_forms pf").
-		Joins("LEFT JOIN users u ON pf.user_uuid = u.uuid").
 		Joins("LEFT JOIN areas a ON pf.area_uuid = a.uuid").
 		Joins("LEFT JOIN provinces pr ON pf.province_uuid = pr.uuid").
 		Where("pf.created_at BETWEEN ? AND ?", start, end).
 		Where("pf.deleted_at IS NULL").
+		Where("EXTRACT(DOW FROM pf.created_at) != 0")
+
+	if countryUUID != "" {
+		query = query.Where("pf.country_uuid = ?", countryUUID)
+	}
+
+	query = query.
 		Select(fmt.Sprintf(`
-			%s,
-			COUNT(DISTINCT pf.uuid),
-			CAST(10 * (EXTRACT(DAY FROM ?::timestamp - ?::timestamp) + 1) AS BIGINT),
-			ROUND(100.0 * COUNT(DISTINCT pf.uuid) / NULLIF(10 * (EXTRACT(DAY FROM ?::timestamp - ?::timestamp) + 1), 0), 2)
-		`, nameCol),
-			end, start, end, start).
-		Group(groupCol + ", " + nameCol)
+			%s AS territory,
+			COUNT(DISTINCT pf.uuid) AS actual_visits,
+			CAST(? AS BIGINT) AS target_visits,
+			ROUND(100.0 * COUNT(DISTINCT pf.uuid) / NULLIF(?, 0), 2) AS achievement_percentage
+		`, nameCol), targetVisits, targetVisits).
+		Group(groupCol + ", " + nameCol).
+		Having(nameCol + " IS NOT NULL AND " + nameCol + " != ''")
 
 	if err := query.Scan(&results).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -1085,21 +1152,41 @@ func GetTeamAbsenceAnalysis(c *fiber.Ctx) error {
 	daysInt, _ := strconv.Atoi(daysInactive)
 	inactiveThreshold := time.Now().AddDate(0, 0, -daysInt)
 
+	countryUUID := c.Query("country_uuid")
+	provinceUUID := c.Query("province_uuid")
+	areaUUID := c.Query("area_uuid")
+
 	type AbsenceAlert struct {
 		AgentUUID    string `json:"agent_uuid"`
 		AgentName    string `json:"agent_name"`
 		AgentTitle   string `json:"agent_title"`
 		DaysInactive int64  `json:"days_inactive"`
 		AlertLevel   string `json:"alert_level"`
+		Province     string `json:"province"`
+		Area         string `json:"area"`
 	}
 
 	var results []AbsenceAlert
 
 	query := db.Table("users u").
 		Joins("LEFT JOIN pos_forms pf ON u.uuid = pf.user_uuid").
+		Joins("LEFT JOIN provinces pr ON u.province_uuid = pr.uuid").
+		Joins("LEFT JOIN areas ar ON u.area_uuid = ar.uuid").
 		Where("u.title IN ?", []string{"ASM", "Supervisor", "DR", "Cyclo", "Agent"}).
 		Where("u.status = true").
-		Having("MAX(pf.created_at) < ? OR MAX(pf.created_at) IS NULL", inactiveThreshold).
+		Having("MAX(pf.created_at) < ? OR MAX(pf.created_at) IS NULL", inactiveThreshold)
+
+	if countryUUID != "" {
+		query = query.Where("u.country_uuid = ?", countryUUID)
+	}
+	if provinceUUID != "" {
+		query = query.Where("u.province_uuid = ?", provinceUUID)
+	}
+	if areaUUID != "" {
+		query = query.Where("u.area_uuid = ?", areaUUID)
+	}
+
+	query = query.
 		Select(`
 			u.uuid        AS agent_uuid,
 			u.fullname    AS agent_name,
@@ -1110,9 +1197,11 @@ func GetTeamAbsenceAnalysis(c *fiber.Ctx) error {
 				WHEN ROUND(EXTRACT(EPOCH FROM (NOW() - MAX(pf.created_at))) / 86400) > 14 THEN '🔴 CRITICAL'
 				WHEN ROUND(EXTRACT(EPOCH FROM (NOW() - MAX(pf.created_at))) / 86400) > 7  THEN '🟡 WARNING'
 				ELSE '🟢 OK'
-			END AS alert_level
+			END AS alert_level,
+			COALESCE(pr.name, '') AS province,
+			COALESCE(ar.name, '')  AS area
 		`, daysInt).
-		Group("u.uuid, u.fullname, u.title").
+		Group("u.uuid, u.fullname, u.title, pr.name, ar.name").
 		Order("days_inactive DESC")
 
 	if err := query.Scan(&results).Error; err != nil {
@@ -1145,15 +1234,16 @@ func GetPeriodComparison(c *fiber.Ctx) error {
 	db := database.DB
 
 	period := c.Query("period", "monthly")
-	lastPeriods := c.Query("periods", "3")
+	lastPeriods := c.Query("periods", "6")
 	periodsInt, _ := strconv.Atoi(lastPeriods)
+	countryUUID := c.Query("country_uuid")
 
 	type PeriodData struct {
-		PeriodLabel     string  `json:"period_label"`
-		Visits          int64   `json:"visits"`
-		POSVisited      int64   `json:"pos_visited"`
-		SyncRate        float64 `json:"sync_rate"`
-		POSMMPercentage float64 `json:"posmm_percentage"`
+		PeriodLabel     string  `json:"period_label"      gorm:"column:period_label"`
+		Visits          int64   `json:"visits"            gorm:"column:visits"`
+		POSVisited      int64   `json:"pos_visited"       gorm:"column:pos_visited"`
+		SyncRate        float64 `json:"sync_rate"         gorm:"column:sync_rate"`
+		POSMMPercentage float64 `json:"posmm_percentage"  gorm:"column:posmm_percentage"`
 	}
 
 	var results []PeriodData
@@ -1163,28 +1253,42 @@ func GetPeriodComparison(c *fiber.Ctx) error {
 		var start, end time.Time
 		var periodLabel string
 
-		if period == "weekly" {
+		switch period {
+		case "daily":
+			day := now.AddDate(0, 0, -i)
+			if day.Weekday() == time.Sunday {
+				continue // skip Sundays — only Mon–Sat are working days
+			}
+			start = time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, day.Location())
+			end = time.Date(day.Year(), day.Month(), day.Day(), 23, 59, 59, 0, day.Location())
+			periodLabel = day.Format("02 Jan")
+		case "weekly":
 			end = now.AddDate(0, 0, -7*i)
 			start = end.AddDate(0, 0, -6)
-			periodLabel = fmt.Sprintf("W%d", start.YearDay()/7)
-		} else {
+			y, w := start.ISOWeek()
+			periodLabel = fmt.Sprintf("S%d %d", w, y)
+		default: // monthly
 			endDate := now.AddDate(0, -i, 0)
 			start = time.Date(endDate.Year(), endDate.Month(), 1, 0, 0, 0, 0, endDate.Location())
 			end = start.AddDate(0, 1, -1)
 			periodLabel = start.Format("Jan 2006")
 		}
 
-		var data PeriodData
-		if err := db.Table("pos_forms pf").
+		query := db.Table("pos_forms pf").
 			Where("pf.created_at BETWEEN ? AND ?", start, end).
-			Where("pf.deleted_at IS NULL").
-			Select(`
-				COUNT(DISTINCT pf.uuid),
-				COUNT(DISTINCT pf.pos_uuid),
-				ROUND(100.0 * COUNT(CASE WHEN pf.sync = true THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0), 2),
-				ROUND(AVG(CASE WHEN pf.price > 0 THEN 100 ELSE 0 END), 2)
-			`).
-			Scan(&data).Error; err != nil {
+			Where("pf.deleted_at IS NULL")
+
+		if countryUUID != "" {
+			query = query.Where("pf.country_uuid = ?", countryUUID)
+		}
+
+		var data PeriodData
+		if err := query.Select(`
+				COUNT(DISTINCT pf.uuid)                                                             AS visits,
+				COUNT(DISTINCT pf.pos_uuid)                                                         AS pos_visited,
+				ROUND(100.0 * COUNT(CASE WHEN pf.sync = true THEN 1 END) / NULLIF(COUNT(*), 0), 2) AS sync_rate,
+				ROUND(AVG(CASE WHEN pf.price > 0 THEN 100 ELSE 0 END), 2)                          AS posmm_percentage
+			`).Scan(&data).Error; err != nil {
 			continue
 		}
 
@@ -1250,6 +1354,7 @@ func GetNDAnalysisByTerritory(c *fiber.Ctx) error {
 		Joins("LEFT JOIN provinces pr ON pf.province_uuid = pr.uuid").
 		Where("pf.created_at BETWEEN ? AND ?", start, end).
 		Where("pf.deleted_at IS NULL").
+		Where("EXTRACT(DOW FROM pf.created_at) != 0").
 		Select(fmt.Sprintf(`
 			%s,
 			COUNT(DISTINCT pf.pos_uuid),

@@ -228,6 +228,9 @@ func setupDashboardRoutes(api fiber.Router) {
 	// Single KPI card: farde, sold, revenue, visits, active POS & agents
 	se.Get("/summary-kpi", dashboard.SalesSummaryKPI)
 
+	// Price distribution donut chart (price FC × visit count × share %)
+	se.Get("/price-pie-chart", dashboard.PricePieChart)
+
 	// ── ND Individuel ────────────────────────────────────────────────────────
 	// Permet à chaque agent de consulter et défendre son propre ND
 	ndi := api.Group("/nd-individual")
@@ -241,6 +244,19 @@ func setupDashboardRoutes(api fiber.Router) {
 	sosi.Get("/summary/:user_uuid", ndindividual.GetSOSSummary)  // KPI global de l'agent
 	sosi.Get("/by-brand/:user_uuid", ndindividual.GetSOSByBrand) // SOS par marque
 	sosi.Get("/pos-list/:user_uuid", ndindividual.GetSOSPosList) // Liste POS visités + fardes
+
+	// ── Sales Evolution Individuel ───────────────────────────────────────────
+	// Permet à chaque agent de consulter l'évolution de ses ventes par marque
+	sei := api.Group("/sales-evolution-individual")
+	sei.Get("/summary-kpi/:user_uuid", ndindividual.GetSEISummaryKPI)
+	sei.Get("/by-pos-type/:user_uuid", ndindividual.GetSEIByPosType)
+	sei.Get("/price-by-brand/:user_uuid", ndindividual.GetSEIPriceByBrand)
+	sei.Get("/evolution-by-month/:user_uuid", ndindividual.GetSEIEvolutionByMonth)
+	sei.Get("/growth-rate/:user_uuid", ndindividual.GetSEIGrowthRate)
+	sei.Get("/brand-competition/:user_uuid", ndindividual.GetSEIBrandCompetition)
+	sei.Get("/top-pos/:user_uuid", ndindividual.GetSEITopPos)
+	sei.Get("/heatmap-day-of-week/:user_uuid", ndindividual.GetSEIHeatmap)
+	sei.Get("/price-pie-chart/:user_uuid", ndindividual.GetSEIPricePieChart)
 
 	// KPI Dashboard
 	kp := dash.Group("/kpi")
