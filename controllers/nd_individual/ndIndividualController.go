@@ -45,13 +45,14 @@ func GetNDSummary(c *fiber.Ctx) error {
 	}
 
 	type SummaryRow struct {
-		UserUUID        string  `json:"user_uuid"`
-		Fullname        string  `json:"fullname"`
-		TotalPosVisited int64   `json:"total_pos_visited"`
-		NdPos           int64   `json:"nd_pos"`
-		NdPercent       float64 `json:"nd_percent"`
-		UniversePos     int64   `json:"universe_pos"`
-		ReachRate       float64 `json:"reach_rate"`
+		UserUUID      string  `json:"user_uuid"`
+		Fullname      string  `json:"fullname"`
+		TotalPosVisit int64   `json:"total_pos_visit"`
+		NdBrand       int64   `json:"nd_brand"`
+		TotalPosforms int64   `json:"total_posforms"`
+		NdPercent     float64 `json:"nd_percent"`
+		UniversePos   int64   `json:"universe_pos"`
+		ReachRate     float64 `json:"reach_rate"`
 	}
 
 	sqlQuery := `
@@ -68,7 +69,17 @@ func GetNDSummary(c *fiber.Ctx) error {
 			  AND pf.deleted_at IS NULL
 		),
 		nd_visited AS (
-			SELECT COUNT(DISTINCT pfi.uuid) AS nd_pos
+			SELECT COUNT(DISTINCT pf.pos_uuid) AS nd_brand
+			FROM pos_forms pf
+			INNER JOIN pos_form_items pfi ON pfi.pos_form_uuid = pf.uuid
+			WHERE pf.user_uuid = @user_uuid
+			  AND pf.created_at BETWEEN @start_date AND @end_date
+			  AND pf.deleted_at IS NULL
+			  AND pfi.deleted_at IS NULL
+			  AND pfi.number_farde > 0
+		),
+		posforms_count AS (
+			SELECT COUNT(DISTINCT pfi.uuid) AS total_posforms
 			FROM pos_forms pf
 			INNER JOIN pos_form_items pfi ON pfi.pos_form_uuid = pf.uuid
 			WHERE pf.user_uuid = @user_uuid
@@ -85,9 +96,10 @@ func GetNDSummary(c *fiber.Ctx) error {
 		SELECT
 			a.uuid                                                            AS user_uuid,
 			a.fullname                                                        AS fullname,
-			COALESCE(v.total_pos, 0)                                          AS total_pos_visited,
-			COALESCE(nd.nd_pos, 0)                                            AS nd_pos,
-			ROUND((COALESCE(nd.nd_pos, 0) * 100.0 /
+			COALESCE(v.total_pos, 0)                                          AS total_pos_visit,
+			COALESCE(nd.nd_brand, 0)                                          AS nd_brand,
+			COALESCE(pc.total_posforms, 0)                                    AS total_posforms,
+			ROUND((COALESCE(nd.nd_brand, 0) * 100.0 /
 			       NULLIF(COALESCE(v.total_pos, 0), 0))::numeric, 2)         AS nd_percent,
 			COALESCE(u.universe_pos, 0)                                       AS universe_pos,
 			ROUND((COALESCE(v.total_pos, 0) * 100.0 /
@@ -95,6 +107,7 @@ func GetNDSummary(c *fiber.Ctx) error {
 		FROM agent a
 		CROSS JOIN visited v
 		CROSS JOIN nd_visited nd
+		CROSS JOIN posforms_count pc
 		CROSS JOIN universe u
 	`
 
@@ -143,11 +156,12 @@ func GetNDByBrand(c *fiber.Ctx) error {
 	}
 
 	type BrandRow struct {
-		BrandUUID string  `json:"brand_uuid"`
-		BrandName string  `json:"brand_name"`
-		NdPos     int64   `json:"nd_pos"`
-		TotalPos  int64   `json:"total_pos"`
-		NdPercent float64 `json:"nd_percent"`
+		BrandUUID     string  `json:"brand_uuid"`
+		BrandName     string  `json:"brand_name"`
+		NdBrand       int64   `json:"nd_brand"`
+		TotalPosVisit int64   `json:"total_pos_visit"`
+		TotalPosforms int64   `json:"total_posforms"`
+		NdPercent     float64 `json:"nd_percent"`
 	}
 
 	sqlQuery := `
@@ -161,7 +175,8 @@ func GetNDByBrand(c *fiber.Ctx) error {
 		nd_counts AS (
 			SELECT
 				pfi.brand_uuid,
-				COUNT(DISTINCT pfi.uuid) AS nd_pos
+				COUNT(DISTINCT CASE WHEN pfi.number_farde > 0 THEN pf.pos_uuid END) AS nd_brand,
+				COUNT(DISTINCT pfi.uuid)                                             AS total_posforms
 			FROM pos_form_items pfi
 			INNER JOIN pos_forms pf ON pfi.pos_form_uuid = pf.uuid
 			WHERE pf.user_uuid = @user_uuid
@@ -173,9 +188,10 @@ func GetNDByBrand(c *fiber.Ctx) error {
 		SELECT
 			b.uuid                                                           AS brand_uuid,
 			b.name                                                           AS brand_name,
-			COALESCE(nd.nd_pos, 0)                                           AS nd_pos,
-			COALESCE(v.total_pos, 0)                                         AS total_pos,
-			ROUND((COALESCE(nd.nd_pos, 0) * 100.0 /
+			COALESCE(nd.nd_brand, 0)                                         AS nd_brand,
+			COALESCE(v.total_pos, 0)                                         AS total_pos_visit,
+			COALESCE(nd.total_posforms, 0)                                   AS total_posforms,
+			ROUND((COALESCE(nd.nd_brand, 0) * 100.0 /
 			       NULLIF(COALESCE(v.total_pos, 0), 0))::numeric, 2)        AS nd_percent
 		FROM nd_counts nd
 		INNER JOIN brands b ON b.uuid = nd.brand_uuid
