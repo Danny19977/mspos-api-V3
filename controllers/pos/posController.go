@@ -587,7 +587,12 @@ func GetAllPosByManager(c *fiber.Ctx) error {
 
 	var data []models.Pos
 	db.Where("country_uuid = ?", countryUUID).
-		Where("status = ?", true).Find(&data)
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",
@@ -603,7 +608,12 @@ func GetAllPosByASM(c *fiber.Ctx) error {
 
 	var data []models.Pos
 	db.Where("province_uuid = ?", ProvinceUUID).
-		Where("status = ?", true).Find(&data)
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",
@@ -619,7 +629,12 @@ func GetAllPosBySup(c *fiber.Ctx) error {
 
 	var data []models.Pos
 	db.Where("area_uuid = ?", AreaUUID).
-		Where("status = ?", true).Find(&data)
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",
@@ -635,7 +650,12 @@ func GetAllPosByDR(c *fiber.Ctx) error {
 
 	var data []models.Pos
 	db.Where("sub_area_uuid = ?", SubAreaUUID).
-		Where("status = ?", true).Find(&data)
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",
@@ -651,7 +671,12 @@ func GetAllPosByCyclo(c *fiber.Ctx) error {
 
 	var data []models.Pos
 	db.Where("user_uuid = ?", UserUUID).
-		Where("status = ?", true).Find(&data)
+		Preload("Country").
+		Preload("Province").
+		Preload("Area").
+		Preload("SubArea").
+		Preload("Commune").
+		Find(&data)
 	return c.JSON(fiber.Map{
 		"status":  "success",
 		"message": "All Pos",

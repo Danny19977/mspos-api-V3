@@ -6,6 +6,14 @@ import (
 )
 
 func Setup(app *fiber.App) {
+	// Keep health checks outside the logged API group to avoid noisy probe logs.
+	app.Head("/api/health", func(c *fiber.Ctx) error {
+		return c.SendStatus(fiber.StatusNoContent) // 204 – lightweight, no body
+	})
+	app.Get("/api/health", func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "ok"})
+	})
+
 	api := app.Group("/api", logger.New())
 
 	// Setup all route groups
